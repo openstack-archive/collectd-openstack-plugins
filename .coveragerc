@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = collectd_ceilometer_plugin
+omit = collectd_ceilometer_plugin/openstack/*
+
+[report]
+ignore_errors = True
