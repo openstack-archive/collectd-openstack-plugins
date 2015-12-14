@@ -1,5 +1,9 @@
 include AUTHORS
+include README
 include ChangeLog
+include requirements.txt test-requirements.txt
+include tox.ini
+include example.conf
 exclude .gitignore
 exclude .gitreview
 

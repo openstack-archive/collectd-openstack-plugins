@@ -13,13 +13,13 @@
 # under the License.
 
 """
-test_collectd_ceilometer_plugin
+test_collectd_ceilometer
 ----------------------------------
 
-Tests for `collectd_ceilometer_plugin` module.
+Tests for `collectd_ceilometer` module.
 """
 
-from collectd_ceilometer_plugin.tests import base
+from collectd_ceilometer.tests import base
 
 
 class TestCollectdCeilometerPlugin(base.TestCase):
