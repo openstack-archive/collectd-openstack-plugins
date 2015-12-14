@@ -5,7 +5,7 @@ collectd-ceilometer-plugin
 OpenStack Ceilometer plugin for collectd.
 
 This plugin for collectd publishes telemetry data gathered by collectd to Ceilometer.
-This enables a more comprehensive telemetry set to be made available to Ceilometer 
+This enables a more comprehensive telemetry set to be made available to Ceilometer
 which will enable smarter scheduling and environmental service assurance monitoring.
 
 * Free software: Apache license

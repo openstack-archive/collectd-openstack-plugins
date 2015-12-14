@@ -11,18 +11,4 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-"""
-test_collectd_ceilometer_plugin
-----------------------------------
-
-Tests for `collectd_ceilometer_plugin` module.
-"""
-
-from collectd_ceilometer_plugin.tests import base
-
-
-class TestCollectdCeilometerPlugin(base.TestCase):
-
-    def test_something(self):
-        pass
+"""Ceilometer collectd plugin implementation"""
