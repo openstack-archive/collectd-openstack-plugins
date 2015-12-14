@@ -12,8 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import pbr.version
+"""
+test_collectd_ceilometer
+------------------------
+
+Tests for `collectd_ceilometer` module.
+"""
+
+from collectd_ceilometer.tests import base
 
 
-__version__ = pbr.version.VersionInfo(
-    'collectd_ceilometer_plugin').version_string()
+class TestCollectdCeilometer(base.TestCase):
+    def test_something(self):
+        pass
