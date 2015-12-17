@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# common functions for collectd ceilometer plugin
+# -----------------------------------------------
+
+
+# start/stop service
+#
+function start_collectd {
+    if [ -e /usr/lib/systemd/system/collectd.service ]; then
+        sudo service collectd start
+    fi
+}
+
+function stop_collectd {
+    if [ -e /usr/lib/systemd/system/collectd.service ]; then
+        sudo service collectd stop
+    fi
+}
+
+# install collectd service
+function install_collectd {
+    install_package collectd
+}
+
+# backup original /etc/collectd.conf and configure collectd ceilometer plugin
+function adapt_collectd_conf {
+
+cat << EOF | sudo tee /etc/collectd.d/collectd-ceilometer-plugin.conf
+<LoadPlugin python>
+  Globals true
+</LoadPlugin>
+
+<Plugin python>
+    ModulePath "$COLLECTD_DIR"
+    LogTraces true
+    Interactive false
+    Import "collectd_ceilometer"
+
+    <Module collectd_ceilometer>
+
+        # Batch size
+        BATCH_SIZE 3
+
+        # Service endpoint addresses
+        OS_AUTH_URL "$OS_AUTH_URL"
+
+        # Ceilometer address
+        #CEILOMETER_ENDPOINT
+        CEILOMETER_URL_TYPE "$CEILOMETER_URL_TYPE"
+
+        # Ceilometer timeout in ms
+        CEILOMETER_TIMEOUT "$CEILOMETER_TIMEOUT"
+
+        # # Ceilometer user creds
+        OS_USERNAME "$OS_USERNAME"
+        OS_PASSWORD "$OS_PASSWORD"
+        OS_TENANT_NAME "service"
+
+    </Module>
+</Plugin>
+EOF
+
+}
+
+
+# restore original version of /etc/collectd.conf
+function restore_collectd_conf {
+
+    if [ -f '/etc/collectd.d/collectd-ceilometer-plugin.conf' ]; then
+        sudo rm -f /etc/collectd.d/collectd-ceilometer-plugin.conf
+    fi
+
+}
