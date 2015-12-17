@@ -16,4 +16,7 @@ which will enable smarter scheduling and environmental service assurance monitor
 Features
 --------
 
-* TODO
+* Converts from collectd data sources to Ceilometer format
+* * Adds units for Ceilometer
+* Devstack plugin
+* * Configure and deploy plugin
