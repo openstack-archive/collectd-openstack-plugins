@@ -14,6 +14,5 @@
 """Collectd Ceilometer plugin implementation"""
 import pbr.version
 
-
 __version__ = pbr.version.VersionInfo(
     'collectd_ceilometer_plugin').version_string()
