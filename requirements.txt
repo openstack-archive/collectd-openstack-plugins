@@ -6,3 +6,5 @@ requests
 libvirt-python
 pbr>=1.6
 Babel>=1.3
+python2-future
+python3-future
