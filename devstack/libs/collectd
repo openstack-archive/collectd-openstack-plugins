@@ -3,32 +3,53 @@
 # common functions for collectd ceilometer plugin
 # -----------------------------------------------
 
+if is_ubuntu; then
+    COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d
+elif is_fedora; then
+    COLLECTD_CONF_DIR=/etc/collectd.d
+fi
+
 
 # start/stop service
 #
 function start_collectd {
-    if [ -e /usr/lib/systemd/system/collectd.service ]; then
-        sudo service collectd start
+    if is_fedora; then
+        if [ -e /usr/lib/systemd/system/collectd.service ]; then
+            sudo service collectd start
+        fi
+    elif is_ubuntu; then
+        if [ -e /etc/init.d/collectd ]; then
+            sudo service collectd start
+        fi
     fi
 }
 
 function stop_collectd {
-    if [ -e /usr/lib/systemd/system/collectd.service ]; then
-        sudo service collectd stop
+    if is_fedora; then
+        if [ -e /usr/lib/systemd/system/collectd.service ]; then
+            sudo service collectd stop
+        fi
+    elif is_ubuntu; then
+        if [ -e /etc/init.d/collectd ]; then
+            sudo service collectd stop
+        fi
     fi
 }
 
 # install collectd service
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
-        install_package collectd
+        if is_fedora || is_ubuntu; then
+            install_package collectd
+        else
+            die $LINENO "No support for collectd on this platform"
+        fi
     fi
 }
 
 # Add conf file for plugin
 function adapt_collectd_conf {
-
-cat << EOF | sudo tee /etc/collectd.d/collectd-ceilometer-plugin.conf
+cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 <LoadPlugin python>
   Globals true
 </LoadPlugin>
@@ -69,8 +90,8 @@ EOF
 # remove plugin conf file
 function restore_collectd_conf {
 
-    if [ -f '/etc/collectd.d/collectd-ceilometer-plugin.conf' ]; then
-        sudo rm -f /etc/collectd.d/collectd-ceilometer-plugin.conf
+    if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
+        sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     fi
 
 }
