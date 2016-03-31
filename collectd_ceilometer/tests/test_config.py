@@ -19,6 +19,7 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.tests.base import TestCase
+import logging
 import mock
 import six
 
@@ -114,6 +115,7 @@ class TestConfig(TestCase):
 
         cfg.read(node)
 
+        logging.error("DEBUG calls={0}".format(mock_log.error.mock_calls))
         mock_log.error.assert_any_call(
             'No configuration value found for "%s"', "OS_AUTH_URL")
         mock_log.error.assert_any_call(
