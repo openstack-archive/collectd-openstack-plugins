@@ -14,13 +14,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Configuration tests"""
+"""
+Configuration tests
+"""
 
 from __future__ import unicode_literals
 
 from collectd_ceilometer.tests.base import TestCase
 import mock
 import six
+import threading
 
 
 class TestConfig(TestCase):
@@ -62,7 +65,6 @@ class TestConfig(TestCase):
         of the Config class is created by user.
         """
         # pylint: disable=invalid-name,unused-variable
-
         Config = self.config_class
 
         with self.assertRaises(TypeError) as exc:
@@ -93,7 +95,6 @@ class TestConfig(TestCase):
         """Test unknown parameter
 
         Test configuration parameter which is not known (expected)"""
-
         cfg = self.config_class.instance()
         self.config.update_value('UNKNOWN', 'xyz')
         cfg.read(self.config.node)
@@ -103,7 +104,6 @@ class TestConfig(TestCase):
     @mock.patch('collectd_ceilometer.settings.LOGGER')
     def test_missing_value(self, mock_log):
         """Test configuration node vithout value"""
-
         cfg = self.config_class.instance()
 
         # remove values from some node
@@ -144,7 +144,6 @@ class TestConfig(TestCase):
 
         The unit node contains three values (two are expected)
         """
-
         self.config.add_unit('age', 'years')
 
         node = self.config.node
