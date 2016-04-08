@@ -14,7 +14,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Unittest tools"""
+"""
+Unittest tools
+Testcases are run in multithread enviroment, so locking is needed
+"""
 
 from __future__ import unicode_literals
 
@@ -24,6 +27,7 @@ import logging
 from mock import Mock
 from mock import patch
 import six
+import threading
 import unittest
 
 
@@ -120,6 +124,7 @@ class TestCase(unittest.TestCase):
         super(TestCase, self).__init__(*args, **kwargs)
         self._patchset = None
         self._mocked = {}
+        self._lock = threading.Lock()
 
     def get_mock(self, module):
         """Get module mock"""
@@ -127,6 +132,7 @@ class TestCase(unittest.TestCase):
 
     def setUp(self):
         """Mock collectd module"""
+        self._lock.acquire()
 
         super(TestCase, self).setUp()
 
@@ -156,6 +162,7 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         """Clean up"""
         self._patchset.stop()
+        self._lock.release()
 
     def assertNoError(self):
         """Assert no error has been logged"""
