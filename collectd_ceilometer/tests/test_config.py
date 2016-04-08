@@ -19,9 +19,9 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.tests.base import TestCase
+from collectd_ceilometer.settings import Config
 import mock
 import six
-
 
 class TestConfig(TestCase):
     """Test configuration reader"""
@@ -31,14 +31,12 @@ class TestConfig(TestCase):
 
         super(TestConfig, self).setUp()
 
-        # TODO (ema-l-foley) Import at top and mock here
-        from collectd_ceilometer.settings import Config
         self.config_class = Config
 
     @mock.patch('collectd_ceilometer.settings.LOGGER')
     def test_default_configuration(self, mock_log):
         """Test valid configuration"""
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
 
         # read default configuration
         cfg.read(self.config.node)
@@ -81,7 +79,7 @@ class TestConfig(TestCase):
 
         Test string instead of int
         """
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
         self.config.update_value('BATCH_SIZE', 'xyz')
         cfg.read(self.config.node)
         self.assertEqual(cfg.BATCH_SIZE, 1)
@@ -94,7 +92,7 @@ class TestConfig(TestCase):
 
         Test configuration parameter which is not known (expected)"""
 
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
         self.config.update_value('UNKNOWN', 'xyz')
         cfg.read(self.config.node)
         self.assertFalse(hasattr(cfg, 'UNKNOWN'))
@@ -104,7 +102,7 @@ class TestConfig(TestCase):
     def test_missing_value(self, mock_log):
         """Test configuration node vithout value"""
 
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
 
         # remove values from some node
         node = self.config.node
@@ -128,7 +126,7 @@ class TestConfig(TestCase):
         self.config.add_unit('star.distance', 'LY')
         self.config.add_unit('star.temperature', 'K')
 
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
         cfg.read(self.config.node)
         mock_log.error.assert_not_called()
 
@@ -151,7 +149,7 @@ class TestConfig(TestCase):
         unit = node.children[-1].children[0]
         unit.values = [1, 2, 3]
 
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
         cfg.read(node)
 
         mock_log.error.assert_called_with(
@@ -168,7 +166,7 @@ class TestConfig(TestCase):
         unit = node.children[-1].children[0]
         unit.key = 'NOT_UNITS'
 
-        cfg = self.config_class.instance()
+        cfg = self.config_class.creator()
         cfg.read(node)
 
         mock_log.error.assert_called_with(
