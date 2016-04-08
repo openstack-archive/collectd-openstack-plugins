@@ -28,6 +28,9 @@ class Singleton(object):
     def __call__(self, *args, **kwargs):
         raise TypeError('Singleton must be accessed through instance() method')
 
+    def creator(self):
+        return self._decorated()
+
     def instance(self):
         """Return singleton instance"""
         # pylint: disable=attribute-defined-outside-init
