@@ -1,6 +1,7 @@
 # General settings
 COLLECTD_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 COLLECTD_BATCH_SIZE=${COLLECTD_BATCH_SIZE:-3}
+COLLECTD_INSTALL=${COLLECTD_INSTALL:-True}
 
 # Ceilometer connection info.
 CEILOMETER_URL_TYPE=${CEILOMETER_URL_TYPE:-internalURL}
