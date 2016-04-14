@@ -63,7 +63,7 @@ class Plugin(object):
             self._writer.write(vl, data)
         except Exception as exc:
             if collectd is not None:
-                collectd.error('Exception during write: %s' % exc)
+                LOGGER.exception('Exception during write: %s', exc)
 
     def shutdown(self):
         """Shutdown callback"""
@@ -73,7 +73,7 @@ class Plugin(object):
             self._writer.flush()
         except Exception as exc:
             if collectd is not None:
-                collectd.error('Exception during shutdown: %s' % exc)
+                LOGGER.exception('Exception during shutdown: %s', exc)
 
 
 # The collectd plugin instance
