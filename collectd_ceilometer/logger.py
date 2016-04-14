@@ -42,6 +42,14 @@ class CollectdLogHandler(logging.Handler):
 
             if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
                 logger = collectd.info
+
+            size = len(msg)
+            # workaround for collectd limited log size
+            while size > 1023:
+                logger(msg)
+                msg = msg[1023:]
+                size -= 1023
+
             logger(msg)
 
         except Exception as e:
