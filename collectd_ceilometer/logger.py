@@ -42,7 +42,10 @@ class CollectdLogHandler(logging.Handler):
 
             if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
                 logger = collectd.info
-            logger(msg)
+
+            # collectd limits log size to 1023B, this is workaround
+            for i in range(0, len(msg), 1023):
+                logger(msg[i:i + 1023])
 
         except Exception as e:
             collectd.info("Exception in logger %s" % e)
