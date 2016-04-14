@@ -95,7 +95,7 @@ class ClientV2(object):
             resp.raise_for_status()
             resp_data = resp.json()['access']
         except (KeyError, ValueError, requests.exceptions.HTTPError) as e:
-            raise InvalidResponse(e, resp.json())
+            raise InvalidResponse(e, resp)
 
         return resp_data
 
