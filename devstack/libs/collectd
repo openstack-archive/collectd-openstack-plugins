@@ -41,6 +41,9 @@ cat << EOF | sudo tee /etc/collectd.d/collectd-ceilometer-plugin.conf
 
     <Module collectd_ceilometer_plugin>
 
+        # Verbosity 1|0
+        #VERBOSE 0
+
         # Batch size
         BATCH_SIZE 3
 
