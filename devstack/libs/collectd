@@ -3,12 +3,14 @@
 # common functions for collectd ceilometer plugin
 # -----------------------------------------------
 
-if is_ubuntu; then
-    COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d
-elif is_fedora; then
-    COLLECTD_CONF_DIR=/etc/collectd.d
+# Fall back to default conf dir if option is unset
+if [ -z $COLLECTD_CONF_DIR ]; then
+    if is_ubuntu; then
+        COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d
+    elif is_fedora; then
+        COLLECTD_CONF_DIR=/etc/collectd.d
+    fi
 fi
-
 
 # start/stop service
 #
