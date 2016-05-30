@@ -15,7 +15,13 @@
 
 from __future__ import unicode_literals
 
+# pylint: disable=import-error
+import collectd
+# pylint: enable=import-error
 from collectd_ceilometer.settings import Config
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Meter(object):
@@ -42,3 +48,21 @@ class Meter(object):
         """Get meter unit"""
         # pylint: disable=no-self-use
         return Config.instance().unit(vl.plugin, vl.type)
+
+    def sample_type(self, vl):
+        """Translate from collectd counter type to Ceilometer type"""
+        types = {"gauge": "gauge",
+                 "derive": "delta",
+                 "absolute": "cumulative",
+                 "counter": "cumulative"}
+
+        try:
+            # get_dataset -> [('value', 'derive', 0.0, None)]
+            collectd_type = collectd.get_dataset(str(vl.type))[0][1]
+        except Exception as e:
+            LOGGER.warning("Exception on mapping counter types: ".format(e))
+            LOGGER.warning("Cannot map counter types for collectd<5.5 ;"
+                           "using type 'gauge'.")
+            collectd_type = "gauge"
+
+        return types[collectd_type]
