@@ -1,0 +1,9 @@
+Code-Review+2: sean mooney <sean.k.mooney@intel.com>
+Code-Review+2: Emma Foley <emma.l.foley@intel.com>
+Workflow+1: Emma Foley <emma.l.foley@intel.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 01 Jun 2016 15:28:18 +0000
+Reviewed-on: https://review.openstack.org/315515
+Project: openstack/collectd-ceilometer-plugin
+Branch: refs/heads/stable/mitaka
