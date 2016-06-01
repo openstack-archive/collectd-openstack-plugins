@@ -20,7 +20,9 @@ function stop_collectd {
 
 # install collectd service
 function install_collectd {
-    install_package collectd
+    if [[ "$COLLECTD_INSTALL" == True  ]]; then
+        install_package collectd
+    fi
 }
 
 # Add conf file for plugin
