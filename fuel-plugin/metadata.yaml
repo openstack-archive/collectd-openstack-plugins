@@ -1,0 +1,32 @@
+# Plugin name
+name: fuel-plugin-collectd-ceilometer
+# Human-readable name for your plugin
+title: Deploy Collectd Ceilometer Plugin
+# Plugin version
+version: '0.9.0'
+# Description
+description: Deploy Collectd Ceilometer Plugin
+# Required fuel version
+fuel_version: ['9.0']
+# Specify license of your plugin
+licenses: ['Apache License Version 2.0']
+# Specify author or company name
+authors: ['ruijing.guo@intel.com']
+# A link to the plugin's page
+homepage: 'https://github.com/openstack/collectd-ceilometer-plugin'
+# Specify a group which your plugin implements, possible options:
+# network, storage, storage::cinder, storage::glance, hypervisor
+groups: ['network']
+
+is_hotpluggable: false
+
+# The plugin is compatible with releases in the list
+releases:
+  - os: ubuntu
+    version: mitaka-9.0
+    mode: ['ha']
+    deployment_scripts_path: deployment_scripts/
+    repository_path: repositories/ubuntu
+
+# Version of plugin package
+package_version: '4.0.0'

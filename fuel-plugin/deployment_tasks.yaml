@@ -1,0 +1,32 @@
+- id: collectd_install
+  type: puppet
+  version: 2.0.0
+  groups: [compute]
+  required_for: [deployment_end]
+  requires: [setup_repositories]
+  parameters:
+    puppet_manifest: puppet/manifests/collectd_install.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 720
+
+- id: collectd-ceilometer_install
+  type: puppet
+  version: 2.0.0
+  groups: [compute]
+  required_for: [deployment_end]
+  requires: [collectd_install]
+  parameters:
+    puppet_manifest: puppet/manifests/collectd-ceilometer_install.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 720
+
+- id: collectd_restart
+  type: puppet
+  version: 2.0.0
+  groups: [compute]
+  required_for: [post_deployment_end]
+  requires: [post_deployment_start]
+  parameters:
+    puppet_manifest: puppet/manifests/collectd_restart.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 720
