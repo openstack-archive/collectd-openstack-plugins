@@ -12,6 +12,8 @@ which will enable smarter scheduling and environmental service assurance monitor
 * Documentation: http://docs.openstack.org/developer/collectd-ceilometer-plugin
 * Source: http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
 * Bugs: http://bugs.launchpad.net/collectd-ceilometer-plugin
+* Contact: E-mail the dev mailing list with the [collectd-ceilometer-plugin] tag
+           mailto:openstack-dev@lists.openstack.org?subject=[collectd-ceilometer-plugin]
 
 Features
 --------
