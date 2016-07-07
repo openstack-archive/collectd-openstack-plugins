@@ -39,9 +39,9 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     ModulePath "$COLLECTD_DIR"
     LogTraces true
     Interactive false
-    Import "collectd_ceilometer_plugin"
+    Import "collectd_ceilometer.plugin"
 
-    <Module collectd_ceilometer_plugin>
+    <Module collectd_ceilometer.plugin>
 
         # Verbosity 1|0
         #VERBOSE 0
