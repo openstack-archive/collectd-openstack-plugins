@@ -17,13 +17,27 @@ function stop_collectd {
     fi
 }
 
+function build_collectd {
+    git_clone $COLLECTD_REPO $COLLECTD_DIR $COLLECTD_BRANCH
+    pushd $COLLECTD_DIR
+    ./build.sh
+    ./configure --enable-python --enable-debug --enable-logging --prefix=$COLLECTD_DIR
+    sudo make all install
+    popd
+
+}
+
 # install collectd service
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
-        if is_fedora || is_ubuntu; then
-            install_package collectd
-        else
-            die $LINENO "No support for collectd on this platform"
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            build_collectd
+        else # if install type is binary
+            if is_fedora || is_ubuntu; then
+                install_package collectd
+            else
+                die $LINENO "No support for collectd on this platform"
+            fi
         fi
     fi
 }
