@@ -15,7 +15,8 @@ local.conf settings
 COLLECTD_CONF_DIR
     (directory) Specify a directory where collectd conf files reside.
     This is required if you use a distro other than Ubuntu or Fedora, or if
-    the config file is in a non default location.
+    the config file is in a non default location. This config directory will
+    be created if it doesn't already exist
     Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collect.d (Fedora)
 
 
