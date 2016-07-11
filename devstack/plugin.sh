@@ -8,6 +8,7 @@ set -o xtrace
         "stack")
             case $2 in
                 "pre-install")
+                    create_folder
                     # install system package
                     install_collectd
                 ;;

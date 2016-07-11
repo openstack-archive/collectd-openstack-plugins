@@ -17,6 +17,19 @@ function stop_collectd {
     fi
 }
 
+# Check if folder for config file exist if not create it
+function create_folder {
+    if is_ubuntu; then
+        if [ ! -d "$/etc/collectd/collectd.conf.d" ]; then
+            sudo mkdir  /etc/collectd/collectd.conf.d
+        fi
+    elif is_fedora; then
+        if [ ! -d "$/etc/collectd.d" ]; then
+            sudo mkdir  /etc/collectd.d
+        fi
+    fi
+}
+
 # install collectd service
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
