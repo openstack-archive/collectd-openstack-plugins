@@ -35,6 +35,7 @@ class CollectdCeilometerPlugin(object):
 
         @param cfg configuration node provided by collectd
         """
+
         # pylint: disable=no-self-use
         from collectd_ceilometer.settings import Config
         Config.instance().read(cfg)
@@ -68,6 +69,7 @@ class CollectdCeilometerPlugin(object):
 
     @classmethod
     def activate(cls):
+
         # pylint: disable=import-error
         import collectd
         # pylint: enable=import-error
