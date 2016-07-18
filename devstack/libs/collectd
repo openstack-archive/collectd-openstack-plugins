@@ -36,7 +36,7 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 </LoadPlugin>
 
 <Plugin python>
-    ModulePath "$COLLECTD_DIR"
+    ModulePath "$COLLECTD_CEILOMETER_DIR"
     LogTraces true
     Interactive false
     Import "collectd_ceilometer_plugin"

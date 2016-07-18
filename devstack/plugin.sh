@@ -2,7 +2,7 @@ local xtrace=$(set +o | grep xtrace)
 set -o xtrace
 
     # Initial source of lib script
-    source $COLLECTD_DIR/devstack/libs/collectd
+    source $COLLECTD_CEILOMETER_DIR/devstack/libs/collectd
 
     case $1 in
         "stack")
