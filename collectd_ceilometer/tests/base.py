@@ -18,13 +18,15 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import KeystoneException
 from collections import OrderedDict
+import fnmatch
 import logging
-from mock import Mock
-from mock import patch
-import six
 import unittest
+
+import mock
+import six
+
+from collectd_ceilometer.keystone_light import KeystoneException
 
 
 class Value(object):
@@ -133,7 +135,7 @@ class TestCase(unittest.TestCase):
         modules = ['collectd', 'libvirt', 'requests',
                    'collectd_ceilometer.keystone_light']
 
-        self._mocked = {module: Mock() for module in modules}
+        self._mocked = {module: mock.Mock() for module in modules}
 
         # requests
         requests = self.get_mock('requests')
@@ -146,7 +148,7 @@ class TestCase(unittest.TestCase):
             {'collectd_ceilometer.keystone_light.KeystoneException':
              keystone.KeystoneException})
 
-        self._patchset = patch.dict('sys.modules', self._mocked)
+        self._patchset = mock.patch.dict('sys.modules', self._mocked)
         self._patchset.start()
 
         self.config = TestConfig()
@@ -174,6 +176,21 @@ class TestCase(unittest.TestCase):
         """Assert the list of logged errors"""
 
         collectd = self.get_mock('collectd')
-        self.assertTrue(collectd.error.called, 'Errors expected but not logged')
-        expected = [((i,),) for i in errors]
-        self.assertEqual(expected, collectd.error.call_args_list)
+        collectd.error.assert_has_calls(
+            [mock.call(match_string(i)) for i in errors])
+
+
+def match_string(s):
+    return FNMatch(s)
+
+
+class FNMatch(object):
+
+    def __init__(self, pattern):
+        self._pattern = pattern
+
+    def __eq__(self, obj):
+        return fnmatch.fnmatchcase(obj, self._pattern)
+
+    def __repr__(self, *args, **kwargs):
+        return 'FNMatch({})'.format(repr(self._pattern))
