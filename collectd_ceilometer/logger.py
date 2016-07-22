@@ -15,37 +15,37 @@
 
 from __future__ import unicode_literals
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
+import traceback
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
-    cfg = Config.instance()
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level)
+        self._collectd = collectd
+        self._hooks = {
+            logging.DEBUG: collectd.debug,
+            logging.INFO: collectd.info,
+            logging.WARNING: collectd.warning,
+            logging.ERROR: collectd.error,
+            logging.CRITICAL: collectd.error,
+        }
 
     def emit(self, record):
+        # pylint: disable=broad-except
         try:
             msg = self.format(record)
-
-            logger = self.priority_map.get(record.levelno, collectd.error)
-
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
-
-            # collectd limits log size to 1023B, this is workaround
+            logger = self._hooks[record.levelno]
             for i in range(0, len(msg), 1023):
                 logger(msg[i:i + 1023])
+        except Exception:
+            traceback.print_exc()
 
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+    def set_verbose(self, verbose):
+        if verbose:
+            verbose_logger = self._collectd.info
+        else:
+            verbose_logger = self._collectd.debug
+        self._hooks[logging.DEBUG] = verbose_logger
