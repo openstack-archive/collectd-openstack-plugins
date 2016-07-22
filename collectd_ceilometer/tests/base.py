@@ -18,37 +18,33 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import KeystoneException
-from collections import OrderedDict
-import logging
+import collections
+import unittest
+
 from mock import Mock
 from mock import patch
 import six
-import unittest
+
+from collectd_ceilometer.keystone_light import KeystoneException
 
 
-class Value(object):
-    """Value used for testing"""
+class Value(collections.namedtuple(
+        'Value',
+        ['host', 'plugin', 'plugin_instance', 'time', 'type', 'type_instance',
+         'interval', 'values', 'meta'])):
 
-    def __init__(self):
-        self.host = 'localhost'
-        self.plugin = None
-        self.plugin_instance = None
-        self.type = None
-        self.type_instance = None
-        self.time = 123456789
-        self.values = []
-        self.meta = None
-
-    def add_value(self, value):
-        """Add value"""
-        self.values.append(value)
+    @classmethod
+    def create(cls, host='localhost', plugin='cpu', plugin_instance='0',
+               time=0., type='cpu', type_instance='user', intervall=10.,
+               values=None, meta=None):
+        return cls(host, plugin, plugin_instance, time, type, type_instance,
+                   intervall, values or [], meta)
 
 
 class TestConfig(object):
     """Test configuration"""
 
-    default_values = OrderedDict([
+    default_values = collections.OrderedDict([
         ('BATCH_SIZE', 1,),
         ('OS_AUTH_URL', 'https://test-auth.url.tld/test',),
         ('CEILOMETER_URL_TYPE', 'internalURL',),
@@ -148,10 +144,7 @@ class TestCase(unittest.TestCase):
 
         self._patchset = patch.dict('sys.modules', self._mocked)
         self._patchset.start()
-
         self.config = TestConfig()
-
-        logging.getLogger().handlers = []
 
     def tearDown(self):
         """Clean up"""
