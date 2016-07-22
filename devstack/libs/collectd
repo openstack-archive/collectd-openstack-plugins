@@ -73,7 +73,7 @@ EOF
 
 # Configure collectd logfile plugin
 if [ -n $COLLECTD_LOG_FILE ]; then
-    sudo touch $COLLECTD_LOG_FILE
+    touch $COLLECTD_LOG_FILE
 cat << EOF | sudo tee "$COLLECTD_CONF_DIR/logfile.conf"
 LoadPlugin "logfile"
 <Plugin "logfile">
