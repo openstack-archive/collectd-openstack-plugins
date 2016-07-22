@@ -1,0 +1,45 @@
+---
+- name: Install required packages
+  hosts: all
+  remote_user: vagrant
+  tasks:
+
+  - name: update aptitude cache
+    raw: sudo apt-get update -y
+
+  - name: upgrade installed packages
+    raw: sudo apt-get upgrade -y --force-yes
+
+  - name: install packages with APT
+    raw: >
+        sudo apt-get install -y --force-yes
+        python2.7 python2.7-dev python-pip python3 python3-dev tmux
+        python-setuptools libffi-dev libssl-dev libxml2-dev libxslt1-dev
+        collectd build-essential git libvirt-dev libvirt-bin python-apt
+
+  - name: install paclages with pip
+    raw: sudo pip install -U urllib3 'pip>=8' 'setuptools>=24' tox
+
+  - name: some basic apt stuff
+    apt: pkg={{ item }} state=installed
+         update_cache=yes cache_valid_time=3600
+    with_items:
+    - git
+    - vim
+    - libxslt1-dev
+
+- name: install devstack
+  hosts: all
+  remote_user: vagrant
+  tasks:
+
+  - name: clone devstack
+    git: repo=https://github.com/openstack-dev/devstack.git
+         dest=~/devstack
+         version=master
+
+  - name: devstack local.conf
+    raw: sudo ln -sfn /vagrant/local.conf ~/devstack/local.conf
+
+  - name: stack it
+    command: chdir=~/devstack ./stack.sh
