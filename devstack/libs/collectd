@@ -30,6 +30,9 @@ function install_collectd {
 
 # Add conf file for plugin
 function adapt_collectd_conf {
+if [ ! -d "$COLLECTD_CONF_DIR" ]; then
+        sudo mkdir "$COLLECTD_CONF_DIR"
+fi
 cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 <LoadPlugin python>
   Globals true
