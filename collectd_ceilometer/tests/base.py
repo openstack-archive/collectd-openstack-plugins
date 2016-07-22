@@ -148,10 +148,7 @@ class TestCase(unittest.TestCase):
 
         self._patchset = patch.dict('sys.modules', self._mocked)
         self._patchset.start()
-
         self.config = TestConfig()
-
-        logging.getLogger().handlers = []
 
     def tearDown(self):
         """Clean up"""
