@@ -3,6 +3,9 @@
 # C extensions
 *.so
 
+# log files
+*.log
+
 # Packages
 *.egg
 *.egg-info
@@ -52,3 +55,7 @@ ChangeLog
 *~
 .*.swp
 .*sw?
+.settings/
+
+# Vagrant
+.vagrant/
