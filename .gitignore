@@ -52,3 +52,8 @@ ChangeLog
 *~
 .*.swp
 .*sw?
+.settings/
+
+# Vagrant
+.vagrant/
+/playbook.retry
