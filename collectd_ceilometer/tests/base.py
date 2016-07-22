@@ -18,13 +18,17 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import KeystoneException
 from collections import OrderedDict
+import fnmatch
 import logging
+import unittest
+
+from mock import call
 from mock import Mock
 from mock import patch
 import six
-import unittest
+
+from collectd_ceilometer.keystone_light import KeystoneException
 
 
 class Value(object):
@@ -56,6 +60,7 @@ class TestConfig(object):
         ('OS_USERNAME', 'tester',),
         ('OS_PASSWORD', 'testpasswd',),
         ('OS_TENANT_NAME', 'service',),
+        ('VERBOSE', False)
     ])
 
     def __init__(self):
@@ -150,7 +155,6 @@ class TestCase(unittest.TestCase):
         self._patchset.start()
 
         self.config = TestConfig()
-
         logging.getLogger().handlers = []
 
     def tearDown(self):
@@ -174,6 +178,21 @@ class TestCase(unittest.TestCase):
         """Assert the list of logged errors"""
 
         collectd = self.get_mock('collectd')
-        self.assertTrue(collectd.error.called, 'Errors expected but not logged')
-        expected = [((i,),) for i in errors]
-        self.assertEqual(expected, collectd.error.call_args_list)
+        collectd.error.assert_has_calls(
+            [call(match_string(i)) for i in errors])
+
+
+def match_string(s):
+    return _MatchString(s)
+
+
+class _MatchString(object):
+
+    def __init__(self, pattern):
+        self._pattern = pattern
+
+    def __eq__(self, obj):
+        return fnmatch.fnmatchcase(obj, self._pattern)
+
+    def __repr__(self, *args, **kwargs):
+        return 'FNMatch({})'.format(repr(self._pattern))

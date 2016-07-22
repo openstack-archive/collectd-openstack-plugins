@@ -19,11 +19,14 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.tests.base import TestCase
-from collectd_ceilometer.tests.base import Value
 from collections import namedtuple
 import json
-import mock
+import sys
+
+from mock import Mock
+
+from collectd_ceilometer.tests.base import TestCase
+from collectd_ceilometer.tests.base import Value
 
 
 class PluginTest(TestCase):
@@ -36,11 +39,12 @@ class PluginTest(TestCase):
         client_class.return_value\
             .get_service_endpoint.return_value = "https://test-ceilometer.tld"
 
+        sys.modules.pop('collectd_ceilometer.plugin', None)
+
         # TODO(emma-l-foley): Import at top and mock here
         from collectd_ceilometer.plugin import instance
-        from collectd_ceilometer.plugin import Plugin
         self.default_instance = instance
-        self.plugin_instance = Plugin()
+        self.plugin_instance = instance
         self.maxDiff = None
 
     def test_callbacks(self):
@@ -177,8 +181,7 @@ class PluginTest(TestCase):
         self._init_instance()
 
         # write the value
-        errors = [
-            'Exception during write: Test Client() exception']
+        errors = ['Exception during write*']
         self._write_value(self._create_value(), errors)
 
         # no requests method has been called
@@ -325,7 +328,7 @@ class PluginTest(TestCase):
 
         self._init_instance()
 
-        writer = mock.Mock()
+        writer = Mock()
         writer.flush.side_effect = Exception('Test shutdown error')
         writer.write.side_effect = Exception('Test write error')
 
@@ -337,8 +340,8 @@ class PluginTest(TestCase):
         self.plugin_instance.shutdown()
 
         self.assertErrors([
-            'Exception during write: Test write error',
-            'Exception during shutdown: Test shutdown error'])
+            'Exception during write*: Test write error',
+            'Exception during shutdown*: Test shutdown error'])
 
     @staticmethod
     def _create_value():

@@ -13,39 +13,46 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
+import traceback
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
-    cfg = Config.instance()
+    MAX_MESSAGE_LENGHT = 1023
+
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+
+        # hooks to be used by emit method
+        self._hooks = {
+            logging.DEBUG: collectd.debug,
+            logging.INFO: collectd.info,
+            logging.WARNING: collectd.warning,
+            logging.ERROR: collectd.error,
+            logging.CRITICAL: collectd.error}
+
+        # hook to be used when verbose is False
+        self._collectd_debug = collectd.debug
 
     def emit(self, record):
+        # pylint: disable=broad-except
         try:
-            msg = self.format(record)
+            max_lenght = self.MAX_MESSAGE_LENGHT
+            logger = self._hooks[record.levelno]
+            message = self.format(record)
+            for i in range(0, len(message), max_lenght):
+                logger(message[i:i + max_lenght])
+        except Exception:
+            traceback.print_exc()
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
-
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
-
-            # collectd limits log size to 1023B, this is workaround
-            for i in range(0, len(msg), 1023):
-                logger(msg[i:i + 1023])
-
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+    def set_verbose(self, verbose):
+        if verbose:
+            # debug messages has to be show as regular infos
+            verbose_logger = self._hooks[logging.INFO]
+        else:
+            # debug messages has to be show as debug infos
+            verbose_logger = self._collectd_debug
+        self._hooks[logging.DEBUG] = verbose_logger
