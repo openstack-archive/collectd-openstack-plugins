@@ -177,8 +177,7 @@ class PluginTest(TestCase):
         self._init_instance()
 
         # write the value
-        errors = [
-            'Exception during write: Test Client() exception']
+        errors = ['Exception during write*']
         self._write_value(self._create_value(), errors)
 
         # no requests method has been called
@@ -337,8 +336,8 @@ class PluginTest(TestCase):
         self.plugin_instance.shutdown()
 
         self.assertErrors([
-            'Exception during write: Test write error',
-            'Exception during shutdown: Test shutdown error'])
+            'Exception during write*: Test write error',
+            'Exception during shutdown*: Test shutdown error'])
 
     @staticmethod
     def _create_value():
