@@ -52,3 +52,6 @@ ChangeLog
 *~
 .*.swp
 .*sw?
+
+# Vagrant
+.vagrant/
