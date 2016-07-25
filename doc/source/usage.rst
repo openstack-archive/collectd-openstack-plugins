@@ -25,3 +25,19 @@ COLLECTD_INSTALL
     Set this to False if you are running a custom collectd build or do not
     want to upgrade installed version.
     Default: True
+
+
+COLLECTD_BATCH_SIZE
+    Set the amount of samples to be buffered before sending.
+    Default: 1 i.e. no batching/buffering.
+
+
+COLLECTD_DIR
+    Specify collectd directory, this is required if collectd was installed
+    manually.
+    Default: /opt/collectd
+
+
+CEILOMETER_TIMEOUT
+    Sets the ceilometer's request timeout. The value is passed in milliseconds.
+    Default: 1000 i.e. 1 sec.
