@@ -44,13 +44,13 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     Interactive false
     Import "collectd_ceilometer.plugin"
 
-    <Module collectd_ceilometer.plugin>
+    <Module "collectd_ceilometer.plugin">
 
         # Verbosity 1|0
         #VERBOSE 0
 
         # Batch size
-        BATCH_SIZE 3
+        BATCH_SIZE "$COLLECTD_BATCH_SIZE"
 
         # Service endpoint addresses
         OS_AUTH_URL "$OS_AUTH_URL"
