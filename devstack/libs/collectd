@@ -17,13 +17,58 @@ function stop_collectd {
     fi
 }
 
-# install collectd service
+function install_service_file {
+    # Systemd
+    #if [[ -d "/etc/systemd/system" ]]; then
+
+    #    sudo wget  https://raw.githubusercontent.com/martin-magakian/collectd-script/master/collectd.service -O /etc/systemd/system/collectd.service
+    #    # Adjust file content
+    #    sed "s#/opt/collectd#$COLLECTD_DIR#g" -i /etc/systemd/system/collectd.service
+    #else
+        local service_file=/etc/init.d/collectd
+        # sysvinit
+        sudo -EH wget https://raw.githubusercontent.com/astro/collectd/master/debian/collectd.init.d -O /etc/init.d/collectd
+
+        # adjust conf file
+        #local service_dir=/etc/init.d/
+        # Add collectd dir to PATH
+        sudo sed 's#PATH=.*$#&:'"$COLLECTD_DIR"'#' -i /etc/init.d/collectd
+        # Point DAEMON, SCRIPTNAME, CONFDIRs at $COLLECTD_DIR/{etc/collectd.conf,sbin/collectd}
+        sudo sed 's#DAEMON=/#DAEMON='"$COLLECTD_DIR"'#g' -i /etc/init.d/collectd
+        sudo sed 's#SCRIPTNAME=/#SCRIPTNAME='"$COLLECTD_DIR"'#g' -i /etc/init.d/collectd
+        sudo sed 's#CONFIGDIR=/#CONFIGDIR='"$COLLECTD_DIR"'#g' -i /etc/init.d/collectd
+        sudo sed 's#FALLBACKCONF=/#FALLBACKCONF='"$COLLECTD_DIR"'#g' -i /etc/init.d/collectd
+
+        sudo chmod +x /etc/init.d/collectd
+
+    #fi
+}
+
+function build_collectd {
+    git_clone $COLLECTD_REPO $COLLECTD_DIR $COLLECTD_BRANCH
+    pushd $COLLECTD_DIR
+    . build.sh
+    ./configure --enable-python --enable-debug \
+       --enable-logging --enable-syslog \
+       --prefix=$COLLECTD_DIR
+    sudo make all install
+    popd
+
+    install_service_file
+
+}
+
+# install collectd
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
-        if is_fedora || is_ubuntu; then
-            install_package collectd
-        else
-            die $LINENO "No support for collectd on this platform"
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            build_collectd
+        else # if install type is binary
+            if is_fedora || is_ubuntu; then
+                install_package collectd
+            else
+                die $LINENO "No support for collectd on this platform"
+            fi
         fi
     fi
 }

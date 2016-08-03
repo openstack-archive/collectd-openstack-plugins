@@ -12,6 +12,12 @@ To use collectd-ceilometer-plugin in collectd::
 local.conf settings
 -------------------
 
+COLLECTD_BRANCH
+    (<git branch>) Indicates which branch of collectd to checkout before
+    compiling.
+
+    Default: master
+
 COLLECTD_CONF_DIR
     (directory) Specify a directory where collectd conf files reside.
     This is required if you use a distro other than Ubuntu or Fedora, or if
@@ -19,13 +25,17 @@ COLLECTD_CONF_DIR
     be created if it doesn't already exist.
     Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collect.d (Fedora)
 
+COLLECTD_DIR
+    (directory)
+    Default: $DEST/collectd-$COLLECTD_BRANCH/
 
 COLLECTD_INSTALL
-    (True|False) Indicates whether to install collectd from package manager.
-    Set this to False if you are running a custom collectd build or do not
-    want to upgrade installed version.
-    Default: True
+    (True|False) Indicates whether to install collectd.
 
+    Set this to False if you are running a pre-built version of collectd or do
+    not want to upgrade installed version.
+
+    Default: True
 
 COLLECTD_BATCH_SIZE
     Set the amount of samples to be buffered before sending.
@@ -41,3 +51,15 @@ COLLECTD_DIR
 CEILOMETER_TIMEOUT
     Sets the ceilometer's request timeout. The value is passed in milliseconds.
     Default: 1000 i.e. 1 sec.
+
+COLLECTD_INSTALL_TYPE
+    (source|binary) Specify whether the collectd installation should use the
+    package manager or install from source.
+
+    Default: binary
+
+
+COLLECTD_REPO
+    (url) Location of git repo to clone collectd from.
+
+    Default: http://github.com/collectd/collectd.git
