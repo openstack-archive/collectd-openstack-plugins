@@ -13,33 +13,43 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
+
+import bisect
 import logging
 import traceback
-
-from collectd_ceilometer.settings import Config
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    # pylint: disable=no-member
-    cfg = Config.instance()
+    # this is the maximum message lenght supported by collectd
+    # messages longer than this size has to be split
+    max_message_lenght = 1023
+
+    # sorted list of logging level numbers to be used to look for hooks
+    # this list is sorted because it is used by bisec function to look for
+    # the best hook for any given message logging level
+    _levels = (logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR)
+
+    # all messages with a logging level lesser of greater to these are going
+    # to be clamped inside this interval
+    min_level = _levels[0]
+    max_level = _levels[-1]
 
     def __init__(self, collectd, level=logging.NOTSET):
         super(CollectdLogHandler, self).__init__(level=level)
-        self.priority_map = {
-            logging.DEBUG: collectd.debug,
-            logging.INFO: collectd.info,
-            logging.WARNING: collectd.warning,
-            logging.ERROR: collectd.error,
-            logging.CRITICAL: collectd.error
-        }
+
+        # bind hooks to be used by emit method. Every logging level in _levels
+        # must have an hook in the same position here.
+        self._hooks = (
+            collectd.debug, collectd.info, collectd.warning, collectd.error)
 
     def emit(self, record):
+        "Called by loggers when a message has to be sent to collecd."
         # pylint: disable=broad-except
-        level = record.levelno
-        if self.cfg.VERBOSE and logging.DEBUG == level:
-            level = logging.INFO
+
+        # clamp the level between given min and max and
+        level = max(self.min_level, min(record.levelno, self.max_level))
 
         try:
             message = self.format(record)
@@ -49,8 +59,9 @@ class CollectdLogHandler(logging.Handler):
         self.emit_message(message, level)
 
     def emit_message(self, message, level):
-        hook = self.priority_map.get(level, logging.ERROR)
+        # get the hook using binary search over valid levels
+        hook = self._hooks[bisect.bisect_left(self._levels, level)]
 
         # collectd limits log size to 1023B, this is workaround
-        for i in range(0, len(message), 1023):
-            hook(message[i:i + 1023])
+        for i in range(0, len(message), self.max_message_lenght):
+            hook(message[i:i + self.max_message_lenght])
