@@ -13,39 +13,35 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
+import bisect
 import logging
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
-    cfg = Config.instance()
+    max_message_lenght = 1023
+
+    _levels = (logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR)
+    min_level = _levels[0]
+    max_level = _levels[-1]
+
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+
+        # hooks to be used by emit method
+        self._hooks = [
+            collectd.debug, collectd.info, collectd.warning, collectd.error]
 
     def emit(self, record):
-        try:
-            msg = self.format(record)
+        # clamp the level between given min and max
+        level = max(self.min_level, min(record.levelno, self.max_level))
+        # get the hook using binary search over valid levels
+        hook = self._hooks[bisect.bisect_left(self._levels, level)]
+        message = self.format(record)
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
-
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
-
-            # collectd limits log size to 1023B, this is workaround
-            for i in range(0, len(msg), 1023):
-                logger(msg[i:i + 1023])
-
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+        # collectd limits log size to 1023B, this is workaround
+        step = self.max_message_lenght
+        for i in range(0, len(message), step):
+            hook(message[i:i + step])
