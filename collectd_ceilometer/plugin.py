@@ -19,14 +19,22 @@ from __future__ import unicode_literals
 import collectd
 # pylint: enable=import-error
 
+import collectd_ceilometer
 from collectd_ceilometer.logger import CollectdLogHandler
 from collectd_ceilometer.meters import MeterStorage
 from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
 import logging
 
-logging.getLogger().addHandler(CollectdLogHandler())
-logging.getLogger().setLevel(logging.NOTSET)
+# cappure only log messages produced by this plugin
+# to avoid duplicated messages produced by other plugins
+#
+# TODO(fressi):
+#   the logger name where to add the habdler should be given by configuration.
+
+log_handler = CollectdLogHandler(collectd=collectd)
+logging.getLogger(collectd_ceilometer.__name__).addHandler(log_handler)
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -45,7 +53,13 @@ class Plugin(object):
         @param cfg configuration node provided by collectd
         """
         # pylint: disable=no-self-use
-        Config.instance().read(cfg)
+        config = Config.instance()
+        config.read(cfg)
+
+        if config.VERBOSE:
+            log_handler.min_level = logging.INFO
+        else:
+            log_handler.min_level = logging.DEBUG
 
     def init(self):
         """Initialization callback"""
