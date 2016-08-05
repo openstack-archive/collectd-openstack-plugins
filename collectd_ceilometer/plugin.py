@@ -25,8 +25,8 @@ from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
 import logging
 
-logging.getLogger().addHandler(CollectdLogHandler())
-logging.getLogger().setLevel(logging.NOTSET)
+log_handler = CollectdLogHandler(collectd=collectd)
+logging.getLogger().addHandler(log_handler)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -45,7 +45,9 @@ class Plugin(object):
         @param cfg configuration node provided by collectd
         """
         # pylint: disable=no-self-use
-        Config.instance().read(cfg)
+        config = Config.instance()
+        config.read(cfg)
+        log_handler.set_verbose(config.VERBOSE)
 
     def init(self):
         """Initialization callback"""
