@@ -13,39 +13,55 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
+import collections
 import logging
+
+import six
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
-    cfg = Config.instance()
+    MAX_MESSAGE_LENGHT = 1023
+
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+
+        # hooks to be used by emit method
+        self._hooks = collections.OrderedDict(
+            sorted([(logging.DEBUG, collectd.debug),
+                    (logging.INFO, collectd.info),
+                    (logging.WARNING, collectd.warning),
+                    (logging.ERROR, collectd.error),
+                    (logging.CRITICAL, collectd.error)]))
+
+        # hook to be used when verbose is False
+        self._collectd_debug = collectd.debug
+        self.addFilter(self)
 
     def emit(self, record):
-        try:
-            msg = self.format(record)
+        # pylint: disable=broad-except
+        max_lenght = self.MAX_MESSAGE_LENGHT
+        hook = getattr(record, 'hook', None)
+        # filters out hook level befor formatting
+        if hook:
+            message = self.format(record)
+            for i in range(0, len(message), max_lenght):
+                hook(message[i:i + max_lenght])
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
+    def filter(self, record):
+        if record.levelno >= self.level:
+            for hook_level, hook in six.iteritems(self._hooks):
+                if record.levelno <= hook_level:
+                    record.hook = hook
+                    return 1
+        return 0
 
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
-
-            # collectd limits log size to 1023B, this is workaround
-            for i in range(0, len(msg), 1023):
-                logger(msg[i:i + 1023])
-
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+    def set_verbose(self, verbose):
+        if verbose:
+            # debug messages has to be show as regular infos
+            self._hooks[logging.DEBUG] = self._hooks[logging.INFO]
+        else:
+            # debug messages has to be show as debug infos
+            self._hooks[logging.DEBUG] = self._collectd_debug
