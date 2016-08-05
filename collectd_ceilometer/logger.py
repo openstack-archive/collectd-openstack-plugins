@@ -16,14 +16,15 @@
 import logging
 import traceback
 
-from collectd_ceilometer.settings import Config
-
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    # pylint: disable=no-member
-    cfg = Config.instance()
+    # this is the maximum message lenght supported by collectd
+    # messages longer than this size has to be split
+    max_message_lenght = 1023
+
+    verbose = False
 
     def __init__(self, collectd, level=logging.NOTSET):
         super(CollectdLogHandler, self).__init__(level=level)
@@ -36,6 +37,8 @@ class CollectdLogHandler(logging.Handler):
         }
 
     def emit(self, record):
+        "Called by loggers when a message has to be sent to collecd."
+
         try:
             self.emit_message(
                 message=self.format(record),
@@ -48,12 +51,12 @@ class CollectdLogHandler(logging.Handler):
                 level=logging.ERROR)
 
     def emit_message(self, message, level):
-        if self.cfg.VERBOSE and level == logging.DEBUG:
+        if self.verbose and level == logging.DEBUG:
             level = logging.INFO
         elif level not in self.priority_map:
             level = logging.ERROR
         hook = self.priority_map[level]
 
         # collectd limits log size to 1023B, this is workaround
-        for i in range(0, len(message), 1023):
-            hook(message[i:i + 1023])
+        for i in range(0, len(message), self.max_message_lenght):
+            hook(message[i:i + self.max_message_lenght])
