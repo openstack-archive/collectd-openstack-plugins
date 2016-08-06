@@ -20,9 +20,9 @@ import collectd
 # pylint: enable=import-error
 
 import collectd_ceilometer
+from collectd_ceilometer.configuration import Configuration
 from collectd_ceilometer.logger import CollectdLogHandler
 from collectd_ceilometer.meters import MeterStorage
-from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
 import logging
 
@@ -45,6 +45,7 @@ class Plugin(object):
     def __init__(self):
         self._meters = None
         self._writer = None
+        self.configuration = Configuration()
         logging.getLogger("requests").setLevel(logging.WARNING)
 
     def config(self, cfg):
@@ -52,21 +53,20 @@ class Plugin(object):
 
         @param cfg configuration node provided by collectd
         """
-        # pylint: disable=no-self-use
-        config = Config.instance()
-        config.read(cfg)
-
-        if config.VERBOSE:
+        configuration = self.configuration
+        configuration.read_collectd_configuration(cfg)
+        if configuration.VERBOSE:
             log_handler.min_level = logging.INFO
         else:
             log_handler.min_level = logging.DEBUG
+        configuration.check_required_attributes()
 
     def init(self):
         """Initialization callback"""
 
         collectd.info('Initializing the collectd OpenStack python plugin')
-        self._meters = MeterStorage()
-        self._writer = Writer(self._meters)
+        self._meters = MeterStorage(config=self.configuration)
+        self._writer = Writer(self._meters, config=self.configuration)
 
     def write(self, vl, data=None):
         """Collectd write callback"""

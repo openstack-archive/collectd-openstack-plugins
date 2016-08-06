@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
 
 class Configuration(attribute.HasAttributes):
 
+    # TODO(fressi): these options has to be documented
     BATCH_SIZE = attribute.Integer(1)
     CEILOMETER_URL_TYPE = attribute.String('internalURL')
     CEILOMETER_TIMEOUT = attribute.Integer(1000)
@@ -39,12 +40,15 @@ class Configuration(attribute.HasAttributes):
     LIBVIRT_CONN_URI = attribute.String('qemu:///system')
 
     def read_collectd_configuration(self, configuration):
+        "Reads configuration received by plugin config hook from collectd."
+
         assert configuration.key.upper() == 'MODULE'
 
-        # store data by name
+        # store data by name for easier retrieaval
         children = collections.OrderedDict(
             (child.key.upper(), child) for child in configuration.children)
 
+        # take units names provided by user
         units = children.pop('UNITS', None)
         if units:
             for child in units.children:

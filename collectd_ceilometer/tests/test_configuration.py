@@ -26,6 +26,7 @@ from collectd_ceilometer.units import UNITS
 class TestConfiguration(unittest.TestCase):
 
     def test_init(self):
+        # Given
         configuration = Configuration()
 
         self.assertEqual(1, configuration.BATCH_SIZE)
