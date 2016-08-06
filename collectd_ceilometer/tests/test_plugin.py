@@ -26,11 +26,11 @@ import json
 import mock
 
 
-class PluginTest(TestCase):
+class TestPlugin(TestCase):
     """Test the collectd plugin"""
 
     def setUp(self):
-        super(PluginTest, self).setUp()
+        super(TestPlugin, self).setUp()
         client_class \
             = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
         client_class.return_value\
@@ -68,9 +68,10 @@ class PluginTest(TestCase):
         # create a value
         data = self._create_value()
 
-        # set batch size to 2 and init instance
-        self.config.update_value('BATCH_SIZE', 2)
         self._init_instance()
+
+        # set batch size to 2 and init instance
+        self.plugin_instance.configuration.BATCH_SIZE = 2
 
         # no authentication has been performed so far
         self.assertFalse(client_class.called)
@@ -352,8 +353,12 @@ class PluginTest(TestCase):
 
     def _init_instance(self):
         """Init current plugin instance"""
-        self.plugin_instance.config(self.config.node)
+        # self.plugin_instance.config(self.config.node)
         self.plugin_instance.init()
+        self.plugin_instance.configuration.OS_AUTH_URL = 'url'
+        self.plugin_instance.configuration.OS_PASSWORD = '***'
+        self.plugin_instance.configuration.OS_TENANT_NAME = 'tenant'
+        self.plugin_instance.configuration.OS_USERNAME = 'user'
 
     def _write_value(self, value, errors=None):
         """Write a value and verify result"""
