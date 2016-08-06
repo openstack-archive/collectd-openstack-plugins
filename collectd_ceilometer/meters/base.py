@@ -15,11 +15,12 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.settings import Config
-
 
 class Meter(object):
     """Default collectd meter"""
+
+    def __init__(self, config):
+        self._config = config
 
     def meter_name(self, vl):
         """Return meter name"""
@@ -41,4 +42,4 @@ class Meter(object):
     def unit(self, vl):
         """Get meter unit"""
         # pylint: disable=no-self-use
-        return Config.instance().unit(vl.plugin, vl.type)
+        return self._config.unit(vl.plugin, vl.type)

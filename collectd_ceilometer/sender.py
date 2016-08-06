@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 
 from collectd_ceilometer.keystone_light import ClientV2 as keystoneClientV2
 from collectd_ceilometer.keystone_light import KeystoneException
-from collectd_ceilometer.settings import Config
+
 import logging
 import requests
 from requests.exceptions import RequestException
@@ -36,7 +36,7 @@ HTTP_UNAUTHORIZED = 401
 class Sender(object):
     """Sends the JSON serialized data to Ceilometer"""
 
-    def __init__(self):
+    def __init__(self, config):
         """Create the Sender instance
 
         The cofinguration must be initialized before the object is created.
@@ -46,6 +46,7 @@ class Sender(object):
         self._auth_token = None
         self._auth_lock = threading.Lock()
         self._failed_auth = False
+        self._config = config
 
     def _authenticate(self):
         """Authenticate and renew the authentication token"""
@@ -65,7 +66,7 @@ class Sender(object):
             try:
                 # create a keystone client if it doesn't exist
                 if self._keystone is None:
-                    cfg = Config.instance()
+                    cfg = self._config
                     self._keystone = keystoneClientV2(
                         auth_url=cfg.OS_AUTH_URL,
                         username=cfg.OS_USERNAME,
@@ -78,7 +79,7 @@ class Sender(object):
                 # get the uri of service endpoint
                 endpoint = self._keystone.get_service_endpoint(
                     "ceilometer",
-                    Config.instance().CEILOMETER_URL_TYPE)
+                    self._config.CEILOMETER_URL_TYPE)
 
                 self._url_base = "{}/v2/meters/%s".format(endpoint)
                 LOGGER.info('Authenticating request - success')
@@ -156,8 +157,7 @@ class Sender(object):
                         result.status_code,
                         result.text)
 
-    @classmethod
-    def _perform_request(cls, url, payload, auth_token):
+    def _perform_request(self, url, payload, auth_token):
         """Perform the POST request"""
 
         LOGGER.debug('Performing request to %s', url)
@@ -169,7 +169,7 @@ class Sender(object):
         try:
             return requests.post(
                 url, data=payload, headers=headers,
-                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+                timeout=(self._config.CEILOMETER_TIMEOUT / 1000.))
         except RequestException as exc:
             LOGGER.error('Ceilometer request error: %s', six.text_type(exc))
         return None

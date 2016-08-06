@@ -18,7 +18,6 @@ from __future__ import unicode_literals
 # pylint: disable=import-error
 import collectd
 # pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
 
 
@@ -32,16 +31,12 @@ class CollectdLogHandler(logging.Handler):
         logging.ERROR: collectd.error,
         logging.CRITICAL: collectd.error
     }
-    cfg = Config.instance()
 
     def emit(self, record):
         try:
             msg = self.format(record)
 
             logger = self.priority_map.get(record.levelno, collectd.error)
-
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
 
             # collectd limits log size to 1023B, this is workaround
             for i in range(0, len(msg), 1023):
