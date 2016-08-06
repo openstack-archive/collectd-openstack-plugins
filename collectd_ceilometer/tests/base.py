@@ -19,11 +19,9 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.keystone_light import KeystoneException
-from collections import OrderedDict
 import logging
 from mock import Mock
 from mock import patch
-import six
 import unittest
 
 
@@ -43,74 +41,6 @@ class Value(object):
     def add_value(self, value):
         """Add value"""
         self.values.append(value)
-
-
-class TestConfig(object):
-    """Test configuration"""
-
-    default_values = OrderedDict([
-        ('BATCH_SIZE', 1,),
-        ('OS_AUTH_URL', 'https://test-auth.url.tld/test',),
-        ('CEILOMETER_URL_TYPE', 'internalURL',),
-        ('CEILOMETER_TIMEOUT', 1000,),
-        ('OS_USERNAME', 'tester',),
-        ('OS_PASSWORD', 'testpasswd',),
-        ('OS_TENANT_NAME', 'service',),
-    ])
-
-    def __init__(self):
-        self._values = self.default_values.copy()
-        self._units = {}
-
-    def update_value(self, key, value):
-        """Update the configuration value
-
-        @param key      configuration key
-        @param value    configuration value
-        """
-        self._values.update({key: value})
-
-    def add_unit(self, name, unit):
-        """Add user defined unit
-
-        @param name     name of the plugin
-        @param unit     unit name
-        """
-        self._units.update({name: unit})
-
-    @property
-    def node(self):
-        """Return the master node of current configuration
-
-        Return the configuration node in format readable by config singleton.
-        """
-        nodes = [self._Node(key=key, values=[val])
-                 for key, val in six.iteritems(self._values)]
-        units = [self._Node(key='UNIT', values=[key, val])
-                 for key, val in six.iteritems(self._units)]
-        if units:
-            nodes.append(self._Node(key='UNITS', children=units))
-        return self._Node(key='MODULE', children=nodes)
-
-    class _Node(object):
-        """Test configuration node"""
-
-        def __init__(self, children=None, key=None, values=None):
-            """Create the node
-
-            @param children     list of children nodes
-            @param key          configuration key
-            @param value        configuration value
-            """
-
-            if children is None:
-                children = []
-            if values is None:
-                values = []
-
-            self.children = children
-            self.key = key
-            self.values = values
 
 
 class TestCase(unittest.TestCase):
@@ -148,8 +78,6 @@ class TestCase(unittest.TestCase):
 
         self._patchset = patch.dict('sys.modules', self._mocked)
         self._patchset.start()
-
-        self.config = TestConfig()
 
         logging.getLogger().handlers = []
 

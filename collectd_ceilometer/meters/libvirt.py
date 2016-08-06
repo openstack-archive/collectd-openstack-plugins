@@ -13,10 +13,10 @@
 # under the License.
 """Collectd meter for libvirt plugin"""
 
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from collectd_ceilometer.meters.base import Meter
-from collectd_ceilometer.settings import Config
 import libvirt
 import threading
 
@@ -24,7 +24,8 @@ import threading
 class LibvirtMeter(Meter):
     """Specialization for libvirt plugin"""
 
-    def __init__(self):
+    def __init__(self, config):
+        super(LibvirtMeter, self).__init__(config)
         self._cache_lock = threading.Lock()
         self._conn = None
         self._vms = {}
@@ -41,7 +42,7 @@ class LibvirtMeter(Meter):
                 if not hostname:
                     if self._conn is None:
                         self._conn = libvirt.openReadOnly(
-                            Config.instance().LIBVIRT_CONN_URI)
+                            self._config.LIBVIRT_CONN_URI)
 
                     hostname = self._conn.lookupByName(vl.host).UUIDString()
                     self._vms[vl.host] = hostname
