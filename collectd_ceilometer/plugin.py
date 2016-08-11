@@ -65,7 +65,7 @@ class Plugin(object):
         """Initialization callback"""
 
         collectd.info('Initializing the collectd OpenStack python plugin')
-        self._meters = MeterStorage()
+        self._meters = MeterStorage(collectd=collectd)
         self._writer = Writer(self._meters)
 
     def write(self, vl, data=None):
