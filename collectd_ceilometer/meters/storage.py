@@ -29,12 +29,12 @@ class MeterStorage(object):
         'libvirt': LibvirtMeter,
     }
 
-    def __init__(self):
+    def __init__(self, collectd):
         self._meters = {}
-        self._default = Meter()
+        self._default = Meter(collectd=collectd)
 
         # fill dict with specialized meters classes
-        self._meters = {key: meter_class()
+        self._meters = {key: meter_class(collectd=collectd)
                         for key, meter_class in six.iteritems(self._classes)}
 
     def get(self, plugin):

@@ -24,7 +24,8 @@ import threading
 class LibvirtMeter(Meter):
     """Specialization for libvirt plugin"""
 
-    def __init__(self):
+    def __init__(self, collectd):
+        super(LibvirtMeter, self).__init__(collectd=collectd)
         self._cache_lock = threading.Lock()
         self._conn = None
         self._vms = {}

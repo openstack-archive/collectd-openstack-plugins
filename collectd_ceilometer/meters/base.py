@@ -21,6 +21,9 @@ from collectd_ceilometer.settings import Config
 class Meter(object):
     """Default collectd meter"""
 
+    def __init__(self, collectd):
+        self._collectd = collectd
+
     def meter_name(self, vl):
         """Return meter name"""
         # pylint: disable=no-self-use
