@@ -16,21 +16,32 @@
 from __future__ import division
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import ClientV2 as keystoneClientV2
+import logging
+import threading
+
+import requests
+import six
+
+from collectd_ceilometer.keystone_light import ClientV2
 from collectd_ceilometer.keystone_light import KeystoneException
 from collectd_ceilometer.settings import Config
-import logging
-import requests
-from requests.exceptions import RequestException
-import six
-import threading
 
 
 LOGGER = logging.getLogger(__name__)
 
-# HTTP status codes
-HTTP_CREATED = 201
-HTTP_UNAUTHORIZED = 401
+HTTP_CREATED = requests.codes['CREATED']
+HTTP_UNAUTHORIZED = requests.codes['UNAUTHORIZED']
+
+# Lookup dictionary for getting code status name from code status number
+# this is the inverse mapping of requests.codes dictionary
+STATUS_NAMES = {
+    code_status: code_name
+    for code_name, code_status in six.iteritems(requests.codes.__dict__)}
+
+
+def get_code_status_name(code_status):
+    "Get an human frieendly name for given status code"
+    return STATUS_NAMES.get(code_status, str(code_status))
 
 
 class Sender(object):
@@ -66,7 +77,7 @@ class Sender(object):
                 # create a keystone client if it doesn't exist
                 if self._keystone is None:
                     cfg = Config.instance()
-                    self._keystone = keystoneClientV2(
+                    self._keystone = ClientV2(
                         auth_url=cfg.OS_AUTH_URL,
                         username=cfg.OS_USERNAME,
                         password=cfg.OS_PASSWORD,
@@ -125,39 +136,34 @@ class Sender(object):
         url = self._url_base % metername
 
         # send the POST request
-        result = self._perform_request(url, payload, auth_token)
-        if not result:
-            return
+        try:
+            return self._perform_request(url, payload, auth_token)
+        except requests.exceptions.HTTPError as exc:
+            response = exc.response
 
-        # if the request failed due to an auth error
-        if result.status_code == HTTP_UNAUTHORIZED:
-            # reset the auth token in order to force the subsequent
-            # _authenticate() call to renew it
-            # Here, it can happen that the token is reset right after
-            # another thread has finished the authentication and thus
-            # the authentication may be performed twice
-            self._auth_token = None
+            # if the request failed due to an auth error
+            if response.status_code == HTTP_UNAUTHORIZED:
+                LOGGER.info('Renew authentication.')
 
-            LOGGER.debug('Result: %s %s',
-                         six.text_type(result.status_code),
-                         result.text)
+                # reset the auth token in order to force the subsequent
+                # _authenticate() call to renew it
+                # Here, it can happen that the token is reset right after
+                # another thread has finished the authentication and thus
+                # the authentication may be performed twice
+                self._auth_token = None
 
-            # renew the authentication token
-            auth_token = self._authenticate()
+                # renew the authentication token
+                auth_token = self._authenticate()
 
-            if auth_token is not None:
-                # and try to repost
-                result = self._perform_request(url, payload, auth_token)
+                if auth_token is not None:
+                    # and try to repost
+                    return self._perform_request(url, payload, auth_token)
+            else:
+                # This is an error and it has to be forwarded
+                raise
 
-        if result.status_code == HTTP_CREATED:
-            LOGGER.debug('Result: %s', HTTP_CREATED)
-        else:
-            LOGGER.info('Result: %s %s',
-                        result.status_code,
-                        result.text)
-
-    @classmethod
-    def _perform_request(cls, url, payload, auth_token):
+    @staticmethod
+    def _perform_request(url, data, auth_token):
         """Perform the POST request"""
 
         LOGGER.debug('Performing request to %s', url)
@@ -166,10 +172,23 @@ class Sender(object):
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
+        response = requests.post(
+            url, data=data, headers=headers,
+            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+
+        # Raises exception if there was an error
         try:
-            return requests.post(
-                url, data=payload, headers=headers,
-                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
-        except RequestException as exc:
-            LOGGER.error('Ceilometer request error: %s', six.text_type(exc))
-        return None
+            response.raise_for_status()
+        # pylint: disable=broad-except
+        except Exception:
+            exc_info = 1
+            raise
+        else:
+            exc_info = 0
+        finally:
+            # Log out the result of the request for debugging purpose
+            LOGGER.debug(
+                'Result: %s, %d, %r',
+                get_code_status_name(response.status_code),
+                response.status_code, response.text, exc_info=exc_info)
+        return response
