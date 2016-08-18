@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -13,46 +12,70 @@
 # under the License.
 """Ceilometer collectd plugin"""
 
-from __future__ import unicode_literals
+import logging
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-
+import collectd_ceilometer
 from collectd_ceilometer.logger import CollectdLogHandler
 from collectd_ceilometer.meters import MeterStorage
 from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
-import logging
 
-logging.getLogger().addHandler(CollectdLogHandler(collectd=collectd))
-logging.getLogger().setLevel(logging.NOTSET)
+
 LOGGER = logging.getLogger(__name__)
+
+# setup logging
+ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
+
+
+def setup_plugin(collectd):
+    ROOT_LOGGER.addHandler(CollectdLogHandler(collectd=collectd))
+    ROOT_LOGGER.setLevel(logging.NOTSET)
+
+    config = Config.instance()
+
+    # The collectd plugin instance
+    # pylint: disable=invalid-name
+    instance = Plugin(collectd=collectd, config=config)
+    # pylint: enable=invalid-name
+
+    # Register plugin callbacks
+    collectd.register_init(instance.init)
+    collectd.register_config(instance.config)
+    collectd.register_write(instance.write)
+    collectd.register_shutdown(instance.shutdown)
 
 
 class Plugin(object):
     """Ceilometer plugin with collectd callbacks"""
     # NOTE: this is multithreaded class
 
-    def __init__(self):
+    def __init__(self, collectd, config):
         self._meters = None
         self._writer = None
-        logging.getLogger("requests").setLevel(logging.WARNING)
+        self._collectd = collectd
+        self._config = config
 
     def config(self, cfg):
         """Configuration callback
 
         @param cfg configuration node provided by collectd
         """
-        # pylint: disable=no-self-use
-        Config.instance().read(cfg)
+        # pylint: disable=broad-except
+        try:
+            self._config.read(cfg)
+        except Exception:
+            LOGGER.exception('Exception during config.')
 
     def init(self):
         """Initialization callback"""
+        # pylint: disable=broad-except
 
-        collectd.info('Initializing the collectd OpenStack python plugin')
-        self._meters = MeterStorage(collectd=collectd)
-        self._writer = Writer(self._meters)
+        try:
+            LOGGER.info('Initializing the collectd OpenStack python plugin')
+            self._meters = MeterStorage(collectd=self._collectd)
+            self._writer = Writer(self._meters, config=self._config)
+        except Exception:
+            LOGGER.exception('Exception during init.')
 
     def write(self, vl, data=None):
         """Collectd write callback"""
@@ -60,28 +83,24 @@ class Plugin(object):
         # pass arguments to the writer
         try:
             self._writer.write(vl, data)
-        except Exception as exc:
-            if collectd is not None:
-                collectd.error('Exception during write: %s' % exc)
+        except Exception:
+            LOGGER.exception('Exception during write.')
 
     def shutdown(self):
         """Shutdown callback"""
         # pylint: disable=broad-except
-        collectd.info("SHUTDOWN")
+        LOGGER.info("SHUTDOWN")
         try:
             self._writer.flush()
-        except Exception as exc:
-            if collectd is not None:
-                collectd.error('Exception during shutdown: %s' % exc)
+        except Exception:
+            LOGGER.exception('Exception during shutdown.')
 
 
-# The collectd plugin instance
-# pylint: disable=invalid-name
-instance = Plugin()
-# pylint: enable=invalid-name
-
-# Register plugin callbacks
-collectd.register_init(instance.init)
-collectd.register_config(instance.config)
-collectd.register_write(instance.write)
-collectd.register_shutdown(instance.shutdown)
+try:
+    # pylint: disable=import-error
+    import collectd
+    # pylint: enable=import-error
+except ImportError:
+    pass  # when running unit tests collectd is not avaliable
+else:
+    setup_plugin(collectd=collectd)
