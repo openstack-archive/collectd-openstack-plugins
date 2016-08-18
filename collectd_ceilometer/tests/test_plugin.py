@@ -24,6 +24,7 @@ from collectd_ceilometer.tests.base import Value
 from collections import namedtuple
 import json
 import mock
+import requests
 
 
 class PluginTest(TestCase):
@@ -53,13 +54,13 @@ class PluginTest(TestCase):
         self.assertTrue(collectd.register_write.called)
         self.assertTrue(collectd.register_shutdown.called)
 
-    def test_write(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_write(self, post):
         """Test collectd data writing"""
         from collectd_ceilometer.sender import HTTP_CREATED
 
-        requests = self.get_mock('requests')
-        requests.post.return_value.status_code = HTTP_CREATED
-        requests.post.return_value.text = 'Created'
+        post.return_value = response = requests.Response()
+        response.status_code = HTTP_CREATED
 
         client_class \
             = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
@@ -79,7 +80,7 @@ class PluginTest(TestCase):
         self._write_value(data)
 
         # no value has been sent to ceilometer
-        self.assertFalse(requests.post.called)
+        post.assert_not_called()
 
         # send the second value
         self._write_value(data)
@@ -88,8 +89,7 @@ class PluginTest(TestCase):
         self.assertTrue(client_class.called)
         self.assertEqual(client_class.call_count, 1)
         # and values has been sent
-        self.assertTrue(requests.post.called)
-        self.assertEqual(requests.post.call_count, 1)
+        post.assert_called_once()
 
         expected_args = ('https://test-ceilometer.tld/v2/meters/cpu.freq',)
         expected_kwargs = {
@@ -118,26 +118,26 @@ class PluginTest(TestCase):
 
         # we cannot compare JSON directly because the original data
         # dictionary is unordered
-        called_kwargs = requests.post.call_args[1]
+        called_kwargs = post.call_args[1]
         called_kwargs['data'] = json.loads(called_kwargs['data'])
 
         # verify data sent to ceilometer
-        self.assertEqual(requests.post.call_args[0], expected_args)
+        self.assertEqual(post.call_args[0], expected_args)
         self.assertEqual(called_kwargs, expected_kwargs)
 
         # reset post method
-        requests.post.reset_mock()
+        post.reset_mock()
 
         # write another values
         self._write_value(data)
         # nothing has been sent
-        self.assertFalse(requests.post.called)
+        post.assert_not_called()
 
         # call shutdown
         self.plugin_instance.shutdown()
         self.assertNoError()
         # previously written value has been sent
-        self.assertTrue(requests.post.called)
+        post.assert_called_once()
         # no more authentication required
         self.assertEqual(client_class.call_count, 1)
 
@@ -158,14 +158,15 @@ class PluginTest(TestCase):
 
         # we cannot compare JSON directly because the original data
         # dictionary is unordered
-        called_kwargs = requests.post.call_args[1]
+        called_kwargs = post.call_args[1]
         called_kwargs['data'] = json.loads(called_kwargs['data'])
 
         # verify data sent to ceilometer
-        self.assertEqual(requests.post.call_args[0], expected_args)
+        self.assertEqual(post.call_args[0], expected_args)
         self.assertEqual(called_kwargs, expected_kwargs)
 
-    def test_write_auth_failed(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_write_auth_failed(self, post):
         """Test authentication failure"""
 
         # tell the auth client to rise an exception
@@ -182,10 +183,10 @@ class PluginTest(TestCase):
         self._write_value(self._create_value(), errors)
 
         # no requests method has been called
-        self.assertFalse(self.get_mock('requests').post.called,
-                         "requests method has been called")
+        post.assert_not_called()
 
-    def test_write_auth_failed2(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_write_auth_failed2(self, post):
         """Test authentication failure2"""
 
         # tell the auth client to rise an exception
@@ -209,18 +210,17 @@ class PluginTest(TestCase):
         self._write_value(self._create_value(), errors)
 
         # no requests method has been called
-        self.assertFalse(self.get_mock('requests').post.called,
-                         "requests method has been called")
+        post.assert_not_called()
 
-    def test_request_error(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_request_error(self, post):
         """Test error raised by underlying requests module"""
 
         # we have to import the RequestException here as it has been mocked
         from requests.exceptions import RequestException
 
         # tell POST request to raise an exception
-        requests = self.get_mock('requests')
-        requests.post.side_effect = RequestException('Test POST exception')
+        post.side_effect = RequestException('Test POST exception')
 
         # init instance
         self._init_instance()
@@ -230,11 +230,14 @@ class PluginTest(TestCase):
             self._create_value(),
             ['Ceilometer request error: Test POST exception'])
 
-    def test_reauthentication(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_reauthentication(self, post):
         """Test re-authentication"""
         from collectd_ceilometer.sender import HTTP_UNAUTHORIZED
 
-        requests = self.get_mock('requests')
+        post.return_value = response = requests.Response()
+        response.status_code = 0
+
         client_class \
             = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
         client_class.return_value.auth_token = 'Test auth token'
@@ -246,22 +249,22 @@ class PluginTest(TestCase):
         self._write_value(self._create_value())
 
         # verify the auth token
-        call_list = requests.post.call_args_list
+        call_list = post.call_args_list
         self.assertEqual(len(call_list), 1)
         # 0 = first call > 1 = call kwargs > headers argument > auth token
         token = call_list[0][1]['headers']['X-Auth-Token']
         self.assertEqual(token, 'Test auth token')
 
         # subsequent call of POST method will fail due to the authentication
-        requests.post.return_value.status_code = HTTP_UNAUTHORIZED
-        requests.post.return_value.text = 'Unauthorized'
+        response.status_code = HTTP_UNAUTHORIZED
+
         # set a new auth token
         client_class.return_value.auth_token = 'New test auth token'
 
         self._write_value(self._create_value())
 
         # verify the auth token
-        call_list = requests.post.call_args_list
+        call_list = post.call_args_list
 
         # POST called three times
         self.assertEqual(len(call_list), 3)
@@ -272,7 +275,8 @@ class PluginTest(TestCase):
         token = call_list[2][1]['headers']['X-Auth-Token']
         self.assertEqual(token, 'New test auth token')
 
-    def test_authentication_in_multiple_threads(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    def test_authentication_in_multiple_threads(self, post):
         """Test authentication in muliple threads
 
         This test simulates the authentication performed from different thread
@@ -306,7 +310,6 @@ class PluginTest(TestCase):
         self._write_value(self._create_value())
 
         # verify the results
-        requests = self.get_mock('requests')
         client_class \
             = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
 
@@ -314,7 +317,7 @@ class PluginTest(TestCase):
         self.assertFalse(client_class.called)
 
         # verify the auth token
-        call_list = requests.post.call_args_list
+        call_list = post.call_args_list
         self.assertEqual(len(call_list), 1)
         # 0 = first call > 1 = call kwargs > headers argument > auth token
         token = call_list[0][1]['headers']['X-Auth-Token']

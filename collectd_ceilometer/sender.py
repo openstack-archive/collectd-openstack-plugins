@@ -21,6 +21,7 @@ from collectd_ceilometer.keystone_light import KeystoneException
 from collectd_ceilometer.settings import Config
 import logging
 import requests
+from requests.exceptions import HTTPError
 from requests.exceptions import RequestException
 import six
 import threading
@@ -125,36 +126,41 @@ class Sender(object):
         url = self._url_base % metername
 
         # send the POST request
-        result = self._perform_request(url, payload, auth_token)
-        if not result:
-            return
+        try:
+            self._perform_request(url, payload, auth_token).raise_for_status()
 
-        # if the request failed due to an auth error
-        if result.status_code == HTTP_UNAUTHORIZED:
-            # reset the auth token in order to force the subsequent
-            # _authenticate() call to renew it
-            # Here, it can happen that the token is reset right after
-            # another thread has finished the authentication and thus
-            # the authentication may be performed twice
-            self._auth_token = None
+        except HTTPError as exc:
+            response = exc.response
 
-            LOGGER.debug('Result: %s %s',
-                         six.text_type(result.status_code),
-                         result.text)
+            # if the request failed due to an auth error
+            if response.status_code == HTTP_UNAUTHORIZED:
+                # reset the auth token in order to force the subsequent
+                # _authenticate() call to renew it
+                # Here, it can happen that the token is reset right after
+                # another thread has finished the authentication and thus
+                # the authentication may be performed twice
+                self._auth_token = None
 
-            # renew the authentication token
-            auth_token = self._authenticate()
+                LOGGER.debug('Result: %s %s',
+                             six.text_type(response.status_code),
+                             response.text)
 
-            if auth_token is not None:
-                # and try to repost
-                result = self._perform_request(url, payload, auth_token)
+                # renew the authentication token
+                auth_token = self._authenticate()
 
-        if result.status_code == HTTP_CREATED:
-            LOGGER.debug('Result: %s', HTTP_CREATED)
-        else:
-            LOGGER.info('Result: %s %s',
-                        result.status_code,
-                        result.text)
+                if auth_token is not None:
+                    # and try to repost
+                    result = self._perform_request(url, payload, auth_token)
+
+            if result.status_code == HTTP_CREATED:
+                LOGGER.debug('Result: %s', HTTP_CREATED)
+            else:
+                LOGGER.info('Result: %s %s',
+                            result.status_code,
+                            result.text)
+
+        except RequestException as exc:
+            LOGGER.error('Ceilometer request error: %s', six.text_type(exc))
 
     @classmethod
     def _perform_request(cls, url, payload, auth_token):
@@ -166,10 +172,6 @@ class Sender(object):
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
-        try:
-            return requests.post(
-                url, data=payload, headers=headers,
-                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
-        except RequestException as exc:
-            LOGGER.error('Ceilometer request error: %s', six.text_type(exc))
-        return None
+        return requests.post(
+            url, data=payload, headers=headers,
+            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
