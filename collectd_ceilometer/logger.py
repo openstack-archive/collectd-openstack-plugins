@@ -13,39 +13,43 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
-
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
+import traceback
+
+from collectd_ceilometer.settings import Config
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
-    cfg = Config.instance()
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+        self.priority_map = {
+            logging.DEBUG: collectd.debug,
+            logging.INFO: collectd.info,
+            logging.WARNING: collectd.warning,
+            logging.ERROR: collectd.error,
+            logging.CRITICAL: collectd.error
+        }
+        self.cfg = Config.instance()
 
     def emit(self, record):
         try:
             msg = self.format(record)
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
-
             if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
+                logger = self.priority_map.get(logging.INFO)
+
+            else:
+                logger = self.priority_map.get(record.levelno)
+                if not logger:
+                    logger = self.priority_map.get(logging.ERROR)
 
             # collectd limits log size to 1023B, this is workaround
             for i in range(0, len(msg), 1023):
                 logger(msg[i:i + 1023])
 
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+        except Exception:
+            logger = self.priority_map.get(logging.ERROR)
+            exception = traceback.format_exc()
+            logger("Exception in logger:\n%s" % exception)
