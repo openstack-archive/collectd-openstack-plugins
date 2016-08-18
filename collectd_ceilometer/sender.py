@@ -16,7 +16,7 @@
 from __future__ import division
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import ClientV2 as keystoneClientV2
+from collectd_ceilometer.keystone_light import ClientV2
 from collectd_ceilometer.keystone_light import KeystoneException
 from collectd_ceilometer.settings import Config
 import logging
@@ -66,7 +66,7 @@ class Sender(object):
                 # create a keystone client if it doesn't exist
                 if self._keystone is None:
                     cfg = Config.instance()
-                    self._keystone = keystoneClientV2(
+                    self._keystone = ClientV2(
                         auth_url=cfg.OS_AUTH_URL,
                         username=cfg.OS_USERNAME,
                         password=cfg.OS_PASSWORD,
@@ -126,7 +126,7 @@ class Sender(object):
 
         # send the POST request
         result = self._perform_request(url, payload, auth_token)
-        if not result:
+        if result:
             return
 
         # if the request failed due to an auth error
