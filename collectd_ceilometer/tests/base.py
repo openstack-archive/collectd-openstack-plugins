@@ -130,15 +130,9 @@ class TestCase(unittest.TestCase):
 
         super(TestCase, self).setUp()
 
-        modules = ['collectd', 'libvirt', 'requests',
-                   'collectd_ceilometer.keystone_light']
+        modules = ['collectd', 'libvirt', 'collectd_ceilometer.keystone_light']
 
         self._mocked = {module: Mock() for module in modules}
-
-        # requests
-        requests = self.get_mock('requests')
-        requests.exceptions.RequestException = Exception
-        self._mocked.update({'requests.exceptions': requests.exceptions})
 
         keystone = self.get_mock('collectd_ceilometer.keystone_light')
         keystone.KeystoneException = KeystoneException
