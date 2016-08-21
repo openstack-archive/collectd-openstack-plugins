@@ -13,39 +13,44 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
-
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
+import traceback
+
+from collectd_ceilometer.settings import Config
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
+    # pylint: disable=no-member
     cfg = Config.instance()
 
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+        self.priority_map = {
+            logging.DEBUG: collectd.debug,
+            logging.INFO: collectd.info,
+            logging.WARNING: collectd.warning,
+            logging.ERROR: collectd.error,
+            logging.CRITICAL: collectd.error
+        }
+
     def emit(self, record):
+        # pylint: disable=broad-except
+        level = record.levelno
+        if self.cfg.VERBOSE and logging.DEBUG == level:
+            level = logging.INFO
+
         try:
-            msg = self.format(record)
+            message = self.format(record)
+        except Exception:
+            message = "Exception in logger:\n{}".format(traceback.format_exc())
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
+        self.emit_message(message, level)
 
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
+    def emit_message(self, message, level):
+        hook = self.priority_map.get(level, logging.ERROR)
 
-            # collectd limits log size to 1023B, this is workaround
-            for i in range(0, len(msg), 1023):
-                logger(msg[i:i + 1023])
-
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+        # collectd limits log size to 1023B, this is workaround
+        for i in range(0, len(message), 1023):
+            hook(message[i:i + 1023])
