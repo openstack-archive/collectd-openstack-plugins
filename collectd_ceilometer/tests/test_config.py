@@ -16,42 +16,92 @@
 # under the License.
 """Configuration tests"""
 
-from __future__ import unicode_literals
+import abc
+from unittest import TestCase
 
-from collectd_ceilometer.tests.base import TestCase
-from collectd_ceilometer.settings import Config
 import mock
 import six
+
+from collectd_ceilometer import settings
+
+
+def config_module(
+        values, units=None, module_name="collectd_ceilometer.plugin"):
+    children = [config_value(key, value)
+                for key, value in six.iteritems(values)]
+    if units:
+        children.append(config_units(units))
+    return config_node('MODULE', children=children, value=module_name)
+
+
+def config_units(units):
+    children = [config_value('UNIT', key, value)
+                for key, value in six.iteritems(units)]
+    return config_node('UNITS', children)
+
+
+def config_node(key, children, value=None):
+    "Create a mocked collectd config node having given children and value"
+    return mock.create_autospec(
+        spec=MockCollectdConfig, spec_set=True, instance=True,
+        children=tuple(children), key=key, values=(value,))
+
+
+def config_value(key, *values):
+    "Create a mocked collectd config node having given multiple values"
+    return mock.create_autospec(
+        spec=MockCollectdConfig, spec_set=True, instance=True,
+        children=tuple(), key=key, values=values)
+
+
+class MockCollectdConfig(object):
+
+    @abc.abstractproperty
+    def children(self):
+        pass
+
+    @abc.abstractproperty
+    def key(self):
+        pass
+
+    @abc.abstractproperty
+    def values(self):
+        pass
+
 
 class TestConfig(TestCase):
     """Test configuration reader"""
 
-    def setUp(self):
-        """Initialization"""
+    @property
+    def default_values(self):
+        return dict(
+            BATCH_SIZE=1,
+            OS_AUTH_URL='https://test-auth.url.tld/test',
+            CEILOMETER_URL_TYPE='internalURL',
+            CEILOMETER_TIMEOUT=1000,
+            OS_USERNAME='tester',
+            OS_PASSWORD='testpasswd',
+            OS_TENANT_NAME='service')
 
-        super(TestConfig, self).setUp()
-
-        self.config_class = Config
-
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_default_configuration(self, mock_log):
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_default_configuration(self, LOGGER):
         """Test valid configuration"""
-        cfg = self.config_class._decorated()
+
+        node = config_module(values=self.default_values)
+        config = settings.Config._decorated()
 
         # read default configuration
-        cfg.read(self.config.node)
+        config.read(node)
 
         # compare the configuration values with the default values
-        for key in self.config.default_values.keys():
-            self.assertEqual(getattr(cfg, key),
-                             self.config.default_values[key])
+        for key, value in six.iteritems(self.default_values):
+            self.assertEqual(value, getattr(config, key))
 
         # test configuration change
-        self.assertEqual(cfg.BATCH_SIZE, 1)
-        self.config.update_value('BATCH_SIZE', 10)
-        cfg.read(self.config.node)
-        self.assertEqual(cfg.BATCH_SIZE, 10)
-        mock_log.error.assert_not_called()
+        self.assertEqual(1, config.BATCH_SIZE)
+        config.read(config_module(values=dict(BATCH_SIZE=10)))
+        self.assertEqual(10, config.BATCH_SIZE)
+        LOGGER.error.assert_not_called()
 
     def test_singleton(self):
         """Test config singleton class
@@ -59,116 +109,128 @@ class TestConfig(TestCase):
         Verify that the TypeError exception is raised when the instance
         of the Config class is created by user.
         """
-        # pylint: disable=invalid-name,unused-variable
-
-        Config = self.config_class
 
         with self.assertRaises(TypeError) as exc:
             # must rise a TypeError as the singleton class cannot
             # be created by the user and can be accessed only
             # by its instance() method
-            new_cfg = Config()  # flake8: noqa
+            settings.Config()  # flake8: noqa
 
         self.assertEqual(
             six.text_type(exc.exception),
             'Singleton must be accessed through instance() method')
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_invalid_value(self, mock_log):
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_invalid_value(self, LOGGER):
         """Test invalid value
 
         Test string instead of int
         """
-        cfg = self.config_class._decorated()
-        self.config.update_value('BATCH_SIZE', 'xyz')
-        cfg.read(self.config.node)
-        self.assertEqual(cfg.BATCH_SIZE, 1)
-        mock_log.error.assert_called_with(
-            'Invalid value "xyz" for configuration parameter "BATCH_SIZE"')
+        values = self.default_values
+        values["BATCH_SIZE"] = "xyz"
+        node = config_module(values=values)
+        config = settings.Config._decorated()
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_unknown_parameter(self, mock_log):
+        config.read(node)
+
+        LOGGER.error.assert_called_once_with(
+            'Invalid value "xyz" for configuration parameter "BATCH_SIZE"')
+        self.assertEqual(1, config.BATCH_SIZE)
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_unknown_parameter(self, LOGGER):
         """Test unknown parameter
 
-        Test configuration parameter which is not known (expected)"""
+        Test configuration parameter which is not known (expected)
+        """
+        values = self.default_values
+        values["UNKNOWN"] = "xyz"
+        node = config_module(values=values)
+        config = settings.Config._decorated()
 
-        cfg = self.config_class._decorated()
-        self.config.update_value('UNKNOWN', 'xyz')
-        cfg.read(self.config.node)
-        self.assertFalse(hasattr(cfg, 'UNKNOWN'))
-        mock_log.error.assert_called_with('Unknown configuration parameter "%s"', 'UNKNOWN')
+        config.read(node)
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_missing_value(self, mock_log):
+        LOGGER.error.assert_called_with(
+            'Unknown configuration parameter "%s"', 'UNKNOWN')
+        self.assertFalse(hasattr(node, 'UNKNOWN'))
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_missing_value(self, LOGGER):
         """Test configuration node vithout value"""
 
-        cfg = self.config_class._decorated()
-
+        node = config_module(values=self.default_values)
         # remove values from some node
-        node = self.config.node
-        first = node.children[1]
-        self.assertEqual(first.key, 'OS_AUTH_URL')
-        first.values = []
+        for child in node.children:
+            if child.key == 'OS_AUTH_URL':
+                child.values = tuple()
+                break
+        config = settings.Config._decorated()
 
-        cfg.read(node)
+        config.read(node)
 
-        mock_log.error.assert_any_call(
-            'No configuration value found for "%s"', "OS_AUTH_URL")
-        mock_log.error.assert_any_call(
-            'Configuration parameter %s not set.', "OS_AUTH_URL")
-        mock_log.error.assert_any_call(
-            'Collectd plugin for Ceilometer will not work properly')
+        LOGGER.error.assert_has_calls([
+            mock.call('No configuration value found for "%s"', "OS_AUTH_URL"),
+            mock.call('Configuration parameter %s not set.', "OS_AUTH_URL"),
+            mock.call('Collectd plugin for Ceilometer will not work properly')])
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_user_units(self, mock_log):
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_units(self, LOGGER):
         """Test configuration with user defined units"""
-        self.config.add_unit('age', 'years')
-        self.config.add_unit('star.distance', 'LY')
-        self.config.add_unit('star.temperature', 'K')
 
-        cfg = self.config_class._decorated()
-        cfg.read(self.config.node)
-        mock_log.error.assert_not_called()
+        node = config_module(
+            values=self.default_values,
+            units={'age': 'years',
+                   'star.distance': 'LY',
+                   'star.temperature': 'K'})
+        config = settings.Config._decorated()
 
-        self.assertEqual(cfg.unit('age', None), 'years')
-        self.assertEqual(cfg.unit('star', 'distance'), 'LY')
-        self.assertEqual(cfg.unit('star', 'temperature'), 'K')
-        self.assertEqual(cfg.unit('monty', None), 'None')
-        self.assertEqual(cfg.unit('monty', 'python'), 'None')
+        config.read(node)
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_user_units_invalid(self, mock_log):
+        LOGGER.error.assert_not_called()
+        self.assertEqual('years', config.unit('age', None))
+        self.assertEqual('LY', config.unit('star', 'distance'))
+        self.assertEqual('K', config.unit('star', 'temperature'))
+        self.assertEqual('None', config.unit('monty', None))
+        self.assertEqual('None', config.unit('monty', 'python'))
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_units_invalid(self, LOGGER):
         """Test invalid user defined units
 
         The unit node contains three values (two are expected)
         """
 
-        self.config.add_unit('age', 'years')
+        node = config_module(values=self.default_values,
+                             units=dict(age='years'))
+        # make some unit entry invalid
+        for child in node.children:
+            if child.key == 'UNITS':
+                child.children[0].values = (1, 2, 3)
+                break
+        config = settings.Config._decorated()
 
-        node = self.config.node
-        unit = node.children[-1].children[0]
-        unit.values = [1, 2, 3]
+        config.read(node)
 
-        cfg = self.config_class._decorated()
-        cfg.read(node)
-
-        mock_log.error.assert_called_with(
+        self.assertEqual('None', config.unit('age', None))
+        LOGGER.error.assert_called_with(
             'Invalid unit configuration: unit "1" "2" "3"')
-        self.assertEqual(cfg.unit('age', None), 'None')
 
-    @mock.patch('collectd_ceilometer.settings.LOGGER')
-    def test_user_units_invalid_invalid_node(self, mock_log):
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_units_invalid_invalid_node(self, LOGGER):
         """Test invalid node with units configuration"""
 
-        self.config.add_unit('age', 'years')
+        node = config_module(values=self.default_values,
+                             units=dict(age='years'))
+        # make some unit entry invalid
+        for child in node.children:
+            if child.key == 'UNITS':
+                child.children[0].key = 'NOT_UNITS'
+                break
+        config = settings.Config._decorated()
 
-        node = self.config.node
-        unit = node.children[-1].children[0]
-        unit.key = 'NOT_UNITS'
+        config.read(node)
 
-        cfg = self.config_class._decorated()
-        cfg.read(node)
-
-        mock_log.error.assert_called_with(
+        LOGGER.error.assert_called_with(
             'Invalid unit configuration: %s',"NOT_UNITS")
-        self.assertEqual(cfg.unit('age', None), 'None')
+        self.assertEqual('None', config.unit('age', None))
+
