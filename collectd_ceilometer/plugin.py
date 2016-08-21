@@ -25,7 +25,7 @@ from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
 import logging
 
-logging.getLogger().addHandler(CollectdLogHandler())
+logging.getLogger().addHandler(CollectdLogHandler(collectd=collectd))
 logging.getLogger().setLevel(logging.NOTSET)
 LOGGER = logging.getLogger(__name__)
 
