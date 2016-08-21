@@ -13,39 +13,47 @@
 # under the License.
 """Ceilometer collectd plugin implementation"""
 
-from __future__ import unicode_literals
-
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
-from collectd_ceilometer.settings import Config
 import logging
+import traceback
+
+from collectd_ceilometer.settings import Config
 
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""
 
-    priority_map = {
-        logging.DEBUG: collectd.debug,
-        logging.INFO: collectd.info,
-        logging.WARNING: collectd.warning,
-        logging.ERROR: collectd.error,
-        logging.CRITICAL: collectd.error
-    }
+    # pylint: disable=no-member
     cfg = Config.instance()
+
+    def __init__(self, collectd, level=logging.NOTSET):
+        super(CollectdLogHandler, self).__init__(level=level)
+        self.priority_map = {
+            logging.DEBUG: collectd.debug,
+            logging.INFO: collectd.info,
+            logging.WARNING: collectd.warning,
+            logging.ERROR: collectd.error,
+            logging.CRITICAL: collectd.error
+        }
 
     def emit(self, record):
         try:
-            msg = self.format(record)
+            self.emit_message(
+                message=self.format(record),
+                level=record.levelno)
+        # pylint: disable=broad-except
+        except Exception:
+            self.emit_message(
+                message="Error emitting message:\n{}".format(
+                    traceback.format_exc()),
+                level=logging.ERROR)
 
-            logger = self.priority_map.get(record.levelno, collectd.error)
+    def emit_message(self, message, level):
+        if self.cfg.VERBOSE and level == logging.DEBUG:
+            level = logging.INFO
+        elif level not in self.priority_map:
+            level = logging.ERROR
+        hook = self.priority_map[level]
 
-            if self.cfg.VERBOSE and logging.DEBUG == record.levelno:
-                logger = collectd.info
-
-            # collectd limits log size to 1023B, this is workaround
-            for i in range(0, len(msg), 1023):
-                logger(msg[i:i + 1023])
-
-        except Exception as e:
-            collectd.info("Exception in logger %s" % e)
+        # collectd limits log size to 1023B, this is workaround
+        for i in range(0, len(message), 1023):
+            hook(message[i:i + 1023])
