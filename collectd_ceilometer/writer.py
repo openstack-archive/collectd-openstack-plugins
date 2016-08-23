@@ -16,7 +16,6 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.sender import Sender
-from collectd_ceilometer.settings import Config
 from collections import defaultdict
 from collections import namedtuple
 import json
@@ -87,10 +86,11 @@ class SampleContainer(object):
 class Writer(object):
     """Data collector"""
 
-    def __init__(self, meters):
+    def __init__(self, meters, config):
         self._meters = meters
         self._samples = SampleContainer()
         self._sender = Sender()
+        self._config = config
 
     def write(self, vl, data):
         """Collect data from collectd
@@ -123,8 +123,7 @@ class Writer(object):
         ]
 
         # add data to cache and get the samples to send
-        to_send = self._samples.add(metername, data,
-                                    Config.instance().BATCH_SIZE)
+        to_send = self._samples.add(metername, data, self._config.BATCH_SIZE)
         if to_send:
             self._send_data(metername, to_send)
 
