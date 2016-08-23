@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -13,75 +12,72 @@
 # under the License.
 """Ceilometer collectd plugin"""
 
-from __future__ import unicode_literals
+import logging
 
-# pylint: disable=import-error
-import collectd
-# pylint: enable=import-error
+try:
+    # pylint: disable=import-error
+    import collectd
+    # pylint: enable=import-error
+except ImportError:
+    collectd = None  # when running unit tests collectd is not avaliable
 
+import collectd_ceilometer
 from collectd_ceilometer.logger import CollectdLogHandler
 from collectd_ceilometer.meters import MeterStorage
 from collectd_ceilometer.settings import Config
 from collectd_ceilometer.writer import Writer
-import logging
 
-logging.getLogger().addHandler(CollectdLogHandler(collectd=collectd))
-logging.getLogger().setLevel(logging.NOTSET)
+
 LOGGER = logging.getLogger(__name__)
+ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
+
+
+def register_plugin(collectd):
+    "Bind plugin hooks to collectd and viceversa"
+
+    config = Config.instance()
+
+    # Setup loggging
+    log_handler = CollectdLogHandler(collectd=collectd)
+    log_handler.cfg = config
+    ROOT_LOGGER.addHandler(log_handler)
+    ROOT_LOGGER.setLevel(logging.NOTSET)
+
+    # Creates collectd plugin instance
+    instance = Plugin(collectd=collectd, config=config)
+
+    # Register plugin callbacks
+    collectd.register_config(instance.config)
+    collectd.register_write(instance.write)
+    collectd.register_shutdown(instance.shutdown)
 
 
 class Plugin(object):
     """Ceilometer plugin with collectd callbacks"""
     # NOTE: this is multithreaded class
 
-    def __init__(self):
-        self._meters = None
-        self._writer = None
-        logging.getLogger("requests").setLevel(logging.WARNING)
+    def __init__(self, collectd, config):
+        self._config = config
+        self._meters = MeterStorage(collectd=collectd)
+        self._writer = Writer(self._meters, config=config)
 
     def config(self, cfg):
         """Configuration callback
 
         @param cfg configuration node provided by collectd
         """
-        # pylint: disable=no-self-use
-        Config.instance().read(cfg)
 
-    def init(self):
-        """Initialization callback"""
-
-        collectd.info('Initializing the collectd OpenStack python plugin')
-        self._meters = MeterStorage(collectd=collectd)
-        self._writer = Writer(self._meters)
+        self._config.read(cfg)
 
     def write(self, vl, data=None):
         """Collectd write callback"""
-        # pylint: disable=broad-except
-        # pass arguments to the writer
-        try:
-            self._writer.write(vl, data)
-        except Exception as exc:
-            if collectd is not None:
-                collectd.error('Exception during write: %s' % exc)
+        self._writer.write(vl, data)
 
     def shutdown(self):
         """Shutdown callback"""
-        # pylint: disable=broad-except
-        collectd.info("SHUTDOWN")
-        try:
-            self._writer.flush()
-        except Exception as exc:
-            if collectd is not None:
-                collectd.error('Exception during shutdown: %s' % exc)
+        LOGGER.info("SHUTDOWN")
+        self._writer.flush()
 
 
-# The collectd plugin instance
-# pylint: disable=invalid-name
-instance = Plugin()
-# pylint: enable=invalid-name
-
-# Register plugin callbacks
-collectd.register_init(instance.init)
-collectd.register_config(instance.config)
-collectd.register_write(instance.write)
-collectd.register_shutdown(instance.shutdown)
+if collectd:
+    register_plugin(collectd=collectd)
