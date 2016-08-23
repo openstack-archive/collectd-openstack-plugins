@@ -14,265 +14,280 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+"""Plugin tests
 
-"""Plugin tests"""
+"""
 
-from __future__ import unicode_literals
-
-from collectd_ceilometer.tests.base import TestCase
-from collectd_ceilometer.tests.base import Value
 from collections import namedtuple
-import json
+import logging
+import requests
+import unittest
+
 import mock
 
+from collectd_ceilometer import keystone_light
+from collectd_ceilometer import plugin
+from collectd_ceilometer import sender
 
-class PluginTest(TestCase):
+from collectd_ceilometer.tests import match
+
+
+Logger = logging.getLoggerClass()
+
+
+class TestPlugin(unittest.TestCase):
     """Test the collectd plugin"""
 
-    def setUp(self):
-        super(PluginTest, self).setUp()
-        client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
-        client_class.return_value\
-            .get_service_endpoint.return_value = "https://test-ceilometer.tld"
-
-        # TODO(emma-l-foley): Import at top and mock here
-        from collectd_ceilometer.plugin import instance
-        from collectd_ceilometer.plugin import Plugin
-        self.default_instance = instance
-        self.plugin_instance = Plugin()
-        self.maxDiff = None
-
-    def test_callbacks(self):
+    @mock.patch.object(plugin, 'Plugin', autospec=True)
+    @mock.patch.object(plugin, 'Config', autospec=True)
+    @mock.patch.object(plugin, 'CollectdLogHandler', autospec=True)
+    @mock.patch.object(plugin, 'ROOT_LOGGER', autospec=True)
+    def test_callbacks(
+            self, ROOT_LOGGER, CollectdLogHandler, Config, Plugin):
         """Verify that the callbacks are registered properly"""
 
-        collectd = self.get_mock('collectd')
+        collectd = mocked_collectd()
 
-        self.assertTrue(collectd.register_init.called)
-        self.assertTrue(collectd.register_config.called)
-        self.assertTrue(collectd.register_write.called)
-        self.assertTrue(collectd.register_shutdown.called)
+        # When plugin function is called
+        plugin.setup_plugin(collectd=collectd)
 
-    def test_write(self):
+        # Logger handler is set up
+        ROOT_LOGGER.addHandler.assert_called_once_with(
+            CollectdLogHandler.return_value)
+        ROOT_LOGGER.setLevel.assert_called_once_with(logging.NOTSET)
+
+        # It create a plugin
+        Plugin.assert_called_once_with(
+            collectd=collectd, config=Config.instance.return_value)
+
+        # callbacks are registered to collectd
+        instance = Plugin.return_value
+        collectd.register_init.assert_called_once_with(instance.init)
+        collectd.register_config.assert_called_once_with(instance.config)
+        collectd.register_write.assert_called_once_with(instance.write)
+        collectd.register_shutdown.assert_called_once_with(instance.shutdown)
+
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    def test_write(self, ClientV2, post):
         """Test collectd data writing"""
-        from collectd_ceilometer.sender import HTTP_CREATED
 
-        requests = self.get_mock('requests')
-        requests.post.return_value.status_code = HTTP_CREATED
-        requests.post.return_value.text = 'Created'
+        auth_client = ClientV2.return_value
+        auth_client.get_service_endpoint.return_value =\
+            'https://test-ceilometer.tld'
 
-        client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
-        auth_token = client_class.return_value.auth_token
+        post.return_value.status_code = sender.HTTP_CREATED
+        post.return_value.text = 'Created'
 
-        # create a value
-        data = self._create_value()
-
-        # set batch size to 2 and init instance
-        self.config.update_value('BATCH_SIZE', 2)
-        self._init_instance()
+        # init instance
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=2)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
         # no authentication has been performed so far
-        self.assertFalse(client_class.called)
+        ClientV2.assert_not_called()
+
+        # create a value
+        data = mocked_value()
 
         # write first value
-        self._write_value(data)
+        instance.write(data)
+        collectd.error.assert_not_called()
 
         # no value has been sent to ceilometer
-        self.assertFalse(requests.post.called)
+        post.assert_not_called()
 
         # send the second value
-        self._write_value(data)
+        instance.write(data)
+        collectd.error.assert_not_called()
 
         # authentication client has been created
-        self.assertTrue(client_class.called)
-        self.assertEqual(client_class.call_count, 1)
+        ClientV2.assert_called_once()
+
         # and values has been sent
-        self.assertTrue(requests.post.called)
-        self.assertEqual(requests.post.call_count, 1)
-
-        expected_args = ('https://test-ceilometer.tld/v2/meters/cpu.freq',)
-        expected_kwargs = {
-            'data': [{
-                "source": "collectd",
-                "counter_name": "cpu.freq",
-                "counter_unit": "jiffies",
-                "counter_volume": 1234,
-                "timestamp": "Thu Nov 29 21:33:09 1973",
-                "resource_id": "localhost-0",
-                "resource_metadata": None,
-                "counter_type": "gauge"
-            }, {
-                "source": "collectd",
-                "counter_name": "cpu.freq",
-                "counter_unit": "jiffies",
-                "counter_volume": 1234,
-                "timestamp": "Thu Nov 29 21:33:09 1973",
-                "resource_id": "localhost-0",
-                "resource_metadata": None,
-                "counter_type": "gauge"}],
-            'headers': {
-                'Content-type': u'application/json',
-                'X-Auth-Token': auth_token},
-            'timeout': 1.0}
-
-        # we cannot compare JSON directly because the original data
-        # dictionary is unordered
-        called_kwargs = requests.post.call_args[1]
-        called_kwargs['data'] = json.loads(called_kwargs['data'])
-
-        # verify data sent to ceilometer
-        self.assertEqual(requests.post.call_args[0], expected_args)
-        self.assertEqual(called_kwargs, expected_kwargs)
+        post.assert_called_once_with(
+            'https://test-ceilometer.tld/v2/meters/cpu.freq',
+            data=match.json([
+                {"source": "collectd",
+                 "counter_name": "cpu.freq",
+                 "counter_unit": "jiffies",
+                 "counter_volume": 1234,
+                 "timestamp": "Thu Nov 29 21:33:09 1973",
+                 "resource_id": "localhost-0",
+                 "resource_metadata": None,
+                 "counter_type": "gauge"},
+                {"source": "collectd",
+                 "counter_name": "cpu.freq",
+                 "counter_unit": "jiffies",
+                 "counter_volume": 1234,
+                 "timestamp": "Thu Nov 29 21:33:09 1973",
+                 "resource_id": "localhost-0",
+                 "resource_metadata": None,
+                 "counter_type": "gauge"}]),
+            headers={'Content-type': 'application/json',
+                     'X-Auth-Token': auth_client.auth_token},
+            timeout=1.0)
 
         # reset post method
-        requests.post.reset_mock()
+        post.reset_mock()
 
         # write another values
-        self._write_value(data)
+        instance.write(data)
+        collectd.error.assert_not_called()
+
         # nothing has been sent
-        self.assertFalse(requests.post.called)
+        post.assert_not_called()
 
         # call shutdown
-        self.plugin_instance.shutdown()
-        self.assertNoError()
+        instance.shutdown()
+
+        # no errors
+        collectd.error.assert_not_called()
+
         # previously written value has been sent
-        self.assertTrue(requests.post.called)
-        # no more authentication required
-        self.assertEqual(client_class.call_count, 1)
+        post.assert_called_once_with(
+            'https://test-ceilometer.tld/v2/meters/cpu.freq',
+            data=match.json([
+                {"source": "collectd",
+                 "counter_name": "cpu.freq",
+                 "counter_unit": "jiffies",
+                 "counter_volume": 1234,
+                 "timestamp": "Thu Nov 29 21:33:09 1973",
+                 "resource_id": "localhost-0",
+                 "resource_metadata": None,
+                 "counter_type": "gauge"}]),
+            headers={
+                'Content-type': 'application/json',
+                'X-Auth-Token': auth_client.auth_token},
+            timeout=1.0)
 
-        expected_kwargs = {
-            'data': [{
-                "source": "collectd",
-                "counter_name": "cpu.freq",
-                "counter_unit": "jiffies",
-                "counter_volume": 1234,
-                "timestamp": "Thu Nov 29 21:33:09 1973",
-                "resource_id": "localhost-0",
-                "resource_metadata": None,
-                "counter_type": "gauge"}],
-            'headers': {
-                'Content-type': u'application/json',
-                'X-Auth-Token': auth_token},
-            'timeout': 1.0}
-
-        # we cannot compare JSON directly because the original data
-        # dictionary is unordered
-        called_kwargs = requests.post.call_args[1]
-        called_kwargs['data'] = json.loads(called_kwargs['data'])
-
-        # verify data sent to ceilometer
-        self.assertEqual(requests.post.call_args[0], expected_args)
-        self.assertEqual(called_kwargs, expected_kwargs)
-
-    def test_write_auth_failed(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    @mock.patch.object(plugin, 'LOGGER', autospec=True)
+    def test_write_auth_failed(self, LOGGER, ClientV2, post):
         """Test authentication failure"""
 
         # tell the auth client to rise an exception
-        client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
-        client_class.side_effect = Exception('Test Client() exception')
+        ClientV2.side_effect = RuntimeError('Test Client() exception')
 
         # init instance
-        self._init_instance()
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
         # write the value
-        errors = [
-            'Exception during write: Test Client() exception']
-        self._write_value(self._create_value(), errors)
+        self.assertRaises(RuntimeError, lambda: instance.write(mocked_value()))
 
         # no requests method has been called
-        self.assertFalse(self.get_mock('requests').post.called,
-                         "requests method has been called")
+        post.assert_not_called()
 
-    def test_write_auth_failed2(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    @mock.patch.object(sender, 'LOGGER', autospec=True)
+    def test_write_auth_failed2(self, LOGGER, ClientV2, post):
         """Test authentication failure2"""
 
-        # tell the auth client to rise an exception
-        keystone \
-            = self.get_mock('collectd_ceilometer.keystone_light')
-
-        client_class = keystone.ClientV2
-        client_class.side_effect = keystone.KeystoneException(
+        ClientV2.side_effect = keystone_light.KeystoneException(
             "Missing name 'xxx' in received services",
             "exception",
             "services list")
 
         # init instance
-        self._init_instance()
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
         # write the value
-        errors = [
-            "Suspending error logs until successful auth",
-            "Authentication error: Missing name 'xxx' in received services"
-            "\nReason: exception"]
-        self._write_value(self._create_value(), errors)
+        instance.write(mocked_value())
+
+        LOGGER.error.assert_called_once_with(
+            "Suspending error logs until successful auth")
+        LOGGER.log.assert_called_once_with(
+            logging.ERROR, "Authentication error: %s",
+            "Missing name 'xxx' in received services\nReason: exception",
+            exc_info=0)
 
         # no requests method has been called
-        self.assertFalse(self.get_mock('requests').post.called,
-                         "requests method has been called")
+        post.assert_not_called()
 
-    def test_request_error(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    @mock.patch.object(sender, 'LOGGER', autospec=True)
+    def test_request_error(self, LOGGER, ClientV2, post):
         """Test error raised by underlying requests module"""
 
-        # we have to import the RequestException here as it has been mocked
-        from requests.exceptions import RequestException
-
         # tell POST request to raise an exception
-        requests = self.get_mock('requests')
-        requests.post.side_effect = RequestException('Test POST exception')
+        post.side_effect = requests.RequestException('Test POST exception')
 
         # init instance
-        self._init_instance()
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
         # write the value
-        self._write_value(
-            self._create_value(),
-            ['Ceilometer request error: Test POST exception'])
+        instance.write(mocked_value())
 
-    def test_reauthentication(self):
+        LOGGER.error.assert_called_once_with(
+            'Ceilometer request error: %s', 'Test POST exception')
+
+    # https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1614772
+    @unittest.expectedFailure
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    def test_reauthentication(self, ClientV2, post):
         """Test re-authentication"""
-        from collectd_ceilometer.sender import HTTP_UNAUTHORIZED
 
-        requests = self.get_mock('requests')
-        client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
-        client_class.return_value.auth_token = 'Test auth token'
+        # assure post rensponse is not mocked
+        post.return_value = rensponse = requests.Response()
+
+        client = ClientV2.return_value
+        client.auth_token = 'Test auth token'
 
         # init instance
-        self._init_instance()
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
-        # write the first value
-        self._write_value(self._create_value())
+        # write the value
+        instance.write(mocked_value())
 
         # verify the auth token
-        call_list = requests.post.call_args_list
-        self.assertEqual(len(call_list), 1)
-        # 0 = first call > 1 = call kwargs > headers argument > auth token
-        token = call_list[0][1]['headers']['X-Auth-Token']
-        self.assertEqual(token, 'Test auth token')
+        post.assert_called_once_with(
+            mock.ANY, data=mock.ANY,
+            headers={'Content-type': 'application/json',
+                     'X-Auth-Token': 'Test auth token'},
+            timeout=1.)
 
         # subsequent call of POST method will fail due to the authentication
-        requests.post.return_value.status_code = HTTP_UNAUTHORIZED
-        requests.post.return_value.text = 'Unauthorized'
-        # set a new auth token
-        client_class.return_value.auth_token = 'New test auth token'
+        rensponse.status_code = sender.HTTP_UNAUTHORIZED
 
-        self._write_value(self._create_value())
+        # set a new auth token
+        client.auth_token = 'New test auth token'
+        post.reset_mock()
+
+        # write the value
+        instance.write(mocked_value())
 
         # verify the auth token
-        call_list = requests.post.call_args_list
+        post.assert_has_calls([
+            mock.call(mock.ANY, data=mock.ANY,
+                      headers={'Content-type': 'application/json',
+                               'X-Auth-Token': 'Test auth token'},
+                      timeout=1.),
+            mock.call(mock.ANY, data=mock.ANY,
+                      headers={'Content-type': 'application/json',
+                               'X-Auth-Token': 'New test auth token'},
+                      timeout=1.)])
 
-        # POST called three times
-        self.assertEqual(len(call_list), 3)
-        # the second call contains the old token
-        token = call_list[1][1]['headers']['X-Auth-Token']
-        self.assertEqual(token, 'Test auth token')
-        # the third call contains the new token
-        token = call_list[2][1]['headers']['X-Auth-Token']
-        self.assertEqual(token, 'New test auth token')
-
-    def test_authentication_in_multiple_threads(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    @mock.patch.object(plugin, 'LOGGER', autospec=True)
+    def test_authentication_in_multiple_threads(self, LOGGER, ClientV2, post):
         """Test authentication in muliple threads
 
         This test simulates the authentication performed from different thread
@@ -282,17 +297,21 @@ class PluginTest(TestCase):
         """
         # pylint: disable=protected-access
 
-        # init plugin instance
-        self._init_instance()
+        # init instance
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
         # the sender used by the instance
-        sender = self.plugin_instance._writer._sender
+        sender = instance._writer._sender
 
         # create a dummy lock
         class DummyLock(namedtuple('LockBase', ['sender', 'token', 'urlbase'])):
             """Lock simulation, which sets the auth token when locked"""
 
             def __enter__(self, *args, **kwargs):
+                # pylint: disable=protected-access
                 self.sender._auth_token = self.token
                 self.sender._url_base = self.urlbase
 
@@ -303,62 +322,179 @@ class PluginTest(TestCase):
         sender._auth_lock = DummyLock(sender, 'TOKEN', 'URLBASE/%s')
 
         # write the value
-        self._write_value(self._create_value())
+        instance.write(mocked_value())
 
-        # verify the results
-        requests = self.get_mock('requests')
-        client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+        # No errors has been registered
+        LOGGER.exception.assert_not_called()
 
         # client has not been called at all
-        self.assertFalse(client_class.called)
+        ClientV2.assert_not_called()
 
         # verify the auth token
-        call_list = requests.post.call_args_list
-        self.assertEqual(len(call_list), 1)
-        # 0 = first call > 1 = call kwargs > headers argument > auth token
-        token = call_list[0][1]['headers']['X-Auth-Token']
-        self.assertEqual(token, 'TOKEN')
+        post.assert_called_once_with(
+            'URLBASE/cpu.freq', data=mock.ANY,
+            headers={
+                'Content-type': 'application/json', 'X-Auth-Token': 'TOKEN'},
+            timeout=1.0)
 
-    def test_exceptions(self):
+    @mock.patch.object(requests, 'post', spec=callable)
+    @mock.patch.object(sender, 'keystoneClientV2', autospec=True)
+    @mock.patch.object(plugin, 'Writer', autospec=True)
+    @mock.patch.object(plugin, 'LOGGER', autospec=True)
+    def test_exceptions(self, LOGGER, Writer, ClientV2, post):
         """Test exception raised during write and shutdown"""
 
-        self._init_instance()
+        writer = Writer.return_value
+        writer.write.side_effect = ValueError('Test write error')
+        writer.flush.side_effect = RuntimeError('Test shutdown error')
 
-        writer = mock.Mock()
-        writer.flush.side_effect = Exception('Test shutdown error')
-        writer.write.side_effect = Exception('Test write error')
+        # init instance
+        collectd = mocked_collectd()
+        config = mocked_config(BATCH_SIZE=1)
+        instance = plugin.Plugin(collectd=collectd, config=config)
+        instance.init()
 
-        # pylint: disable=protected-access
-        self.plugin_instance._writer = writer
-        # pylint: enable=protected-access
+        self.assertRaises(ValueError, lambda: instance.write(mocked_value()))
+        self.assertRaises(RuntimeError, instance.shutdown)
 
-        self.plugin_instance.write(self._create_value())
-        self.plugin_instance.shutdown()
+    @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
+    def test_log_debug_to_collectd(self, ROOT_LOGGER):
+        """Verify that debug messages are sent to collectd."""
 
-        self.assertErrors([
-            'Exception during write: Test write error',
-            'Exception during shutdown: Test shutdown error'])
+        collectd = mocked_collectd()
+        plugin.setup_plugin(collectd=collectd)
 
-    @staticmethod
-    def _create_value():
-        """Create a value"""
-        retval = Value()
-        retval.plugin = 'cpu'
-        retval.plugin_instance = '0'
-        retval.type = 'freq'
-        retval.add_value(1234)
-        return retval
+        # When log messages are produced
+        ROOT_LOGGER.debug('some %s', 'noise')
 
-    def _init_instance(self):
-        """Init current plugin instance"""
-        self.plugin_instance.config(self.config.node)
-        self.plugin_instance.init()
+        # When plugin function is called
+        collectd.debug.assert_called_once_with('some noise')
 
-    def _write_value(self, value, errors=None):
-        """Write a value and verify result"""
-        self.plugin_instance.write(value)
-        if errors is None:
-            self.assertNoError()
-        else:
-            self.assertErrors(errors)
+    @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
+    def test_log_infos_to_collectd(self, ROOT_LOGGER):
+        """Verify that the callbacks are registered properly"""
+
+        collectd = mocked_collectd()
+        plugin.setup_plugin(collectd=collectd)
+
+        # When log messages are produced
+        ROOT_LOGGER.info('%d info', 1)
+
+        # When plugin function is called
+        collectd.info.assert_called_once_with('1 info')
+
+    @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
+    def test_log_errors_to_collectd(self, ROOT_LOGGER):
+        """Verify that the callbacks are registered properly"""
+
+        collectd = mocked_collectd()
+        plugin.setup_plugin(collectd=collectd)
+
+        # When log messages are produced
+        ROOT_LOGGER.error('some error')
+
+        # When plugin function is called
+        collectd.error.assert_called_once_with('some error')
+
+    @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
+    def test_log_fatal_to_collectd(self, ROOT_LOGGER):
+        """Verify that the callbacks are registered properly"""
+
+        collectd = mocked_collectd()
+        plugin.setup_plugin(collectd=collectd)
+
+        # When log messages are produced
+        ROOT_LOGGER.fatal('some error')
+
+        # When plugin function is called
+        collectd.error.assert_called_once_with('some error')
+
+    @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
+    def test_log_exceptions_to_collectd(self, ROOT_LOGGER):
+        """Verify that the callbacks are registered properly"""
+
+        collectd = mocked_collectd()
+        plugin.setup_plugin(collectd=collectd)
+
+        # When exception is logged
+        try:
+            raise ValueError('some error')
+        except ValueError:
+            ROOT_LOGGER.exception('got exception')
+
+        # When main function is called
+        collectd.error.assert_called_once_with(
+            match.wildcard('got exception\n'
+                           'Traceback (most recent call last):\n'
+                           '*'
+                           'ValueError: some error'))
+
+
+def mocked_collectd(**kwargs):
+    "Returns collecd module with collecd logging hooks."
+    return mock.MagicMock(spec=MockedCollectd, **kwargs)
+
+
+class MockedCollectd(object):
+    "Mocked collectd module specifications."
+
+    def debug(self, record):
+        "Hook for debug messages"
+
+    def info(self, record):
+        "Hook for info messages"
+
+    def warning(self, record):
+        "Hook for warning messages"
+
+    def error(self, record):
+        "Hook for error messages"
+
+    def register_init(self, hook):
+        "Register an hook for init."
+
+    def register_config(self, hook):
+        "Register an hook for config."
+
+    def register_write(self, hook):
+        "Register an hook for write."
+
+    def register_shutdown(self, hook):
+        "Register an hook for shutdown."
+
+
+def mocked_config(**kwargs):
+    "Returns collecd module with collecd logging hooks."
+    return mock.MagicMock(spec=MockedConfig, **kwargs)
+
+
+class MockedConfig(object):
+    "Mocked config class."
+
+    BATCH_SIZE = 1
+
+
+def mocked_value(
+        host='localhost', plugin='cpu', plugin_instance='0',
+        _type='freq', type_instance=None, time=123456789, values=(1234,),
+        **kwargs):
+    """Create a mock value"""
+
+    return mock.MagicMock(
+        spec=MockedValue, host=host, plugin=plugin,
+        plugin_instance=plugin_instance, type=_type,
+        type_instance=type_instance, time=time, values=list(values), meta=None,
+        **kwargs)
+
+
+class MockedValue(object):
+    """Value used for testing"""
+
+    host = 'localhost'
+    plugin = None
+    plugin_instance = None
+    type = None
+    type_instance = None
+    time = 123456789
+    values = []
+    meta = None
