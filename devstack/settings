@@ -4,6 +4,16 @@ COLLECTD_BATCH_SIZE=${COLLECTD_BATCH_SIZE:-3}
 COLLECTD_INSTALL=${COLLECTD_INSTALL:-True}
 COLLECTD_CONF_DIR=${COLLECTD_CONF_DIR:-''}
 
+# set this to 1 to make collectd-ceilometer debuggin messages visible as info messagges
+COLLECTD_CEILOMETER_VERBOSE=${COLLECTD_CEILOMETER_VERBOSE:-0}
+
+# if not empty this is the path where collectd log file is going to be stored
+COLLECTD_LOG_FILE=${COLLECTD_LOG_FILE:-$LOGDIR/collectd.log}
+
+# all log messages with lower criticity are going to be filtered out from log file
+# available values here are: debug|info|notice|warning|err
+COLLECTD_LOG_LEVEL=${COLLECTD_LOG_LEVEL:-info}
+
 # Ceilometer connection info.
 CEILOMETER_URL_TYPE=${CEILOMETER_URL_TYPE:-internalURL}
 CEILOMETER_TIMEOUT=${CEILOMETER_TIMEOUT:-1000}
@@ -21,4 +31,3 @@ if [ -z $COLLECTD_CONF_DIR ]; then
         COLLECTD_CONF_DIR=/etc/collectd.d
     fi
 fi
-
