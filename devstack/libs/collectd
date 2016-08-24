@@ -7,7 +7,7 @@
 #
 function start_collectd {
     if [ -e /usr/lib/systemd/system/collectd.service ] || [ -e /etc/init.d/collectd ]; then
-        sudo service collectd start
+        sudo service collectd restart
     fi
 }
 
@@ -33,6 +33,7 @@ function adapt_collectd_conf {
 if [ ! -d "$COLLECTD_CONF_DIR" ]; then
         sudo mkdir "$COLLECTD_CONF_DIR"
 fi
+
 cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 <LoadPlugin python>
   Globals true
@@ -46,8 +47,8 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
     <Module "collectd_ceilometer.plugin">
 
-        # Verbosity 1|0
-        #VERBOSE 0
+        # Verbosity True|False
+        VERBOSE $COLLECTD_CEILOMETER_VERBOSE
 
         # Batch size
         BATCH_SIZE "$COLLECTD_BATCH_SIZE"
@@ -70,6 +71,19 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     </Module>
 </Plugin>
 EOF
+
+# Configure collectd logfile plugin
+if [ -n $COLLECTD_LOG_FILE ]; then
+    touch $COLLECTD_LOG_FILE
+cat << EOF | sudo tee "$COLLECTD_CONF_DIR/logfile.conf"
+LoadPlugin "logfile"
+<Plugin "logfile">
+  LogLevel "$COLLECTD_LOG_LEVEL"
+  File "$COLLECTD_LOG_FILE"
+  Timestamp true
+</Plugin>
+EOF
+fi
 
 }
 
