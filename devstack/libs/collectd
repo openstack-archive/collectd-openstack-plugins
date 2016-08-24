@@ -47,7 +47,7 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     <Module "collectd_ceilometer.plugin">
 
         # Verbosity 1|0
-        #VERBOSE 0
+        VERBOSE $COLLECTD_VERBOSE
 
         # Batch size
         BATCH_SIZE "$COLLECTD_BATCH_SIZE"
@@ -70,6 +70,19 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
     </Module>
 </Plugin>
 EOF
+
+# Configure collectd logfile plugin
+if [ -n $COLLECTD_LOG_FILE ]; then
+    touch $COLLECTD_LOG_FILE
+cat << EOF | sudo tee "$COLLECTD_CONF_DIR/logfile.conf"
+LoadPlugin "logfile"
+<Plugin "logfile">
+  LogLevel "info"
+  File "$COLLECTD_LOG_FILE"
+  Timestamp true
+</Plugin>
+EOF
+fi
 
 }
 
