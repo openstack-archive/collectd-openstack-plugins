@@ -1,6 +1,6 @@
-========
+=====
 Usage
-========
+=====
 
 To use collectd-ceilometer-plugin in collectd::
 
@@ -41,3 +41,21 @@ COLLECTD_DIR
 CEILOMETER_TIMEOUT
     Sets the ceilometer's request timeout. The value is passed in milliseconds.
     Default: 1000 i.e. 1 sec.
+
+
+COLLECTD_CEILOMETER_VERBOSE
+    (0|1) Sets this to 1 to make collectd-ceilometer debuggin messages visible
+    as info messagges. This could be useful when running the plugin inside a
+    collectd compiled without debug messages support.
+    Default: 0
+
+
+COLLECTD_LOG_FILE
+    (file) The path of the collectd log file.
+    Default: /opt/stack/logs/collectd.log
+
+
+COLLECTD_LOG_LEVEL
+    (debug|info|notice|warning|err) All log messages with lower criticity than
+    this are going to be filtered out from the log file
+    Default: info
