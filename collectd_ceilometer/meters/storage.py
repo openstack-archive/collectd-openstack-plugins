@@ -18,16 +18,20 @@ from __future__ import unicode_literals
 import six
 
 from collectd_ceilometer.meters.base import Meter
-from collectd_ceilometer.meters.libvirt import LibvirtMeter
+try:
+    from collectd_ceilometer.meters.libvirt import LibvirtMeter
+except ImportError:
+    # libvirt is an optional requirement
+    LibvirtMeter = None
 
 
 class MeterStorage(object):
     """Meter storage"""
 
     # all plugins
-    _classes = {
-        'libvirt': LibvirtMeter,
-    }
+    _classes = {}
+    if LibvirtMeter:
+        _classes['libvirt'] = LibvirtMeter
 
     def __init__(self, collectd):
         self._meters = {}
