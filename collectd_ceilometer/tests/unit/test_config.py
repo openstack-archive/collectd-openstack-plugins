@@ -18,7 +18,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.tests.base import TestCase
+from collectd_ceilometer.tests.unit.base import TestCase
 from collectd_ceilometer.settings import Config
 import mock
 import six
