@@ -19,8 +19,8 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.tests.base import TestCase
-from collectd_ceilometer.tests.base import Value
+from collectd_ceilometer.tests.unit.base import TestCase
+from collectd_ceilometer.tests.unit.base import Value
 from collections import namedtuple
 import json
 import mock
