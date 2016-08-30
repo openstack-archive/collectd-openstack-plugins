@@ -17,24 +17,80 @@ function stop_collectd {
     fi
 }
 
-# install collectd service
+function install_service_file {
+    # systemd
+    if [[ `ps 1` =~ "systemd" ]]; then
+        local service_file=/etc/systemd/system/collectd.service
+        local collectd_binary=$COLLECTD_DIR/sbin/collectd
+        local collectd_conf_file=$COLLECTD_DIR/etc/collectd.conf
+
+        # echo service_file
+        sudo cp $COLLECTD_DIR/contrib/systemd.collectd.service $service_file
+        sudo sed 's#ExecStart=.*$#ExecStart='"$collectd_binary"' -C '"$collectd_conf_file"'#g' -i $service_file
+
+        sudo chmod +x $service_file
+        # Enable collectd
+        sudo systemctl enable collectd
+    else
+        die $LINENO "No support for systemd on this platform.\n
+                     To use collectd, build it and configure the service manually, and set COLLECTD_INSTALL=False."
+    fi
+
+}
+
+function build_collectd {
+    git_clone $COLLECTD_REPO $COLLECTD_DIR $COLLECTD_BRANCH
+    pushd $COLLECTD_DIR
+    . build.sh
+    ./configure --enable-python --enable-debug \
+       --enable-logging --enable-syslog \
+       --prefix=$COLLECTD_DIR
+    make all
+    sudo make install
+    sudo chown -R stack:stack $COLLECTD_DIR
+    # Allow read access to collectd conf file
+    sudo chmod +r $COLLECTD_DIR/etc/collectd.conf
+    popd
+
+    install_service_file
+    add_include_dir
+
+}
+
+# install collectd
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
-        if is_fedora || is_ubuntu; then
-            install_package collectd
-        else
-            die $LINENO "No support for collectd on this platform"
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            build_collectd
+        else # if install type is binary
+            if is_fedora || is_ubuntu; then
+                install_package collectd
+            else
+                die $LINENO "No support for collectd on this platform"
+            fi
         fi
     fi
+}
+
+# Add the Include block so that conf dir is read
+function add_include_dir {
+sudo cat << EOF >> $COLLECTD_DIR/etc/collectd.conf
+
+<Include "$COLLECTD_CONF_DIR">
+    Filter "*.conf"
+</Include>
+EOF
+
+
 }
 
 # Add conf file for plugin
 function adapt_collectd_conf {
 if [ ! -d "$COLLECTD_CONF_DIR" ]; then
-        sudo mkdir "$COLLECTD_CONF_DIR"
+        mkdir "$COLLECTD_CONF_DIR"
 fi
 
-cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+cat << EOF | tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 <LoadPlugin python>
   Globals true
 </LoadPlugin>
