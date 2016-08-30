@@ -17,32 +17,107 @@ function stop_collectd {
     fi
 }
 
+
 function install_requirements {
     echo "Installing pre-resquisites"
+
     if is_ubuntu; then
         install_package libvirt-bin libvirt-dev python-libvirt
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            install_package byacc flex bison build-essential automake libgcrypt20 libtool
+        fi
+
     elif is_fedora; then
         install_package libvirt libvirt-devel libvirt-python
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            install_package flex bison automake autoconf libtool
+        fi
     else
         echo "Unsupported distros"
     fi
+
+}
+
+function install_service_file {
+    # Configure systemd service file
+    if [[ `ls -la /sbin/init` =~ "systemd" ]]; then
+        local service_file=/etc/systemd/system/collectd.service
+        local collectd_binary=$COLLECTD_PREFIX/sbin/collectd
+        local collectd_conf_file=$COLLECTD_PREFIX/etc/collectd.conf
+
+        sudo -E cp $COLLECTD_DIR/contrib/systemd.collectd.service $service_file
+        sudo sed 's#ExecStart=.*$#ExecStart='"$collectd_binary"' -C '"$collectd_conf_file"'#g' -i $service_file
+
+        # Enable collectd
+        sudo systemctl enable collectd
+    else
+        die $LINENO "No support for systemd on this platform.\n
+                     To use collectd, build it, configure the service
+                     manually, and set COLLECTD_INSTALL=False."
+    fi
+
+}
+
+function build_collectd {
+
+    git_clone $COLLECTD_REPO $COLLECTD_DIR $COLLECTD_BRANCH
+    pushd $COLLECTD_DIR
+
+    # $PS4 has been defined to call short_source but the function is not
+    # available when build.sh is called.
+    OPS4=$PS4
+    PS4='+'
+
+    build_output=$( ./build.sh )
+    echo "Build output: " $build_output
+
+    PS4=$OPS4
+
+    ./configure --enable-python --enable-debug \
+       --enable-logging --enable-syslog \
+       --prefix=$COLLECTD_PREFIX/
+    make -j all
+    sudo make install
+    popd
+
+    # Allow read access to collectd conf file
+    sudo chmod +r $COLLECTD_PREFIX/etc/collectd.conf;
+
+    install_service_file
+    add_include_dir
+
 }
 
 # install collectd
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
-        if is_fedora || is_ubuntu; then
-            install_package collectd
-        else
-            die $LINENO "No support for collectd on this platform"
+        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+            build_collectd
+        else # if install type is binary
+            if is_fedora || is_ubuntu; then
+                install_package collectd
+            else
+                die $LINENO "No support for collectd on this platform"
+            fi
         fi
     fi
+}
+
+# Add the Include block so that conf dir is read
+function add_include_dir {
+    cat << EOF | sudo -E tee -a $PREFIX/etc/collectd.conf
+
+    <Include "$COLLECTD_CONF_DIR">
+        Filter "*.conf"
+    </Include>
+EOF
+
 }
 
 # Add conf file for plugin
 function adapt_collectd_conf {
     if [ ! -d "$COLLECTD_CONF_DIR" ]; then
-        sudo mkdir -p "$COLLECTD_CONF_DIR"
+        sudo -E mkdir -p "$COLLECTD_CONF_DIR"
     fi
 
     # Configure collectd-ceilometer-plugin
