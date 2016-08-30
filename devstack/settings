@@ -1,8 +1,12 @@
 # General settings
 COLLECTD_CEILOMETER_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 COLLECTD_BATCH_SIZE=${COLLECTD_BATCH_SIZE:-3}
+COLLECTD_BRANCH=${COLLECTD_BRANCH:-master}
+COLLECTD_DIR=${COLLECTD_DIR:-$DEST/collectd-$COLLECTD_BRANCH/}
 COLLECTD_INSTALL=${COLLECTD_INSTALL:-True}
+COLLECTD_INSTALL_TYPE=${COLLECTD_INSTALL_TYPE:-'binary'}
 COLLECTD_CONF_DIR=${COLLECTD_CONF_DIR:-''}
+COLLECTD_REPO=${COLLECTD_REPO:-'https://github.com/collectd/collectd.git'}
 
 # Ceilometer connection info.
 CEILOMETER_URL_TYPE=${CEILOMETER_URL_TYPE:-internalURL}
@@ -15,7 +19,9 @@ OS_PASSWORD=${SERVICE_PASSWORD}
 
 # Fall back to default conf dir if option is unset
 if [ -z $COLLECTD_CONF_DIR ]; then
-    if is_ubuntu; then
+    if [ "$COLLECTD_INSTALL_TYPE" == 'source' ]; then
+        COLLECTD_CONF_DIR="$COLLECTD_DIR/etc/collectd.conf.d"
+    elif is_ubuntu; then
         COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d
     elif is_fedora; then
         COLLECTD_CONF_DIR=/etc/collectd.d

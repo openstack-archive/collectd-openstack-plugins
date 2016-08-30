@@ -34,6 +34,9 @@ set -o xtrace
             # no cleaning required as of now
             :
         ;;
+        "test-service")
+            install_service_file
+        ;;
     esac
 
 $xtrace
