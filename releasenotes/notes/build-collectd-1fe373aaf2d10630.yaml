@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Devstack code added to clone and build collectd from source, allowing
+    specific versions to be installed, including newly-developed plugin-ins
+    which have not been released yet, or are not included in the collectd main
+    repository.
