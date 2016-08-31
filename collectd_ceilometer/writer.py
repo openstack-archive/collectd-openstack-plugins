@@ -29,14 +29,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Sample(namedtuple('Sample', ['value', 'timestamp', 'meta',
-                                   'resource_id', 'unit', 'metername'])):
+                                   'resource_id', 'unit',
+                                   'metername', 'sample_type'])):
     """Sample data"""
 
     def to_payload(self):
         """Return a payload dictionary"""
         return {
             'counter_name': self.metername,
-            'counter_type': 'gauge',
+            'counter_type': self.sample_type,
             'counter_unit': self.unit,
             'counter_volume': self.value,
             'timestamp': self.timestamp,
@@ -106,16 +107,18 @@ class Writer(object):
         metername = plugin.meter_name(vl)
         unit = plugin.unit(vl)
         timestamp = time.asctime(time.gmtime(vl.time))
+        sample_type = plugin.sample_type(vl)
 
         LOGGER.debug(
-            'Writing: plugin="%s", metername="%s", unit="%s"',
-            vl.plugin, metername, unit)
+            'Writing: plugin="%s", metername="%s", unit="%s", type="%s"',
+            vl.plugin, metername, unit, sample_type)
 
         # store sample for every value
         data = [
             Sample(
                 value=value, timestamp=timestamp, meta=vl.meta,
-                resource_id=resource_id, unit=unit, metername=metername)
+                resource_id=resource_id, unit=unit,
+                metername=metername, sample_type=sample_type)
             for value in vl.values
         ]
 
