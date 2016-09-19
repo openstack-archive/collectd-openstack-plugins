@@ -16,8 +16,6 @@ CEILOMETER_TIMEOUT=${CEILOMETER_TIMEOUT:-1000}
 
 # Auth info
 OS_AUTH_URL="$KEYSTONE_AUTH_URI/v$IDENTITY_API_VERSION"
-OS_USERNAME="ceilometer"
-OS_PASSWORD=${SERVICE_PASSWORD}
 
 # Fall back to default conf dir if option is unset
 if [ -z $COLLECTD_CONF_DIR ]; then
