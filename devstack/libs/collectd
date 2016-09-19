@@ -64,9 +64,9 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         CEILOMETER_TIMEOUT "$CEILOMETER_TIMEOUT"
 
         # # Ceilometer user creds
-        OS_USERNAME "$OS_USERNAME"
-        OS_PASSWORD "$OS_PASSWORD"
-        OS_TENANT_NAME "service"
+        OS_USERNAME "ceilometer"
+        OS_PASSWORD "$SERVICE_PASSWORD"
+        OS_TENANT_NAME "$SERVICE_TENANT_NAME"
 
     </Module>
 </Plugin>
