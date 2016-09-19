@@ -34,57 +34,27 @@ if [ ! -d "$COLLECTD_CONF_DIR" ]; then
         sudo mkdir "$COLLECTD_CONF_DIR"
 fi
 
-cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-<LoadPlugin python>
-  Globals true
-</LoadPlugin>
+sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
 
-<Plugin python>
-    ModulePath "$COLLECTD_CEILOMETER_DIR"
-    LogTraces true
-    Interactive false
-    Import "collectd_ceilometer.plugin"
-
-    <Module "collectd_ceilometer.plugin">
-
-        # Verbosity True|False
-        VERBOSE $COLLECTD_CEILOMETER_VERBOSE
-
-        # Batch size
-        BATCH_SIZE "$COLLECTD_BATCH_SIZE"
-
-        # Service endpoint addresses
-        OS_AUTH_URL "$OS_AUTH_URL"
-        OS_IDENTITY_API_VERSION "$OS_IDENTITY_API_VERSION"
-
-        # Ceilometer address
-        #CEILOMETER_ENDPOINT
-        CEILOMETER_URL_TYPE "$CEILOMETER_URL_TYPE"
-
-        # Ceilometer timeout in ms
-        CEILOMETER_TIMEOUT "$CEILOMETER_TIMEOUT"
-
-        # # Ceilometer user creds
-        OS_USERNAME "ceilometer"
-        OS_PASSWORD "$SERVICE_PASSWORD"
-        OS_TENANT_NAME "$SERVICE_TENANT_NAME"
-
-    </Module>
-</Plugin>
-EOF
+# Configure collectd-ceiloemter-plugin.conf
+sudo sed -i 's|ModulePath.*$|ModulePath "'$COLLECTD_CEILOMETER_DIR'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|VERBOSE.*$|VERBOSE '$COLLECTD_CEILOMETER_VERBOSE'|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|BATCH_SIZE.*$|BATCH_SIZE "'$COLLECTD_BATCH_SIZE'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|OS_AUTH_URL.*$|OS_AUTH_URL "'$OS_AUTH_URL'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|CEILOMETER_URL_TYPE.*$|CEILOMETER_URL_TYPE "'$CEILOMETER_URL_TYPE'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$OS_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
 # Configure collectd logfile plugin
 if [ -n $COLLECTD_LOG_FILE ]; then
     touch $COLLECTD_LOG_FILE
-cat << EOF | sudo tee "$COLLECTD_CONF_DIR/logfile.conf"
-LoadPlugin "logfile"
-<Plugin "logfile">
-  LogLevel "$COLLECTD_LOG_LEVEL"
-  File "$COLLECTD_LOG_FILE"
-  Timestamp true
-</Plugin>
-EOF
 fi
+
+sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf $COLLECTD_CONF_DIR/
+
+sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/logfile.conf
+sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/logfile.conf
 
 }
 
