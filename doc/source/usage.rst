@@ -17,7 +17,7 @@ COLLECTD_CONF_DIR
     This is required if you use a distro other than Ubuntu or Fedora, or if
     the config file is in a non default location. This config directory will
     be created if it doesn't already exist.
-    Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collect.d (Fedora)
+    Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collectd.d (Fedora)
 
 
 COLLECTD_INSTALL
