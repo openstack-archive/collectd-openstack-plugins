@@ -77,3 +77,21 @@ To enable this feature execute the following instructions:
   and seperate each meter and its unit with a comma, as shown below.
 
 | COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
+
+Gnocchi
+=======
+
+To deploy with gnocchi using devstack, add the following to you local.conf:
+
+    enable_plugin collectd-ceilometer-plugin http://github.com/openstack/collectd-ceilometer-plugin
+
+    COLLECTD_INSTALL=True
+    COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d/
+
+    # GNOCCHI
+    enable_plugin gnocchi https://github.com/openstack/gnocchi master
+    enable_service gnocchi-api,gnocchi-metricd,gnocchi-statsd
+    GNOCCHI_USE_KEYSTONE=True
+
+Once deployment is complete, edit collectd-ceilometer-plugin.conf to point at
+the collectd_ceiloemter.gnocchi.plugin module.
