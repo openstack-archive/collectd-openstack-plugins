@@ -40,3 +40,21 @@ Manual install::
    - Enable some read plugins to get some stats
 
    - $ sudo service collectd start
+
+
+Gnocchi
+=======
+
+To deploy with gnocchi using devstack, add the following to you local.conf:
+
+    enable_plugin collectd-ceilometer-plugin /opt/stack/collectd-ceilometer-plugin-local/
+
+    COLLECTD_INSTALL=True
+    COLLECTD_CONF_DIR=/etc/collectd/collectd.conf.d/
+
+    # GNOCCHI
+    enable_plugin gnocchi https://github.com/openstack/gnocchi master
+    enable_service gnocchi-api,gnocchi-metricd,gnocchi-statsd
+    GNOCCHI_USE_KEYSTONE=True
+
+Once deployment is complete, edit collectd-ceilometer-plugin.conf to point at the collectd_ceiloemter.gnocchi.plugin module.
