@@ -21,7 +21,7 @@ from unittest import TestCase
 
 import mock
 
-from collectd_ceilometer.meters.base import Meter
+from collectd_ceilometer.common.meters.base import Meter
 from collectd_ceilometer.tests.mocking import patch_class
 
 
@@ -88,7 +88,7 @@ class MetersTest(TestCase):
         collectd.get_dataset.assert_called_once()
         self.assertEqual("cumulative", actual)
 
-    @mock.patch('collectd_ceilometer.meters.base.LOGGER')
+    @mock.patch('collectd_ceilometer.common.meters.base.LOGGER')
     @patch_collectd
     def test_sample_type_invalid(self, collectd, LOGGER):
         collectd.get_dataset.side_effect = Exception("Boom!")

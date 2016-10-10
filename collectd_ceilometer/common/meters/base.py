@@ -15,7 +15,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.settings import Config
+from collectd_ceilometer.common.settings import Config
 import logging
 
 LOGGER = logging.getLogger(__name__)
