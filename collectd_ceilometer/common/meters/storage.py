@@ -17,8 +17,8 @@ from __future__ import unicode_literals
 
 import six
 
-from collectd_ceilometer.meters.base import Meter
-from collectd_ceilometer.meters.libvirt import LibvirtMeter
+from collectd_ceilometer.common.meters.base import Meter
+from collectd_ceilometer.common.meters.libvirt import LibvirtMeter
 
 
 class MeterStorage(object):
