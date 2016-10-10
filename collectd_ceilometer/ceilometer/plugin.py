@@ -23,10 +23,10 @@ except ImportError:
     collectd = None  # when running unit tests collectd is not avaliable
 
 import collectd_ceilometer
-from collectd_ceilometer.logger import CollectdLogHandler
-from collectd_ceilometer.meters import MeterStorage
-from collectd_ceilometer.settings import Config
-from collectd_ceilometer.writer import Writer
+from collectd_ceilometer.ceilometer.writer import Writer
+from collectd_ceilometer.common.logger import CollectdLogHandler
+from collectd_ceilometer.common.meters import MeterStorage
+from collectd_ceilometer.common.settings import Config
 
 
 LOGGER = logging.getLogger(__name__)

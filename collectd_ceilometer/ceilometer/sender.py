@@ -22,10 +22,10 @@ import threading
 import requests
 import six
 
-from collectd_ceilometer.keystone_light import ClientV2
-from collectd_ceilometer.keystone_light import ClientV3
-from collectd_ceilometer.keystone_light import KeystoneException
-from collectd_ceilometer.settings import Config
+from collectd_ceilometer.common.keystone_light import ClientV2
+from collectd_ceilometer.common.keystone_light import ClientV3
+from collectd_ceilometer.common.keystone_light import KeystoneException
+from collectd_ceilometer.common.settings import Config
 
 
 LOGGER = logging.getLogger(__name__)

@@ -18,7 +18,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.keystone_light import KeystoneException
+from collectd_ceilometer.common.keystone_light import KeystoneException
 from collections import OrderedDict
 import logging
 from mock import Mock
@@ -50,7 +50,7 @@ class TestConfig(object):
 
     default_values = OrderedDict([
         ('BATCH_SIZE', 1,),
-        ('OS_IDENTITY_API_VERSION', '2.0'),
+        ('OS_IDENTITY_API_VERSION', '3'),
         ('OS_AUTH_URL', 'https://test-auth.url.tld/test',),
         ('CEILOMETER_URL_TYPE', 'internalURL',),
         ('CEILOMETER_TIMEOUT', 1000,),
@@ -131,14 +131,20 @@ class TestCase(unittest.TestCase):
 
         super(TestCase, self).setUp()
 
-        modules = ['collectd', 'libvirt', 'collectd_ceilometer.keystone_light']
+        modules = ['collectd', 'libvirt',
+                   'collectd_ceilometer.common.keystone_light']
 
         self._mocked = {module: Mock() for module in modules}
 
-        keystone = self.get_mock('collectd_ceilometer.keystone_light')
+        # requests
+        requests = self.get_mock('requests')
+        requests.exceptions.RequestException = Exception
+        self._mocked.update({'requests.exceptions': requests.exceptions})
+
+        keystone = self.get_mock('collectd_ceilometer.common.keystone_light')
         keystone.KeystoneException = KeystoneException
         self._mocked.update(
-            {'collectd_ceilometer.keystone_light.KeystoneException':
+            {'collectd_ceilometer.common.keystone_light.KeystoneException':
              keystone.KeystoneException})
 
         self._patchset = patch.dict('sys.modules', self._mocked)
