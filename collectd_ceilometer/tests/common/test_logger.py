@@ -16,7 +16,7 @@ import unittest
 
 import mock
 
-from collectd_ceilometer.logger import CollectdLogHandler
+from collectd_ceilometer.common.logger import CollectdLogHandler
 
 from collectd_ceilometer.tests.mocking import patch_class
 

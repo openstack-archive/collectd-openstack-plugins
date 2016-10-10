@@ -25,9 +25,9 @@ import unittest
 
 import mock
 
-from collectd_ceilometer import keystone_light
-from collectd_ceilometer import plugin
-from collectd_ceilometer import sender
+from collectd_ceilometer.common import keystone_light
+from collectd_ceilometer.ceilometer import plugin
+from collectd_ceilometer.ceilometer import sender
 
 from collectd_ceilometer.tests import match
 

@@ -16,6 +16,8 @@
 import logging
 import traceback
 
+from collectd_ceilometer.common.settings import Config
+
 
 class CollectdLogHandler(logging.Handler):
     """A handler class for collectd plugin"""

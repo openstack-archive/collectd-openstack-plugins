@@ -15,8 +15,8 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.singleton import Singleton
-from collectd_ceilometer.units import UNITS
+from collectd_ceilometer.common.singleton import Singleton
+from collectd_ceilometer.common.units import UNITS
 from collections import namedtuple
 import logging
 import six
