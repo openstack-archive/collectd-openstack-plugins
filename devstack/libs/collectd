@@ -93,6 +93,7 @@ function restore_collectd_conf {
 
     if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
         sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+        sudo rm -f $COLLECTD_CONF_DIR/logfile.conf
     fi
 
 }
