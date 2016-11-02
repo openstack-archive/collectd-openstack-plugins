@@ -13,7 +13,10 @@
 # under the License.
 """ Lightweight (keystone) client for the OpenStack Identity API """
 
+import logging
 import requests
+
+LOG = logging.getLogger(__name__)
 
 
 class KeystoneException(Exception):
@@ -36,6 +39,110 @@ class MissingServices(KeystoneException):
     def __init__(self, message, exc, response):
         super(MissingServices, self).__init__(
             "MissingServices: " + message, exc, response)
+
+
+class ClientV3(object):
+    """Light weight client for the OpenStack Identity API V3.
+
+    :param string username: Username for authentication.
+    :param string password: Password for authentication.
+    :param string tenant_name: Tenant name.
+    :param string auth_url: Keystone service endpoint for authorization.
+
+    """
+
+    def __init__(self, auth_url, username, password, tenant_name):
+        """Initialize a new client"""
+
+        self.auth_url = auth_url
+        self.username = username
+        self.password = password
+        self.tenant_name = tenant_name
+        self._auth_token = None
+        self._services = ()
+        self._services_by_name = {}
+
+    @property
+    def auth_token(self):
+        """Return token string usable for X-Auth-Token """
+        # actualize token
+        self.refresh()
+        return self._auth_token
+
+    @property
+    def services(self):
+        """Return list of services retrieved from identity server """
+        return self._services
+
+    def refresh(self):
+        """Refresh token and services list (getting it from identity server) """
+        headers = {'Accept': 'application/json'}
+        url = self.auth_url.rstrip('/') + '/auth/tokens'
+        params = {
+            'auth': {
+                'identity': {
+                    'methods': ['password'],
+                    'password': {
+                        'user': {
+                            'name': self.username,
+                            'domain': {'id': 'default'},
+                            'password': self.password
+                        }
+                    }
+                },
+                'scope': {
+                    'project': {
+                        'name': self.tenant_name,
+                        'domain': {'id': 'default'}
+                    }
+                }
+            }
+        }
+
+        resp = requests.post(url, json=params, headers=headers)
+        resp_data = None
+        # processing response
+        try:
+            resp.raise_for_status()
+            resp_data = resp.json()['token']
+            self._services = tuple(resp_data['catalog'])
+            self._services_by_name = {
+                service['name']: service for service in self._services
+            }
+            self._auth_token = resp.headers['X-Subject-Token']
+        except (TypeError, KeyError, ValueError,
+                requests.exceptions.HTTPError) as e:
+            LOG.exception("Error processing response from keystone")
+            raise InvalidResponse(e, resp_data)
+        return resp_data
+
+    def get_service_endpoint(self, name, urlkey="internalURL", region=None):
+        """Return url endpoint of service
+
+        possible values of urlkey = 'adminURL' | 'publicURL' | 'internalURL'
+        provide region if more endpoints are available
+        """
+
+        try:
+            endpoints = self._services_by_name[name]['endpoints']
+            if not endpoints:
+                raise MissingServices("Missing name '%s' in received services"
+                                      % name,
+                                      None, self._services)
+
+            if region:
+                for ep in endpoints:
+                    if ep['region'] == region and ep['interface'] in urlkey:
+                        return ep["url"].rstrip('/')
+            else:
+                for ep in endpoints:
+                    if ep['interface'] in urlkey:
+                        return ep["url"].rstrip('/')
+            raise MissingServices("No valid endpoints found")
+        except (KeyError, ValueError) as e:
+            LOG.exception("Error while processing endpoints")
+            raise MissingServices("Missing data in received services",
+                                  e, self._services)
 
 
 class ClientV2(object):
