@@ -55,6 +55,7 @@ cat << EOF | sudo tee $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
         # Service endpoint addresses
         OS_AUTH_URL "$OS_AUTH_URL"
+        OS_IDENTITY_API_VERSION "$OS_IDENTITY_API_VERSION"
 
         # Ceilometer address
         #CEILOMETER_ENDPOINT
