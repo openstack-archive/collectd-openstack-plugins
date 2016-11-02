@@ -50,6 +50,7 @@ class TestConfig(object):
 
     default_values = OrderedDict([
         ('BATCH_SIZE', 1,),
+        ('OS_IDENTITY_API_VERSION', '2.0'),
         ('OS_AUTH_URL', 'https://test-auth.url.tld/test',),
         ('CEILOMETER_URL_TYPE', 'internalURL',),
         ('CEILOMETER_TIMEOUT', 1000,),
