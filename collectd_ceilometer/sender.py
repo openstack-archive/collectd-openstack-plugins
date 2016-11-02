@@ -23,6 +23,7 @@ import requests
 import six
 
 from collectd_ceilometer.keystone_light import ClientV2
+from collectd_ceilometer.keystone_light import ClientV3
 from collectd_ceilometer.keystone_light import KeystoneException
 from collectd_ceilometer.settings import Config
 
@@ -77,12 +78,20 @@ class Sender(object):
                 # create a keystone client if it doesn't exist
                 if self._keystone is None:
                     cfg = Config.instance()
-                    self._keystone = ClientV2(
-                        auth_url=cfg.OS_AUTH_URL,
-                        username=cfg.OS_USERNAME,
-                        password=cfg.OS_PASSWORD,
-                        tenant_name=cfg.OS_TENANT_NAME
-                    )
+                    if cfg.OS_IDENTITY_API_VERSION == "2.0":
+                        self._keystone = ClientV2(
+                            auth_url=cfg.OS_AUTH_URL,
+                            username=cfg.OS_USERNAME,
+                            password=cfg.OS_PASSWORD,
+                            tenant_name=cfg.OS_TENANT_NAME
+                        )
+                    else:
+                        self._keystone = ClientV2(
+                            auth_url=cfg.OS_AUTH_URL,
+                            username=cfg.OS_USERNAME,
+                            password=cfg.OS_PASSWORD,
+                            tenant_name=cfg.OS_TENANT_NAME
+                        )
                 # store the authentication token
                 self._auth_token = self._keystone.auth_token
 
