@@ -51,6 +51,7 @@ class Config(object):
     _configuration = [
         CfgParam('BATCH_SIZE', 1, int),
         CfgParam('OS_AUTH_URL', None, six.text_type),
+        CfgParam('OS_IDENTITY_API_VERSION', '2.0', six.text_type),
         CfgParam('CEILOMETER_URL_TYPE', 'internalURL', six.text_type),
         CfgParam('CEILOMETER_TIMEOUT', 1000, int),
         CfgParam('OS_USERNAME', None, six.text_type),
