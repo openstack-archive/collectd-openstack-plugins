@@ -94,7 +94,7 @@ class KeystoneLightTest(unittest.TestCase):
             }
         }
 
-        self.assertEqual(mock_post.call_args[0], (u'test_auth_url/tokens',))
+        self.assertEqual(mock_post.call_args[0], (u'test_auth_url/v2.0/tokens',))
         self.assertEqual(mock_post.call_args[1], expected_args)
 
     @mock.patch('collectd_ceilometer.keystone_light.requests.post')
