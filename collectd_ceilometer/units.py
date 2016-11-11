@@ -39,10 +39,29 @@ UNITS = {
 
     # 'bind': 'None',
 
+    #chrony units
+    'chrony.time_offset': 's',
+    'chrony.frequency_error': 'ppm',
+    'chrony.clock_skew_ppm': 'ppm',
+    'chrony.clock_last_meas': 's',
+    'chrony.clock_reachability': '',
+    'chrony.clock_mode': '',
+    'chrony.clock_state': '',
+    'chrony.clock_stratum': '',
+    'chrony.time_ref': 's',
+    'chrony.time_offset_ntp': 's',
+    'chrony.time_offset_rms': 's',
+    'chrony.root_delay': 's',
+    'chrony.root_dispersion': '',
+    'chrony.clock_last_update': 's',
+
     'conntrack': 'Entries',
     'contextswitch': 'Sw./s',
     'cpu': 'jiffies',
     'cpufreq': 'MHz',
+
+    #cpusleep units
+    'cpusleep.total_time_in_ms': 'ms',
 
     'dbi': 'Count',
     'dbi.mysql_databasesize': 'B',
@@ -64,12 +83,18 @@ UNITS = {
 
     'filecount.files': 'Files',
     'filecount.bytes': 'B',
+    
+    #gps units
+    'gps.satellites': 'Satellites',
+    'gps.dilution_of_precision': 'm'
 
     'hddtemp': '°C',
 
     'interface.if_octets': 'B/s',
     'interface.if_errors': 'Errors/s',
     'interface.if_packets': 'Packets/s',
+    #new interface unit
+    'interface.if_dropped': 'Packets/s',
 
     'ipmi.fanspeed':    'RPM',
     'ipmi.temperature': '°C',
@@ -119,6 +144,21 @@ UNITS = {
     'mysql.cache_size':         'Queries',
     'mysql.time_offset':        's',
     'mysql.mysql_threads':      'Threads',
+    #new mysql
+    'mysql.mysql_sort': '',
+    'mysql.mysql_sort_rows': 'Rows',
+    'mysql.mysql_sort_merge_passes': 'Passes',
+    'mysql.mysql_slow_queries': 'Queries',
+    'mysql.mysql_select': '',
+    'mysql.mysql_innodb_rows': 'Rows',
+    'mysql.mysql_innodb_row_lock': '',
+    'mysql.mysql_innodb_pages': 'Pages',
+    'mysql.mysql_innodb_log': '',
+    'mysql.mysql_innodb_dblwr': '',
+    'mysql.mysql_innodb_data': '',
+    'mysql.mysql_bpool_counters': 'Counters',
+    'mysql.mysql_bpool_pages': 'Pages',
+    'mysql.mysql_bpool_bytes': 'Bytes',
 
     'netlink.if_rx_errors':     'Errors/s',
     'netlink.if_octets':        'B/s',
@@ -135,7 +175,7 @@ UNITS = {
     'nginx.nginx_requests':     'Requests/s',
     'nginx.nginx_connections':  'Connections/s',
 
-    'ntpd': 's',
+    'ntpd': 'ns',
     'ntpd.frequency_offset': 'ppm',
 
     'numa': 'Actions',
@@ -161,6 +201,20 @@ UNITS = {
     'postgresql.pg_db_size':        'B',
     'postgresql.pg_scan':           'Scans/Rows',
 
+    #powerdns units
+    'powerdns.dns_answer': 'Queries/s',
+    'powerdns.latency': 's',
+    'powerdns.dns_question': 'Queries',
+    'powerdns.ipt_packets': 'Packets',
+    'powerdns.total_bytes': 'Bytes',
+    #powerdns recursor units
+    'powerdns.dns_rcode': '',
+    'powerdns.cache_size': 'Bytes',
+    'powerdns.cache_result': '',
+    'powerdns.dns_qtype': '',
+    'powerdns.counter': '',
+    'powerdns.uptime': 's',
+
     'processes':                'Processes',
     'processes.fork_rate':      'forks/s',
     'processes.ps_cputime':     'Jiffies',
@@ -172,6 +226,22 @@ UNITS = {
     'processes.ps_stacksize':   'B',
     'processes.ps_code':        'B',
     'processes.ps_data':        'B',
+
+    #redis units
+    'redis.total_bytes': 'Bytes',
+    'redis.cache_result': '',
+    'redis.current_connections': 'Connections',
+    'redis.pubsub': 'Channels',
+    'redis.evicted_keys': 'Keys',
+    'redis.operations_per_second': 'Operations/s',
+    'redis.total_operations': 'Operations',
+    'redis.total_connections': 'Connections',
+    'redis.volatile_changes': 'Changes',
+    'redis.memory': 'Bytes',
+    'redis.memory_lua': 'Bytes',
+    'redis.uptime': 's',
+    'redis.blocked_clients': 'Clients',
+    'redis.expired_keys': 'Keys',
 
     'swap': 'B',
     'swap.swap_io': 'Pages',
@@ -200,4 +270,18 @@ UNITS = {
     'wireless.signal_quality':  '',
     'wireless.signal_power':    'dBm',
     'wireless.signal_noise':    'dBm',
+
+    #xencpu units
+    'xencpu.percent': '%',
+
+    #zfs_arc units
+    'zfs_arc.io_octets': 'B/s',
+    'zfs_arc.cache_ratio': '',
+    'zfs_arc.cache_result': '',
+    'zfs_arc.cache_eviction': 'Bytes',
+    'zfs_arc.memory_throttle_count': 'Bytes',
+    'zfs_arc.hash_collisions': 'Collisions',
+    'zfs_arc.mutex_operations': 'Operations',
+    'zfs_arc.cache_operation': '',
+    'zfs_arc.cache_size': '',
 }
