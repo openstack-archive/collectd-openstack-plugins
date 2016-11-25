@@ -84,6 +84,10 @@ LoadPlugin "logfile"
   Timestamp true
 </Plugin>
 EOF
+
+    COLLECTD_CONF="$(dirname $COLLECTD_CONF_DIR)/collectd.conf"
+    # disable logging into syslog
+    sudo sed -i "s/^LoadPlugin syslog/#LoadPlugin syslog/" $COLLECTD_CONF
 fi
 
 }
@@ -95,6 +99,10 @@ function restore_collectd_conf {
     if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
         sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo rm -f $COLLECTD_CONF_DIR/logfile.conf
+
+        COLLECTD_CONF="$(dirname $COLLECTD_CONF_DIR)/collectd.conf"
+        # enable logging into syslog
+        sudo sed -i "s/^#LoadPlugin syslog/LoadPlugin syslog/" $COLLECTD_CONF
     fi
 
 }

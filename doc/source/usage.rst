@@ -52,7 +52,7 @@ COLLECTD_CEILOMETER_VERBOSE
 
 COLLECTD_LOG_FILE
     (file) The path of the collectd log file.
-    Default: /opt/stack/logs/collectd.log
+    Default: /var/log/collectd/collectd.log
 
 
 COLLECTD_LOG_LEVEL

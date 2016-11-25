@@ -7,7 +7,7 @@ COLLECTD_CONF_DIR=${COLLECTD_CONF_DIR:-''}
 COLLECTD_CEILOMETER_VERBOSE=${COLLECTD_CEILOMETER_VERBOSE:-False}
 
 # Configurations for Collectd LogFile plugin
-COLLECTD_LOG_FILE=${COLLECTD_LOG_FILE:-$LOGDIR/collectd.log}
+COLLECTD_LOG_FILE=${COLLECTD_LOG_FILE:-/var/log/collectd/collectd.log}
 COLLECTD_LOG_LEVEL=${COLLECTD_LOG_LEVEL:-info}
 
 # Ceilometer connection info.
