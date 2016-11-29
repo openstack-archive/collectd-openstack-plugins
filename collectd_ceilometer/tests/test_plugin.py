@@ -33,7 +33,7 @@ class PluginTest(TestCase):
     def setUp(self):
         super(PluginTest, self).setUp()
         client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+            = self.get_mock('collectd_ceilometer.keystone_light').ClientV3
         client_class.return_value\
             .get_service_endpoint.return_value = "https://test-ceilometer.tld"
 
@@ -63,7 +63,7 @@ class PluginTest(TestCase):
         response.status_code = HTTP_CREATED
 
         client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+            = self.get_mock('collectd_ceilometer.keystone_light').ClientV3
         auth_token = client_class.return_value.auth_token
 
         # create a value
@@ -171,7 +171,7 @@ class PluginTest(TestCase):
 
         # tell the auth client to rise an exception
         client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+            = self.get_mock('collectd_ceilometer.keystone_light').ClientV3
         client_class.side_effect = Exception('Test Client() exception')
 
         # init instance
@@ -193,7 +193,7 @@ class PluginTest(TestCase):
         keystone \
             = self.get_mock('collectd_ceilometer.keystone_light')
 
-        client_class = keystone.ClientV2
+        client_class = keystone.ClientV3
         client_class.side_effect = keystone.KeystoneException(
             "Missing name 'xxx' in received services",
             "exception",
@@ -235,7 +235,7 @@ class PluginTest(TestCase):
         """Test re-authentication"""
 
         client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+            = self.get_mock('collectd_ceilometer.keystone_light').ClientV3
         client_class.return_value.auth_token = 'Test auth token'
 
         # init instance
@@ -314,7 +314,7 @@ class PluginTest(TestCase):
 
         # verify the results
         client_class \
-            = self.get_mock('collectd_ceilometer.keystone_light').ClientV2
+            = self.get_mock('collectd_ceilometer.keystone_light').ClientV3
 
         # client has not been called at all
         self.assertFalse(client_class.called)
