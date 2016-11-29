@@ -1,0 +1,5 @@
+---
+features:
+  - Added support for Keystone V3 API.
+deprecations:
+  - Remove Keystone V2 as this has been deprecated upstream
