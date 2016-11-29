@@ -1,0 +1,3 @@
+---
+deprecations:
+  - Remove Keystone V2 as this has been deprecated upstream
