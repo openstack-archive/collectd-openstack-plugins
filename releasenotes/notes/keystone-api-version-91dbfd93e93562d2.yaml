@@ -1,0 +1,5 @@
+---
+features:
+  - Added support for Keystone V3 API.
+upgrade:
+  - Removed Keystone V2 support.
