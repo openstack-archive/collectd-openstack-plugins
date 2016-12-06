@@ -1,0 +1,26 @@
+[[local|localrc]]
+
+HOST_IP=<SINGLE NODE IP>
+
+VERBOSE=True
+FORCE=yes
+
+MYSQL_PASSWORD=password
+DATABASE_PASSWORD=password
+RABBIT_PASSWORD=password
+ADMIN_PASSWORD=password
+SERVICE_PASSWORD=password
+HORIZON_PASSWORD=password
+SERVICE_TOKEN=tokentoken
+
+disable_all_services
+enable_service key
+enable_service mysql
+enable_service rabbit
+enable_service dstat
+
+enable_plugin ceilometer https://github.com/openstack/ceilometer master
+enable_plugin collectd-ceilometer https://github.com/openstack/collectd-ceilometer-plugin stable/newton
+
+COLLECTD_INSTALL=True
+COLLECTD_CEILOMETER_VERBOSE=True
