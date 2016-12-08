@@ -31,7 +31,7 @@ function install_collectd {
 # Add conf file for plugin
 function adapt_collectd_conf {
 if [ ! -d "$COLLECTD_CONF_DIR" ]; then
-        sudo mkdir "$COLLECTD_CONF_DIR"
+        sudo mkdir -p "$COLLECTD_CONF_DIR"
 fi
 
 sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/

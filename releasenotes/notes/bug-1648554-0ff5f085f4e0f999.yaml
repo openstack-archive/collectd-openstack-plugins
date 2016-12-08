@@ -1,0 +1,4 @@
+---
+fixes:
+  - Added -p flag to "mkdir /etc/collectd/collectd.conf.d" to allow the
+    both directories to be created.
