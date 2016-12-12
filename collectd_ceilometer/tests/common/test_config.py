@@ -22,11 +22,11 @@ from unittest import TestCase
 import mock
 import six
 
-from collectd_ceilometer import settings
+from collectd_ceilometer.common import settings
 
 
 def config_module(
-        values, units=None, module_name="collectd_ceilometer.plugin"):
+        values, units=None, module_name="collectd_ceilometer.ceilometer.plugin"):
     children = [config_value(key, value)
                 for key, value in six.iteritems(values)]
     if units:

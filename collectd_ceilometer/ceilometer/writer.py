@@ -15,7 +15,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.sender import Sender
+from collectd_ceilometer.ceilometer.sender import Sender
 from collections import defaultdict
 from collections import namedtuple
 import json
