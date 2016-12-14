@@ -44,7 +44,7 @@ sudo sed -i 's|OS_AUTH_URL.*$|OS_AUTH_URL "'$OS_AUTH_URL'"|g' $COLLECTD_CONF_DIR
 sudo sed -i 's|CEILOMETER_URL_TYPE.*$|CEILOMETER_URL_TYPE "'$CEILOMETER_URL_TYPE'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$OS_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
 # Configure collectd logfile plugin
 if [ -n $COLLECTD_LOG_FILE ]; then
