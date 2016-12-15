@@ -1,3 +1,6 @@
+Contributing to Openstack
+=========================
+
 If you would like to contribute to the development of OpenStack, you must
 follow the steps in this page:
 
@@ -15,3 +18,53 @@ Pull requests submitted through GitHub will be ignored.
 Bugs should be filed on Launchpad, not GitHub:
 
    https://bugs.launchpad.net/collectd-ceilometer-plugin
+
+Contributing to collectd-ceilometer-plugin
+==========================================
+
+As well as following the OpenStack contribution guidelines, there are a few
+guidelines that should be observed for this project.
+
+Blueprints
+----------
+Blueprints are generally not required for features. A bug should be opened in
+launchpad instead and tagged as "rfe".
+
+
+Feature development
+-------------------
+Each feature should consist of a number of components, which can be submitted
+in separate, dependant patches:
+- Feature enabling code
+
+- Unit tests
+
+- Documentation
+  - How does the feature work?
+  - How do you configure this feature when installing a) manually and b) using
+    devstack?
+  - What configuration options were introduced/changed?
+  - Examples for particular scenarios should be included in the 
+    doc/source/examples/ directory.
+  - Updates to individual config options should be included in doc/source/usage.rst. 
+
+- Deployment code
+  - At a minimum, deployment code for devstack should be included, including
+    any relevant config options, should be included.
+  - Deployment code includes any changes to the given configurations.
+
+- Release note
+  - A reno entry needs to be included for every change:
+    http://docs.openstack.org/developer/reno/#creating-new-release-notes
+
+
+Bug Fixes
+---------
+A bug fix will typically be a single patch, with any relevant changes to
+documantation, configuration, etc included.
+
+Release notes should reference the bug number and have a brief description
+of the bug e.g.::
+  critical|security|fixes:
+    - Fixed bug #123456: Authentication token now automatically renews after
+      expiry.
