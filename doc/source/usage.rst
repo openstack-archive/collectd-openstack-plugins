@@ -59,3 +59,26 @@ COLLECTD_LOG_LEVEL
     (debug|info|notice|warning|err) All log messages with lower log level than
     this are going to be filtered out from the log file.
     Default: info
+
+Authenticating using Identity Server API v3
+===========================================
+
+following environment variables are used in this plugin for authentication
+to Keystone API v3
+
+OS_IDENTITY_API_VERSION
+    specifies version of keystone API used, should be set to 3 as 2.0 is
+    deprecated.
+    Default: 3
+
+OS_AUTH_URL
+    url where keystone is listening
+    Default: based on $KEYSTONE_AUTH_URI/v$IDENTITY_API_VERSION
+
+OS_PASSWORD
+    password for service tenant used for keystone authentication
+    Default: based on $SERVICE_PASSWORD
+
+OS_TENANT_NAME
+    name of service tenant used for keystone authentication
+    Default: based on $SERVICE_TENANT_NAME
