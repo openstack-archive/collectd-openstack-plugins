@@ -1,0 +1,7 @@
+---
+other:
+  - Updated the GSG.rst file to provide instructions on how to
+    enable the custom units feature available to the
+    collectd-ceilometer-plugin. This feature enables the user
+    to customize the units of the meters the plugin makes
+    available.

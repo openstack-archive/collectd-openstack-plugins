@@ -83,8 +83,10 @@ but because you specified "--prefix=/usr" during configuration it is now
 located "/usr/etc/collectd.conf".
 
 Configurations for the plugin itself are specified in its own .conf file,
-collectd-ceilometer-plugin.conf. The filepath to this file should be included
-in the collectd.conf file.
+collectd-ceilometer-plugin.conf.
+
+Copy collectd-celiometer-plugin/etc/collectd.conf.d/collectd-ceilometer-plugin.conf
+onto your machine. Include the filepath to this file in your collectd.conf file.
 
 | Include /path/to/collectd-ceilometer-plugin.conf
 
@@ -107,6 +109,10 @@ to suit your environment:
   "internalURL".
 
   | CEILOMETER_URL_TYPE "internalURL"
+
+* If you would like to enable any additional features please follow the
+  instructions provided in the "Additional Features" section below before
+  moving on to the next step.
 
 Now, you can restart the collectd service and the plugin for ceilometer should
 be working with collectd.
@@ -132,6 +138,42 @@ To verify that ceilometer is working with collectd use the ceilometer client.
 
   |  ceilometer sample-list --meter cpu.cpu
 
+Additional Features
+===================
+
+Customized Units
+----------------
+
+This feature enables you to customize the units of the data being collected. It
+can be used to update existing units or add in new units by updating the plugin
+to unit mappings. If you are creating a new meter by enabling a plugin which
+doesn't provide its own unit mappings, this feature can be used to add in the
+new units for this meter.
+
+To utilize this feature you must enable it before restarting the service.
+Follow the instructions below to implement it:
+
+  - In your collectd-ceilometer-plugin.conf file add in the following lines
+    at the end of the <Module> section. Edit the line to include the name of
+    of your chosen meter and its new units.
+
+::
+     <UNITS>
+        UNIT <meter_name> <units>
+     </UNITS>
+
+    Additional lines of a similar nature can be added to change the units of
+    multiple meters.
+
+  - Now you can restart the collectd service and your customized units will
+    have been updated.
+
+To verify that the units have been changed, observe the ceilometer meter-list
+or the sample-list and check the units of the meter that you changed.
+
+| ceilometer meter-list | grep <meter_name>
+| ceilometer sample-list | grep <meter_name>
+
 Troubleshooting
 ===============
 
@@ -152,4 +194,3 @@ running correctly without any errors, try enabling the csv plugin. This will
 allow you to check if collectd is generating any metrics.
 Enable the csv plugin, restart collectd and check the destination directory
 for the plugin. This will allow you to check if the plugin is loaded.
-
