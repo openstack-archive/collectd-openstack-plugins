@@ -13,8 +13,8 @@ Pre-requisites
 Installation of Devstack
 ========================
 
-Follow the instructions provided in the following document to set up your own
-Devstack deployment.
+Follow the instructions provided in the following documentation to set up your
+own Devstack deployment.
 
     http://docs.openstack.org/developer/devstack/guides/single-machine.html
 
@@ -28,13 +28,14 @@ These configuration instructions only allow for the minimal installation of
 collectd, ceilometer and the plugin. The sample local.conf provided must be
 edited to enable additional services.
 
-To configure Devstack for to install the plugin, download the sample local.conf
+To configure Devstack to install the plugin, download the sample local.conf
 from the collectd-ceilometer-plugin repo into your devstack directory.
 
 | cd devstack
 | wget https://github.com/openstack/collectd-ceilometer-plugin/blob/master/collectd_ceilometer/doc/source/examples/local.conf.minimal
 
-Edit the "HOST_IP" varible to appropriately match your environment.
+Edit the "HOST_IP" varible in the file to appropriately match your environment.
+Then change the name of this file to be "local.conf".
 
 Build your devstack environment.
 
