@@ -1,0 +1,10 @@
+---
+features:
+  - Confirmed that the custom units feature is available to
+    to be enabled if the plugin is installed manually.
+    This feature allows the users to customize the units of
+    the available meters.
+other:
+  - Updated the manual getting started guide to enable
+    the collectd-ceilometer-plugin with the feature outlined
+    above.
