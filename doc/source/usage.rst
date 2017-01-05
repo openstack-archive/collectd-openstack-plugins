@@ -60,6 +60,13 @@ COLLECTD_LOG_LEVEL
     this are going to be filtered out from the log file.
     Default: info
 
+
+COLLECTD_CUSTOMIZE_UNITS
+    (True|False) Set this to True if you wish to customize the units of available
+    meters, or specify units for new meters.
+    Default: False
+
+
 Authenticating using Identity Server API v3
 ===========================================
 
