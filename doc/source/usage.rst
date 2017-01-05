@@ -60,6 +60,13 @@ COLLECTD_LOG_LEVEL
     this are going to be filtered out from the log file.
     Default: info
 
+
+COLLECTD_CEILOMETER_UNITS
+    Sets the measurements units to be used for each meter, should they need to be
+    changed. Also allows the setting of new units if a new meter is created.
+    Default: none
+
+
 Authenticating using Identity Server API v3
 ===========================================
 
