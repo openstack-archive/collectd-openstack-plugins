@@ -46,6 +46,17 @@ sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|
 sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
+# Configure custom units
+if [[ "$COLLECTD_CUSTOMIZE_UNITS" == True ]]; then
+    OIFS=$IFS
+    IFS=','
+    for UNIT in $COLLECTD_CEILOMETER_UNITS
+    do
+        sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+    done
+    IFS=$OIFS
+fi
+
 # Configure collectd logfile plugin
 if [ -n $COLLECTD_LOG_FILE ]; then
     touch $COLLECTD_LOG_FILE
