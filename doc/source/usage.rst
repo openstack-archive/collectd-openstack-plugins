@@ -60,6 +60,14 @@ COLLECTD_LOG_LEVEL
     this are going to be filtered out from the log file.
     Default: info
 
+
+COLLECTD_CEILOMETER_UNITS
+    (meter=unit) a comma seperated list of pairs, defining meters and their units.
+    Allows existing units to be changed and new units to be set for new meters.
+
+    Example: COLLECTD_CEILOMETER_UNITS="<meter> <unit>,<meter> <unit>"
+
+
 Authenticating using Identity Server API v3
 ===========================================
 
