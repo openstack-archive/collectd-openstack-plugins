@@ -68,6 +68,12 @@ COLLECTD_CEILOMETER_UNITS
     Example: COLLECTD_CEILOMETER_UNITS="<meter> <unit>,<meter> <unit>"
 
 
+CEILOMETER_BACKEND
+    (mysql|es|postgresql|mongodb) Set the appropriate storage backend to
+    one of the listed options. This must be set, ceilometer no longer has a
+    default backend.
+
+
 Authenticating using Identity Server API v3
 ===========================================
 

@@ -1,0 +1,6 @@
+---
+fixes:
+  - Fixes 'bug 1655611 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1655611'.
+    Included information on defining the "CEILOMETER_BACKEND", in the usage.rst
+    and in the getting started guides. The ceilometer backend has to be defined now
+    as there is no longer a default.
