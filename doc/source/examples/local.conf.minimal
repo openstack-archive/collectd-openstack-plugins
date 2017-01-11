@@ -20,6 +20,9 @@ enable_service rabbit
 enable_service dstat
 
 enable_plugin ceilometer https://github.com/openstack/ceilometer master
+#Ceilometer requires a backend, selected default is mysql. For more options refer to devstackGSG.rst
+CEILOMETER_BACKEND=mysql
+
 enable_plugin collectd-ceilometer https://github.com/openstack/collectd-ceilometer-plugin stable/newton
 
 COLLECTD_INSTALL=True
