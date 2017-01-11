@@ -36,6 +36,9 @@ from the collectd-ceilometer-plugin repo into your devstack directory.
 
 Edit the "HOST_IP" varible to appropriately match your environment.
 
+Also include your chosen "CEILOMETER_BACKEND", as there is no default backend for
+ceilometer. The options for this backend include mysql,es,postgresql or mongodb.
+
 If you wish to enable any extra features please follow the instructions in the
 "Additional Features" section below before moving on to the next step.
 
