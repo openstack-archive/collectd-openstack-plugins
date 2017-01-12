@@ -28,3 +28,4 @@ enable_plugin collectd-ceilometer https://github.com/openstack/collectd-ceilomet
 
 COLLECTD_INSTALL=True
 COLLECTD_CEILOMETER_VERBOSE=True
+COLLECTD_CEILOMETER_ENABLED=True
