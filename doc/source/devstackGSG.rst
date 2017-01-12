@@ -92,6 +92,4 @@ To deploy with gnocchi using devstack, add the following to you local.conf:
     enable_plugin gnocchi https://github.com/openstack/gnocchi master
     enable_service gnocchi-api,gnocchi-metricd,gnocchi-statsd
     GNOCCHI_USE_KEYSTONE=True
-
-Once deployment is complete, edit collectd-ceilometer-plugin.conf to point at
-the collectd_ceiloemter.gnocchi.plugin module.
+    COLLECTD_GNOCCHI_ENABLED=True
