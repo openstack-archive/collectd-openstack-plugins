@@ -8,10 +8,12 @@ set -o xtrace
         "stack")
             case $2 in
                 "pre-install")
-                    # install system package
-                    install_collectd
+                    # no-op
+                    :
                 ;;
                 "install")
+                    # install system package
+                    install_collectd
                     # adapt collectd.conf
                     adapt_collectd_conf
                 ;;
