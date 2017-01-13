@@ -66,16 +66,7 @@ if [[ "$COLLECTD_GNOCCHI_ENABLED" == "True" ]]; then
 fi
 
 # Configure custom units
-if [[ "$COLLECTD_CEILOMETER_UNITS" != none ]]; then
-    OIFS=$IFS
-    IFS=','
-
-    for UNIT in $COLLECTD_CEILOMETER_UNITS
-    do
-        sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-    done
-    IFS=$OIFS
-fi
+config_custom_units
 
 # Configure collectd logfile plugin
 if [ -n $COLLECTD_LOG_FILE ]; then
@@ -87,6 +78,24 @@ sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf $COLLECTD_CONF
 sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/logfile.conf
 sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/logfile.conf
 
+}
+
+function config_custom_units {
+    if [[ "$COLLECTD_CEILOMETER_UNITS" != none ]]; then
+        OIFS=$IFS
+        IFS=','
+
+        for UNIT in $COLLECTD_CEILOMETER_UNITS
+        do
+            if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
+                sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+            fi
+            if [[ "$COLLECTD_GNOCCHI_ENABLED" == "True" ]]; then
+                sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+            fi
+        done
+    IFS=$OIFS
+    fi
 }
 
 # remove plugin conf file
