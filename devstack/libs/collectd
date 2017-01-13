@@ -54,6 +54,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+        config_custon_units "ceilometer"
     fi
 
     # configure collectd-gnocchi plugin
@@ -70,17 +71,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
-    fi
-
-    # Configure custom units
-    if [[ "$COLLECTD_CEILOMETER_UNITS" != none ]]; then
-        OIFS=$IFS
-        IFS=','
-        for UNIT in $COLLECTD_CEILOMETER_UNITS
-        do
-            sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-        done
-        IFS=$OIFS
+        config_custom_units "gnocchi"
     fi
 
     # Configure collectd logfile plugin
@@ -93,6 +84,21 @@ function adapt_collectd_conf {
     sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/logfile.conf
     sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/logfile.conf
 
+}
+
+function config_custom_units {
+    service_name=$1
+    if [[ "$COLLECTD_CEILOMETER_UNITS" != none ]]; then
+
+        OIFS=$IFS
+        IFS=','
+
+        for UNIT in $COLLECTD_CEILOMETER_UNITS
+        do
+                sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-$service_name-plugin.conf
+        done
+    IFS=$OIFS
+    fi
 }
 
 # remove plugin conf file
