@@ -62,13 +62,23 @@ COLLECTD_LOG_LEVEL
     Default: info
 
 
-COLLECTD_CUSTOM_UNITS
+COLLECTD_CEILOMETER_CUSTOM_UNITS
     (meter=unit) a comma seperated list of pairs, defining meters and their units.
     Allows existing units to be changed and new units to be set for new meters.
     The "meter" is generally in the form of "plugin.type", where plugin and
     plugin type are attributes of the collectd data.
 
-    Example: COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
+    Example: COLLECTD_CEILOMETER_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
+
+
+COLLECTD_GNOCCHI_CUSTOM_UNITS
+    (meter=unit) a comma seperated list of pairs, defining meters and their units.
+    Allows existing units to be changed and new units to be set for new meters.
+    The "meter" is generally in the form of "plugin.type", where plugin and
+    plugin type are attributes of the collectd data.
+
+    Example: COLLECTD_GNOCCHI_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
+
 
 COLLECTD_CEILOMETER_ENABLED
     (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
