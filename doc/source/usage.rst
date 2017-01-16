@@ -61,11 +61,13 @@ COLLECTD_LOG_LEVEL
     Default: info
 
 
-COLLECTD_CEILOMETER_UNITS
+COLLECTD_CUSTOM_UNITS
     (meter=unit) a comma seperated list of pairs, defining meters and their units.
     Allows existing units to be changed and new units to be set for new meters.
+    The "meter" is generally in the form of "plugin.type", where plugin and
+    plugin type are attributes of the collectd data.
 
-    Example: COLLECTD_CEILOMETER_UNITS="<meter> <unit>,<meter> <unit>"
+    Example: COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 
 Authenticating using Identity Server API v3

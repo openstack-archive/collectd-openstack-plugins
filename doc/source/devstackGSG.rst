@@ -71,9 +71,9 @@ To enable this feature execute the following instructions:
 * To include your new units, add the following line with your chosen units to
   your local.conf file.
 
-| COLLECTD_CEILOMETER_UNITS="<meter> <unit>"
+| COLLECTD_CUSTOM_UNITS="<meter> <unit>"
 
   If you would like to add more than one new unit include them in the same line
   and seperate each meter and its unit with a comma, as shown below.
 
-| COLLECTD_CEILOMETER_UNITS="<meter> <unit>,<meter> <unit>"
+| COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
