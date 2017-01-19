@@ -8,10 +8,10 @@ set -o xtrace
         "stack")
             case $2 in
                 "pre-install")
-                    # no-op
-                    :
+                    install_requirements
                 ;;
                 "install")
+                    pip_install $COLLECTD_CEILOMETER_DIR
                     # install system package
                     install_collectd
                     # adapt collectd.conf
