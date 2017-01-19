@@ -62,10 +62,10 @@ function adapt_collectd_conf {
         touch $COLLECTD_LOG_FILE
     fi
 
-    sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf $COLLECTD_CONF_DIR/
+    sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/01-logfile.conf $COLLECTD_CONF_DIR/
 
-    sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/logfile.conf
-    sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/logfile.conf
+    sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
+    sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
 
 }
 
@@ -75,7 +75,7 @@ function restore_collectd_conf {
 
     if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
         sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-        sudo rm -f $COLLECTD_CONF_DIR/logfile.conf
+        sudo rm -f $COLLECTD_CONF_DIR/01-logfile.conf
     fi
 
 }
