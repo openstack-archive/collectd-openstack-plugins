@@ -17,7 +17,16 @@ function stop_collectd {
     fi
 }
 
-# install collectd service
+function install_requirements {
+    echo "Installing pre-resquisites"
+    if is_ubuntu; then
+        install_package libvirt-bin libvirt-dev python-libvirt
+    elif is_fedora; then
+        install_package libvirt libvirt-devel libvirt-python
+    fi
+}
+
+# install collectd
 function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
         if is_fedora || is_ubuntu; then
