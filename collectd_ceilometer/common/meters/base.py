@@ -66,3 +66,17 @@ class Meter(object):
             collectd_type = "gauge"
 
         return types[collectd_type]
+
+    def message(self, vl):
+        """Get the notification message"""
+
+        return vl.message
+
+    def severity(self, vl):
+        """Get the notification severity and translate to Aodh severity type"""
+
+        collectd_severity = {self._collectd.NOTIF_FAILURE: 'critical',
+                             self._collectd.NOTIF_WARNING: 'moderate',
+                             self._collectd.NOTIF_OKAY: 'low',
+                             }.get(vl.severity)
+        return collectd_severity
