@@ -1,0 +1,11 @@
+---
+prelude: >
+  - This change includes the addition of the collectd plugin for Aodh. It
+    allows collectd notifications to be sent to Aodh, where an alarm is
+    created. The notifications are based on threshold rules that are applied
+    to the collectd meters. Tests have also been provided for this change.
+features:
+  - Provides the collectd plugin for Aodh. This allows collectd notifications
+    to to be sent to Aodh, where it is used to create corresponding alarms.
+    The notifications are dependent on threshold rules which are set for
+    particular collectd metrics. Tests have also been provided for this change.
