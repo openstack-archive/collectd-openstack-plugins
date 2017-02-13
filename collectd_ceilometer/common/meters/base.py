@@ -11,7 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Default collectd meter"""
+
+"""Default collectd meter."""
 
 from __future__ import unicode_literals
 
@@ -22,35 +23,35 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Meter(object):
-    """Default collectd meter"""
+    """Default collectd meter."""
 
     def __init__(self, collectd):
+        """Instantiate meter instance."""
         self._collectd = collectd
 
     def meter_name(self, vl):
-        """Return meter name"""
+        """Return meter name."""
         # pylint: disable=no-self-use
         resources = [vl.plugin, vl.type]
         return '.'.join([i for i in resources if i])
 
     def hostname(self, vl):
-        """Get host name"""
+        """Get host name."""
         # pylint: disable=no-self-use
         return vl.host
 
     def resource_id(self, vl):
-        """Get resource ID"""
-
+        """Get resource ID."""
         resources = [self.hostname(vl), vl.plugin_instance, vl.type_instance]
         return '-'.join([i for i in resources if i])
 
     def unit(self, vl):
-        """Get meter unit"""
+        """Get meter unit."""
         # pylint: disable=no-self-use
         return Config.instance().unit(vl.plugin, vl.type)
 
     def sample_type(self, vl):
-        """Translate from collectd counter type to Ceilometer type"""
+        """Translate from collectd counter type to Ceilometer type."""
         types = {"gauge": "gauge",
                  "derive": "delta",
                  "absolute": "cumulative",
@@ -66,3 +67,15 @@ class Meter(object):
             collectd_type = "gauge"
 
         return types[collectd_type]
+
+    def message(self, vl):
+        """Get the notification message."""
+        return vl.message
+
+    def severity(self, vl):
+        """Get the notification severity and translate to Aodh severity type."""
+        collectd_severity = {self._collectd.NOTIF_FAILURE: 'critical',
+                             self._collectd.NOTIF_WARNING: 'moderate',
+                             self._collectd.NOTIF_OKAY: 'low',
+                             }.get(vl.severity)
+        return collectd_severity
