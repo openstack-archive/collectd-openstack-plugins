@@ -1,0 +1,17 @@
+---
+prelude: >
+  - This change includes the addition of the collectd plugin for Aodh. It
+    allows collectd notifications to be sent to Aodh, where an alarm is
+    created. The notifications used to create the alarms can be catergorized
+    into threshold and event alarms. If the notification is triggered based
+    on the breaking of a threshold rule then a threshold alarm is created in
+    aodh, otherwise an event alarm is created. Tests have also been provided
+    for this change.
+features:
+  - Provides the collectd plugin for Aodh. This allows collectd notifications
+    to to be sent to Aodh, where it is used to create corresponding alarms.
+    The notifications used to create the alarms can be catergorized
+    into threshold and event alarms. If the notification is triggered based
+    on the breaking of a threshold rule then a threshold alarm is created in
+    aodh, otherwise an event alarm is created. Tests have also been provided
+    for this change.
