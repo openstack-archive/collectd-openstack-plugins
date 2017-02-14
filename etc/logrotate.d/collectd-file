@@ -1,0 +1,8 @@
+PATH_TO_COLLECTD_LOG {
+    notifempty
+    size 200k
+    daily
+    rotate 5
+    notifempty
+    missingok
+}

@@ -74,8 +74,10 @@ function adapt_collectd_conf {
     fi
 
     sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf $COLLECTD_CONF_DIR/01-logfile.conf
+    sudo cp $COLLECTD_CEILOMETER_DIR/etc/logrotate.d/collectd-file /etc/logrotate.d/
 
     sudo sed -i '/<Plugin.*logfile/,/^<\/Plugin>/{s|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|}' $COLLECTD_CONF_DIR/01-logfile.conf
+    sudo sed -i 's|PATH_TO_COLLECTD_LOG|'$COLLECTD_LOG_FILE'|' /etc/logrotate.d/collectd-file
     sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
 
 }
