@@ -124,7 +124,7 @@ class TestPlugin(unittest.TestCase):
         # Logger handler is set up
         ROOT_LOGGER.addHandler.assert_called_once_with(
             CollectdLogHandler.return_value)
-        ROOT_LOGGER.setLevel.assert_called_once_with(logging.NOTSET)
+        ROOT_LOGGER.setLevel.assert_called_once_with(logging.DEBUG)
 
         # It creates a plugin
         Plugin.assert_called_once_with(
