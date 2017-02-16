@@ -17,7 +17,7 @@ import unittest
 import mock
 
 from collectd_ceilometer.common.logger import CollectdLogHandler
-
+from collectd_ceilometer.common.settings import Config
 from collectd_ceilometer.tests.mocking import patch_class
 
 
@@ -48,11 +48,17 @@ def make_record(
 
 class TestCollectdLogHandler(unittest.TestCase):
 
+    def __init__(self, *args, **kwargs):
+        """Declare additional class attributes"""
+        super(TestCollectdLogHandler, self).__init__(*args, **kwargs)
+        self.config = Config.instance()
+        self.config.VERBOSE = False
+
     @patch_class(MockedCollectd)
     def test_registered_hooks_when_init(self, collectd):
 
         # When CollectdLogHandler is created
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
 
         # Then collectd logging hooks are registered
         # pylint: disable=protected-access
@@ -68,7 +74,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     def test_debug_when_emit(self, collectd):
 
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.DEBUG)
 
         # When a debug record is emitted
@@ -80,8 +86,8 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_verbose_debug_when_emit(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
-        handler.verbose = True
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
+        self.config.VERBOSE = True
         record = make_record(msg="message", level=logging.DEBUG)
 
         # When an info record is emitted
@@ -93,7 +99,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_info_when_emit(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.INFO)
 
         # When an info record is emitted
@@ -105,7 +111,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_warning_when_emit(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.WARNING)
 
         # When a warning record is emitted
@@ -117,7 +123,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_error_when_emit(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.ERROR)
 
         # When an error record is emitted
@@ -129,7 +135,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_fatal_when_emit(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.FATAL)
 
         # When a fatal record is emitted
@@ -142,7 +148,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     def test_long_message_when_emit(self, collectd):
         # Given
         long_message = "LONG " * 20 + "MESSAGE."
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         handler.max_message_length = 10
         record = make_record(msg=long_message)
 
@@ -157,7 +163,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_when_logger_debug(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
@@ -171,8 +177,8 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_verbose_when_logger_info(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
-        handler.verbose = True
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
+        self.config.VERBOSE = True
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
@@ -186,7 +192,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_non_verbose_when_logger_info(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         handler.verbose = False
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
@@ -201,7 +207,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_info_from_logger(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
@@ -214,7 +220,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_warning_from_logger(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
@@ -227,7 +233,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_error_from_logger(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
@@ -240,7 +246,7 @@ class TestCollectdLogHandler(unittest.TestCase):
     @patch_class(MockedCollectd)
     def test_fatal_from_logger(self, collectd):
         # Given
-        handler = CollectdLogHandler(collectd=collectd)
+        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         logger = logging.Logger('some_logger')
         logger.addHandler(handler)
 
