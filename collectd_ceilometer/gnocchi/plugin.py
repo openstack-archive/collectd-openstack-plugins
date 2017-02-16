@@ -38,10 +38,9 @@ def register_plugin(collectd):
     config = Config.instance()
 
     # Setup loggging
-    log_handler = CollectdLogHandler(collectd=collectd)
-    log_handler.cfg = config
+    log_handler = CollectdLogHandler(collectd=collectd, config=config)
     ROOT_LOGGER.addHandler(log_handler)
-    ROOT_LOGGER.setLevel(logging.NOTSET)
+    ROOT_LOGGER.setLevel(logging.INFO)
 
     # Creates collectd plugin instance
     instance = Plugin(collectd=collectd, config=config)

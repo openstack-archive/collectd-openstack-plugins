@@ -131,7 +131,7 @@ class TestPlugin(unittest.TestCase):
         # Logger handler is set up
         ROOT_LOGGER.addHandler.assert_called_once_with(
             CollectdLogHandler.return_value)
-        ROOT_LOGGER.setLevel.assert_called_once_with(logging.NOTSET)
+        ROOT_LOGGER.setLevel.assert_called_once_with(logging.INFO)
 
         # It create a plugin
         Plugin.assert_called_once_with(
@@ -447,7 +447,9 @@ class TestPlugin(unittest.TestCase):
         ROOT_LOGGER.debug('some %s', 'noise')
 
         # When plugin function is called
-        collectd.debug.assert_called_once_with('some noise')
+        # collectd.info.assert_called_once_with('some noise')
+        # Log level is INFO, then no call
+        collectd.info.assert_not_called()
 
     @mock.patch.object(plugin, 'ROOT_LOGGER', new_callable=Logger, name='me')
     @mock_collectd()
