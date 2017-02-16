@@ -2,7 +2,7 @@
 
 HOST_IP=<SINGLE NODE IP>
 
-VERBOSE=True
+VERBOSE=False
 FORCE=yes
 
 MYSQL_PASSWORD=password
@@ -27,5 +27,5 @@ CEILOMETER_BACKEND=mysql
 enable_plugin collectd-ceilometer https://github.com/openstack/collectd-ceilometer-plugin stable/newton
 
 COLLECTD_INSTALL=True
-COLLECTD_CEILOMETER_VERBOSE=True
+COLLECTD_CEILOMETER_VERBOSE=False
 COLLECTD_CEILOMETER_ENABLED=True
