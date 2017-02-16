@@ -24,10 +24,9 @@ class CollectdLogHandler(logging.Handler):
     # messages longer than this size have to be split
     max_message_length = 1023
 
-    verbose = False
-
-    def __init__(self, collectd, level=logging.NOTSET):
+    def __init__(self, collectd, config, level=logging.NOTSET):
         super(CollectdLogHandler, self).__init__(level=level)
+        self.cfg = config
         self.priority_map = {
             logging.DEBUG: collectd.debug,
             logging.INFO: collectd.info,
@@ -51,7 +50,7 @@ class CollectdLogHandler(logging.Handler):
                 level=logging.ERROR)
 
     def emit_message(self, message, level):
-        if self.verbose and level == logging.DEBUG:
+        if self.cfg.VERBOSE and level == logging.DEBUG:
             level = logging.INFO
         elif level not in self.priority_map:
             level = logging.ERROR
