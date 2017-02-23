@@ -44,9 +44,9 @@ CEILOMETER_TIMEOUT
 
 
 COLLECTD_CEILOMETER_VERBOSE
-    (True|False) Set this to True to make collectd-ceilometer debugging
-    messages visible as info messagges. This is useful when running the
-    plugin inside a collectd compiled without debug message support.
+    (True|False) Set this to True to make collectd-{ceilometer,gnocchi,aodh}
+    debugging messages visible as info messagges. This is useful when running
+    the plugin inside a collectd compiled without debug message support.
     Default: False
 
 
@@ -58,6 +58,7 @@ COLLECTD_LOG_FILE
 COLLECTD_LOG_LEVEL
     (debug|info|notice|warning|err) All log messages with lower log level than
     this are going to be filtered out from the log file.
+
     Default: info
 
 
@@ -69,6 +70,20 @@ COLLECTD_CUSTOM_UNITS
 
     Example: COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
+COLLECTD_CEILOMETER_ENABLED
+    (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
+
+    Default: False
+
+COLLECTD_GNOCCHI_ENABLED
+    (True|False) Toggles whether collectd-gnocchi-plugin is enabled.
+
+    Default:True
+
+COLLECTD_AODH_ENABLED
+    (True|False) Toggles whether collectd-aodh-plugin is enabled.
+
+    Default: False
 
 Authenticating using Identity Server API v3
 ===========================================
