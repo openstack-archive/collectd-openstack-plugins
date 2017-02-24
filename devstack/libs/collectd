@@ -28,6 +28,7 @@ function install_requirements {
 
 # install collectd
 function install_collectd {
+    COLLECTD_INSTALL=$(trueorfalse True COLLECTD_INSTALL)
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
         if is_fedora || is_ubuntu; then
             install_package collectd
