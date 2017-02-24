@@ -15,7 +15,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.gnocchi.sender import Sender
+from collectd_ceilometer.gnocchi import sender as gnocchi_sender
 from collections import defaultdict
 from collections import namedtuple
 import datetime
@@ -82,7 +82,7 @@ class Writer(object):
     def __init__(self, meters, config):
         self._meters = meters
         self._samples = SampleContainer()
-        self._sender = Sender()
+        self._sender = gnocchi_sender.Sender()
         self._config = config
 
     def write(self, vl, data):
@@ -136,4 +136,4 @@ class Writer(object):
 
         # gnocchi samples
         payload = json.dumps([sample.to_payload() for sample in to_send])
-        self._sender.send(metername, payload, unit)
+        self._sender.send(metername, payload, unit=unit)
