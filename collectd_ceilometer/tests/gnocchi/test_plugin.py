@@ -22,6 +22,7 @@ import mock
 import requests
 import unittest
 
+from collectd_ceilometer.common import basesender
 from collectd_ceilometer.common.keystone_light import KeystoneException
 from collectd_ceilometer.gnocchi import plugin
 from collectd_ceilometer.gnocchi import sender
@@ -140,7 +141,7 @@ class TestPlugin(unittest.TestCase):
 
     @mock.patch.object(sender.Sender, '_get_metric_id', autospec=True)
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config(BATCH_SIZE=2)
     @mock_value()
@@ -151,7 +152,7 @@ class TestPlugin(unittest.TestCase):
         auth_client.get_service_endpoint.return_value = \
             'https://test-gnocchi.tld'
 
-        post.return_value.status_code = sender.HTTP_CREATED
+        post.return_value.status_code = basesender.BaseSender.HTTP_CREATED
         post.return_value.text = 'Created'
 
         get_metric_id.return_value = 'my-metric-id'
@@ -218,8 +219,8 @@ class TestPlugin(unittest.TestCase):
             timeout=1.0)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
-    @mock.patch.object(sender, 'LOGGER', autospec=True)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -249,8 +250,8 @@ class TestPlugin(unittest.TestCase):
         # no requests method has been called
         post.assert_not_called()
 
-    @mock.patch.object(sender.Sender, '_perform_request', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender.BaseSender, '_perform_request', spec=callable)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -269,7 +270,7 @@ class TestPlugin(unittest.TestCase):
 
     @mock.patch.object(sender.Sender, '_get_metric_id', autospec=True)
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -327,7 +328,7 @@ class TestPlugin(unittest.TestCase):
         self.assertEqual(token, 'New test auth token')
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Writer', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
@@ -346,7 +347,7 @@ class TestPlugin(unittest.TestCase):
         self.assertRaises(ValueError, instance.write, data)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(basesender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Writer', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
