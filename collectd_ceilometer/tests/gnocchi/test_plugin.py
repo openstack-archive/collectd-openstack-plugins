@@ -23,8 +23,9 @@ import requests
 import unittest
 
 from collectd_ceilometer.common.keystone_light import KeystoneException
+from collectd_ceilometer.common import sender
 from collectd_ceilometer.gnocchi import plugin
-from collectd_ceilometer.gnocchi import sender
+from collectd_ceilometer.gnocchi.sender import GnocchiSender
 
 from collectd_ceilometer.tests import match
 
@@ -138,7 +139,7 @@ class TestPlugin(unittest.TestCase):
         collectd.register_write.assert_called_once_with(instance.write)
         collectd.register_shutdown.assert_called_once_with(instance.shutdown)
 
-    @mock.patch.object(sender.Sender, '_get_metric_id', autospec=True)
+    @mock.patch.object(GnocchiSender, '_get_metric_id', autospec=True)
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock_collectd()
@@ -151,7 +152,7 @@ class TestPlugin(unittest.TestCase):
         auth_client.get_service_endpoint.return_value = \
             'https://test-gnocchi.tld'
 
-        post.return_value.status_code = sender.HTTP_CREATED
+        post.return_value.status_code = sender.Sender.HTTP_CREATED
         post.return_value.text = 'Created'
 
         get_metric_id.return_value = 'my-metric-id'
@@ -267,7 +268,7 @@ class TestPlugin(unittest.TestCase):
         # write the value
         self.assertRaises(requests.RequestException, instance.write, data)
 
-    @mock.patch.object(sender.Sender, '_get_metric_id', autospec=True)
+    @mock.patch.object(GnocchiSender, '_get_metric_id', autospec=True)
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock_collectd()

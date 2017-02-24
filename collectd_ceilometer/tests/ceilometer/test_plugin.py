@@ -19,16 +19,15 @@
 """
 
 from collections import namedtuple
+
 import logging
+import mock
 import requests
 import unittest
 
-import mock
-
 from collectd_ceilometer.ceilometer import plugin
-from collectd_ceilometer.ceilometer import sender
 from collectd_ceilometer.common import keystone_light
-
+from collectd_ceilometer.common import sender
 from collectd_ceilometer.tests import match
 
 
@@ -155,7 +154,7 @@ class TestPlugin(unittest.TestCase):
         auth_client.get_service_endpoint.return_value =\
             'https://test-ceilometer.tld'
 
-        post.return_value.status_code = sender.HTTP_CREATED
+        post.return_value.status_code = sender.Sender.HTTP_CREATED
         post.return_value.text = 'Created'
 
         # init instance
