@@ -23,6 +23,8 @@ function install_requirements {
         install_package libvirt-bin libvirt-dev python-libvirt
     elif is_fedora; then
         install_package libvirt libvirt-devel libvirt-python
+    else
+        echo "Unsupported distros"
     fi
 }
 
