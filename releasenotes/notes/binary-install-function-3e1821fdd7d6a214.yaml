@@ -1,0 +1,8 @@
+---
+other:
+  - An additional function was included for a binary install of
+    the plugin. If a binary install is carried out, the collectd
+    service must be stopped immediately after it has been installed.
+    This change introduced a new configuration option, INSTALL_TYPE,
+    which can be set to binary, but the default is source. If set to
+    binary the appropriate install requirements are carried out.

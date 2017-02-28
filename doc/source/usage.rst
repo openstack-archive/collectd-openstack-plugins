@@ -27,6 +27,13 @@ COLLECTD_INSTALL
     Default: True
 
 
+INSTALL_TYPE
+    (binary|source) Indicates the type of install for the plugin itself. If
+    a binary install is carried out, the collectd service must be stopped
+    once it has been installed.
+    Default: source
+
+
 COLLECTD_BATCH_SIZE
     Set the amount of samples to be buffered before sending.
     Default: 1 i.e. no batching/buffering.

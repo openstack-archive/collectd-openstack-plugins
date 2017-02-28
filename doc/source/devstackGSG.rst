@@ -78,6 +78,14 @@ To enable this feature execute the following instructions:
 
 | COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
+Binary installation
+-------------------
+
+If you wish to install the plugin via binary, include the following settting in
+your local.conf.
+
+| INSTALL_TYPE=binary
+
 Gnocchi
 =======
 

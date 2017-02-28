@@ -33,9 +33,17 @@ function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
         if is_fedora || is_ubuntu; then
             install_package collectd
+            binary_install_requirements
         else
             die $LINENO "No support for collectd on this platform"
         fi
+    fi
+}
+
+# binary install requirements
+function binary_install_requirements {
+    if [[ "$INSTALL_TYPE" == "binary" ]]; then
+        stop_collectd
     fi
 }
 
