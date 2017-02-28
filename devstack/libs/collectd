@@ -99,10 +99,13 @@ function adapt_collectd_conf {
 
 # remove plugin conf file
 function restore_collectd_conf {
-
-    if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
+    if [ -e "$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf" ]; then
         sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo rm -f $COLLECTD_CONF_DIR/logfile.conf
     fi
 
+    if [ -e "$COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf" ]; then
+        sudo rm -f $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+        sudo rm -f $COLLECTD_CONF_DIR/logfile.conf
+    fi
 }
