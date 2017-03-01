@@ -78,15 +78,20 @@ function adapt_collectd_conf {
     sudo sed -i 's|LogLevel.*$|LogLevel "'$COLLECTD_LOG_LEVEL'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
     sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
 
+    # Create a backup for all of the .conf files
+    sudo mkdir -p "$COLLECTD_CONF_DIR/backup"
+    sudo cp $COLLECTD_CONF_DIR/*.conf $COLLECTD_CONF_DIR/backup/
+
 }
 
 
 # remove plugin conf file
 function restore_collectd_conf {
-
-    if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
+    sudo rm -f $COLLECTD_CONF_DIR/01-logfile.conf
+    if [ -e '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
         sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-        sudo rm -f $COLLECTD_CONF_DIR/01-logfile.conf
     fi
-
+    if [ -e '$COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf' ]; then
+        sudo rm -f $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+    fi
 }
