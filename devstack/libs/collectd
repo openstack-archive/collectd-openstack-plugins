@@ -33,6 +33,7 @@ function install_collectd {
     if [[ "$COLLECTD_INSTALL" == True  ]]; then
         if is_fedora || is_ubuntu; then
             install_package collectd
+            stop_collectd
         else
             die $LINENO "No support for collectd on this platform"
         fi
