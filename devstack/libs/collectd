@@ -83,10 +83,7 @@ function adapt_collectd_conf {
 
 # remove plugin conf file
 function restore_collectd_conf {
-
-    if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
-        sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-        sudo rm -f $COLLECTD_CONF_DIR/01-logfile.conf
-    fi
-
+    sudo mkdir -p "$COLLECTD_CONF_DIR/backup"
+    sudo cp $COLLECTD_CONF_DIR/*.conf $COLLECTD_CONF_DIR/backup/
+    sudo rm -f $COLLECTD_CONF_DIR/*.conf
 }
