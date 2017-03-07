@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fixed bug https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1669814,
+    by creating the _update_alarm function in the Sender class. This removes
+    duplicate code when the aodh alarms are being updated.
