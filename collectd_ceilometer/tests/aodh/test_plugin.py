@@ -18,8 +18,11 @@
 """Plugin tests."""
 
 import logging
+
 import mock
+
 import requests
+
 import unittest
 
 from collectd_ceilometer.aodh import plugin
@@ -223,6 +226,36 @@ class TestPlugin(unittest.TestCase):
 
         # reset post method
         put.reset_mock()
+
+        # call shutdown
+        instance.shutdown()
+
+    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(sender.Sender, '_get_alarm_type', autospec=True)
+    @mock.patch.object(sender.Sender, '_update_alarm', autospec=True)
+    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock_collectd()
+    @mock_config()
+    @mock_value()
+    def test_update_alarm(self, data, config, collectd, ClientV3, _update_alarm,
+                          _get_alarm_type, _get_alarm_id):
+        """Test the update alarm function."""
+        # init instance
+        instance = plugin.Plugin(collectd=collectd, config=config)
+
+        # Test when a threshold alarm will be updated
+        _get_alarm_id.return_value = True, 'my-alarm-id'
+        _get_alarm_type.return_value = 'threshold'
+
+        # send the value(updates)
+        instance.notify(data)
+
+        # and values that have been sent
+        _update_alarm.return_value.status_code = sender.HTTP_CREATED
+        _update_alarm.return_value.text = 'Updated'
+
+        # reset post method
+        _update_alarm.reset_mock()
 
         # call shutdown
         instance.shutdown()

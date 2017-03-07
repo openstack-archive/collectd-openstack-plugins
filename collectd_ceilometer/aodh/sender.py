@@ -145,32 +145,9 @@ class Sender(object):
                                                     threshold)
         # send the PUT request if alarm update is required
         if update_alarm:
-            # create request URL
-            url = self._url_base % (alarm_id)
-            # get the type of alarm to be updated
-            alarm_type_update = self._alarm_types[alarm_name]
-
-            # create the payload for the update requests
-            if alarm_type_update == 'threshold':
-                rule = {'meter_name': metername,
-                        'threshold': self._thresholds[alarm_name],
-                        }
-                payload = json.dumps({'state': self._get_alarm_state(severity),
-                                      'name': alarm_name,
-                                      'severity': severity,
-                                      'type': "threshold",
-                                      'threshold_rule': rule,
-                                      })
-            elif alarm_type_update == 'event':
-                rule = {'event_type': metername, }
-                payload = json.dumps({'state': self._get_alarm_state(severity),
-                                      'name': alarm_name,
-                                      'severity': severity,
-                                      'type': "event",
-                                      'event_rule': rule,
-                                      })
-
-            result = self._perform_update_request(url, auth_token, payload)
+            # Update the alarm
+            result = self._update_alarm(alarm_id, alarm_name,
+                                        metername, severity, auth_token)
         else:
             result = None
 
@@ -195,35 +172,9 @@ class Sender(object):
 
             if auth_token is not None:
                 if update_alarm:
-                    # create request URL
-                    url = self._url_base % (alarm_id)
-                    # get the type of alarm to be updated
-                    alarm_type_update = self._alarm_types[alarm_name]
-
-                    # create the payload for the update requests
-                    if alarm_type_update == 'threshold':
-                        rule = {'meter_name': metername,
-                                'threshold': self._thresholds[alarm_name],
-                                }
-                        payload = json.dumps({
-                            'state': self._get_alarm_state(severity),
-                            'name': alarm_name,
-                            'severity': severity,
-                            'type': "threshold",
-                            'threshold_rule': rule,
-                            })
-                    elif alarm_type_update == 'event':
-                        rule = {'event_type': metername, }
-                        payload = json.dumps({
-                            'state': self._get_alarm_state(severity),
-                            'name': alarm_name,
-                            'severity': severity,
-                            'type': "event",
-                            'event_rule': rule,
-                            })
-
-                    result = self._perform_update_request(
-                        url, auth_token, payload)
+                    # Update the alarm
+                    result = self._update_alarm(alarm_id, alarm_name,
+                                                metername, severity, auth_token)
 
         if result.status_code == HTTP_NOT_FOUND:
             LOGGER.debug("Received 404 error when submitting %s sample, \
@@ -237,35 +188,9 @@ class Sender(object):
             LOGGER.info('alarmname: %s, alarm_id: %s', alarm_name, alarm_id)
             # Set a new url for the request
             if update_alarm:
-                # create request URL
-                url = self._url_base % (alarm_id)
-                # get the type of alarm to be updated
-                alarm_type_update = self._alarm_types[alarm_name]
-
-                # create the payload for the update requests
-                if alarm_type_update == 'threshold':
-                    rule = {'meter_name': metername,
-                            'threshold': self._thresholds[alarm_name],
-                            }
-                    payload = json.dumps({
-                        'state': self._get_alarm_state(severity),
-                        'name': alarm_name,
-                        'severity': severity,
-                        'type': "threshold",
-                        'threshold_rule': rule,
-                        })
-                elif alarm_type_update == 'event':
-                    rule = {'event_type': metername, }
-                    payload = json.dumps({
-                        'state': self._get_alarm_state(severity),
-                        'name': alarm_name,
-                        'severity': severity,
-                        'type': "event",
-                        'event_rule': rule,
-                        })
-
-                # TODO(helena-mcgough): Add error checking
-                result = self._perform_update_request(url, auth_token, payload)
+                # Update the alarm
+                result = self._update_alarm(alarm_id, alarm_name,
+                                            metername, severity, auth_token)
 
         if result.status_code == HTTP_CREATED:
             LOGGER.debug('Result: %s', HTTP_CREATED)
@@ -328,6 +253,34 @@ class Sender(object):
         alarm_id = json.loads(result.text)['alarm_id']
         LOGGER.debug("alarm_id=%s", alarm_id)
         return alarm_id
+
+    def _update_alarm(self, alarm_id, alarm_name, metername, severity,
+                      auth_token):
+        # create request URL
+        url = self._url_base % (alarm_id)
+        # get the type of alarm to be updated
+        alarm_type_update = self._alarm_types[alarm_name]
+
+        # create the payload for the update requests
+        if alarm_type_update == 'threshold':
+            rule = {'meter_name': metername,
+                    'threshold': self._thresholds[alarm_name],
+                    }
+            payload = json.dumps({'state': self._get_alarm_state(severity),
+                                  'name': alarm_name,
+                                  'severity': severity,
+                                  'type': "threshold",
+                                  'threshold_rule': rule,
+                                  })
+        elif alarm_type_update == 'event':
+            rule = {'event_type': metername, }
+            payload = json.dumps({'state': self._get_alarm_state(severity),
+                                  'name': alarm_name,
+                                  'severity': severity,
+                                  'type': "event",
+                                  'event_rule': rule,
+                                  })
+        return self._perform_update_request(url, auth_token, payload)
 
     def _get_alarm_state(self, severity):
         """Get the state of the alarm."""
