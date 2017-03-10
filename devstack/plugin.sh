@@ -14,6 +14,8 @@ set -o xtrace
                     pip_install $COLLECTD_CEILOMETER_DIR
                     # install system package
                     install_collectd
+                    # stop collectd service once installed
+                    stop_collectd
                     # adapt collectd.conf
                     adapt_collectd_conf
                 ;;
