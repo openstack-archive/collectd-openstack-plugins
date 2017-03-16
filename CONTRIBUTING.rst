@@ -79,3 +79,16 @@ of the bug e.g.::
   critical|security|fixes:
     - Fixed bug #123456: Authentication token now automatically renews after
       expiry.
+
+Documentation Headers
+---------------------
+The following conventions should be used for heading levels in
+collectd-ceilometer-plugin documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+Avoid deeper levels because they do not render well.
