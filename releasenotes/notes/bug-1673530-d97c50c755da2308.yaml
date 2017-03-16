@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes `bug 1673530`_: Added headers to usage.rst to allow linking to
+    configuration option descriptions in usage.rst.
