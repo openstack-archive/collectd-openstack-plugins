@@ -1,0 +1,33 @@
+[[local|localrc]]
+
+HOST_IP=<SINGLE NODE IP>
+
+VERBOSE=True
+FORCE=yes
+
+MYSQL_PASSWORD=password
+DATABASE_PASSWORD=password
+RABBIT_PASSWORD=password
+ADMIN_PASSWORD=password
+SERVICE_PASSWORD=password
+HORIZON_PASSWORD=password
+SERVICE_TOKEN=tokentoken
+
+disable_all_services
+enable_service key
+enable_service mysql
+enable_service rabbit
+enable_service dstat
+
+# For more options refer to devstackGSG.rst
+
+# GNOCCHI
+enable_plugin gnocchi https://github.com/openstack/gnocchi master
+GNOCCHI_USE_KEYSTONE=True
+COLLECTD_GNOCCHI_ENABLED=True
+
+# Setup collectd-ceilometer plugin
+COLLECTD_INSTALL=True
+COLLECTD_INSTALL_TYPE=source
+COLLECTD_CEILOMETER_VERBOSE=True
+enable_plugin collectd-ceilometer http://github.com/openstack/collectd-ceilometer-plugin
