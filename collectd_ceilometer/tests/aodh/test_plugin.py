@@ -25,6 +25,7 @@ import unittest
 from collectd_ceilometer.aodh import plugin
 from collectd_ceilometer.aodh import sender
 from collectd_ceilometer.common.keystone_light import KeystoneException
+from collectd_ceilometer.common.meters import base
 
 Logger = logging.getLoggerClass()
 
@@ -188,6 +189,41 @@ class TestPlugin(unittest.TestCase):
 
         # call shutdown
         instance.shutdown()
+
+    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(sender.Sender, '_update_alarm', autospec=True)
+    @mock.patch.object(base.Meter, 'message', autospec=True)
+    @mock.patch.object(base.Meter, 'meter_name', autospec=True)
+    @mock.patch.object(base.Meter, 'severity', autospec=True)
+    @mock.patch.object(base.Meter, 'resource_id', autospec=True)
+    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock_collectd()
+    @mock_config()
+    @mock_value()
+    def test_update_alarm(self, data, config, collectd, ClientV3,
+                          resource_id, severity, meter_name, message,
+                          _update_alarm, _get_alarm_id):
+        """Test the update alarm function."""
+        auth_client = ClientV3.return_value
+        # init instance
+        instance = sender.Sender()
+
+        # init values to send
+        _get_alarm_id.return_value = 'my-alarm-id'
+        message = message.return_value
+        metername = meter_name.return_value
+        severity = severity.return_value
+        rid = resource_id.return_value
+
+        # send the values
+        instance.send(metername, severity, rid, message)
+
+        # update the alarm
+        _update_alarm.assert_called_once_with(
+            instance, 'my-alarm-id', message, auth_client.auth_token)
+
+        # reset method
+        _update_alarm.reset_mock()
 
     @mock.patch.object(requests, 'put', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
