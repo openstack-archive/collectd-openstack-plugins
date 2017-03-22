@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixed bug https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1669814,
+    by including a test for the _update_alarm function in the sender class.
