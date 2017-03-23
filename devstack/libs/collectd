@@ -184,10 +184,10 @@ function config_custom_units {
 
 # remove plugin conf file
 function restore_collectd_conf {
+    # Create a backup for all of the .conf files
+    sudo mkdir -p "$COLLECTD_CONF_DIR/backup"
+    sudo cp $COLLECTD_CONF_DIR/*.conf $COLLECTD_CONF_DIR/backup/
 
-    if [ -f '$COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf' ]; then
-        sudo rm -f $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
-        sudo rm -f $COLLECTD_CONF_DIR/01-logfile.conf
-    fi
-
+    # Remove all of the .conf files once they are backed up
+    sudo rm -f $COLLECTD_CONF_DIR/*.conf
 }
