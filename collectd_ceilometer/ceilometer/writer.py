@@ -16,12 +16,11 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.ceilometer.sender import Sender
-from collections import defaultdict
+from collectd_ceilometer.common.meters.storage import SampleContainer
 from collections import namedtuple
 import json
 import logging
 import six
-import threading
 import time
 
 LOGGER = logging.getLogger(__name__)
@@ -44,43 +43,6 @@ class Sample(namedtuple('Sample', ['value', 'timestamp', 'meta',
             'source': 'collectd',
             'resource_id': self.resource_id,
         }
-
-
-class SampleContainer(object):
-    """Sample storage"""
-
-    def __init__(self):
-        self._lock = threading.Lock()
-        self._data = defaultdict(list)
-
-    def add(self, key, samples, limit):
-        """Store list of samples under the key
-
-        Store the list of samples under the given key. If numer of stored
-        samples is greater than the given limit, all the samples are returned
-        and the stored samples are dropped. Otherwise None is returned.
-
-        @param key      key of the samples
-        @param samples  list of samples
-        @param limit    sample list limit
-        """
-        with self._lock:
-            current = self._data[key]
-            current += samples
-            if len(current) >= limit:
-                self._data[key] = []
-                return current
-        return None
-
-    def reset(self):
-        """Reset stored samples
-
-        Returns all samples and removes them from the container.
-        """
-        with self._lock:
-            retval = self._data
-            self._data = defaultdict(list)
-        return retval
 
 
 class Writer(object):
