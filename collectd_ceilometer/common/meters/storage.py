@@ -20,6 +20,9 @@ import six
 from collectd_ceilometer.common.meters.base import Meter
 from collectd_ceilometer.common.meters.libvirt import LibvirtMeter
 
+from collections import defaultdict
+import threading
+
 
 class MeterStorage(object):
     """Meter storage"""
@@ -41,3 +44,40 @@ class MeterStorage(object):
         """Get meter for the collectd plugin"""
         # return specialized meter class for collectd plugin or default Meter
         return self._meters.get(plugin, self._default)
+
+
+class SampleContainer(object):
+    """Temporary storage for collectd samples"""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._data = defaultdict(list)
+
+    def add(self, key, samples, limit):
+        """Store list of samples under the key
+
+        Store the list of samples under the given key. If numer of stored
+        samples is greater than the given limit, all the samples are returned
+        and the stored samples are dropped. Otherwise None is returned.
+
+        @param key      key of the samples
+        @param samples  list of samples
+        @param limit    sample list limit
+        """
+        with self._lock:
+            current = self._data[key]
+            current += samples
+            if len(current) >= limit:
+                self._data[key] = []
+                return current
+        return None
+
+    def reset(self):
+        """Reset stored samples
+
+        Returns all samples and removes them from the container.
+        """
+        with self._lock:
+            retval = self._data
+            self._data = defaultdict(list)
+        return retval
