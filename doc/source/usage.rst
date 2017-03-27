@@ -95,6 +95,12 @@ COLLECTD_GNOCCHI_ENABLED
     Default: True
 
 
+COLLECTD_AODH_ENABLED
+    (True|False) Toggles whether collectd-aodh-plugin is enabled.
+
+    Default: False
+
+
 COLLECTD_INSTALL_TYPE
     (source|binary) Specify whether the collectd installation should use the
     package manager or install from source.

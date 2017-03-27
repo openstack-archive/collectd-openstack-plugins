@@ -92,3 +92,20 @@ To deploy with gnocchi using devstack, add the following to you local.conf:
     enable_service gnocchi-api,gnocchi-metricd,gnocchi-statsd
     GNOCCHI_USE_KEYSTONE=True
     COLLECTD_GNOCCHI_ENABLED=True
+
+Aodh
+====
+
+Aodh is an alarming service that allows an alarm to be created and/or updated
+if there is something usual happening with the system. When this service is
+enabled via the collectd-ceilometer-plugin, it allows alarms to be
+created/updated for all notifications sent from collectd. All notifications
+sent from collectd are configured as event alarms in Aodh.
+To enable aodh with collectd, add the following to your local.conf:
+
+   #AODH
+   enable_plugin aodh https://git.openstack.org/openstack/aodh
+
+   enable_plugin collectd-ceilometer-plugin http://github.com/openstack/collectd-ceilometer-plugin
+   COLLECTD_INSTALL=True
+   COLLECTD_AODH_ENABLED=True
