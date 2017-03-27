@@ -144,7 +144,7 @@ function adapt_collectd_conf {
 
         # Configure collectd-gnocchi-plugin.conf
         sudo sed -i 's|ModulePath.*$|ModulePath "'$COLLECTD_CEILOMETER_DIR'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
-        sudo sed -i 's|VERBOSE.*$|VERBOSE '$COLLECTD_CEILOMETER_VERBOSE'|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+        sudo sed -i 's|VERBOSE.*$|VERBOSE '$COLLECTD_GNOCCHI_VERBOSE'|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|BATCH_SIZE.*$|BATCH_SIZE "'$COLLECTD_BATCH_SIZE'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_AUTH_URL.*$|OS_AUTH_URL "'$OS_AUTH_URL'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|CEILOMETER_URL_TYPE.*$|CEILOMETER_URL_TYPE "'$CEILOMETER_URL_TYPE'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
@@ -161,7 +161,7 @@ function adapt_collectd_conf {
 
         # Configure collectd-gnocchi-plugin.conf
         sudo sed -i 's|ModulePath.*$|ModulePath "'$COLLECTD_CEILOMETER_DIR'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
-        sudo sed -i 's|VERBOSE.*$|VERBOSE '$COLLECTD_CEILOMETER_VERBOSE'|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
+        sudo sed -i 's|VERBOSE.*$|VERBOSE '$COLLECTD_AODH_VERBOSE'|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_AUTH_URL.*$|OS_AUTH_URL "'$OS_AUTH_URL'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|CEILOMETER_URL_TYPE.*$|CEILOMETER_URL_TYPE "'$CEILOMETER_URL_TYPE'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
