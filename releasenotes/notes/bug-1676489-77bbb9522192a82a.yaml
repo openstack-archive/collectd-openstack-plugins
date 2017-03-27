@@ -1,0 +1,7 @@
+---
+fixes:
+  - Fixes 'bug 1676489 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1676489'
+    Added new variables COLLECTD_GNOCCHI_VERBOSE and COLLECTD_AODH_VERBOSE, that now allows
+    the verbosity of the plugins to be configured separately. Their default is set to what
+    the value of COLLECTD_CEILOMETER_VERBOSE is set to. Included information on the
+    verbosity options in usage.rst.
