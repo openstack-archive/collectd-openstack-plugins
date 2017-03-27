@@ -25,6 +25,7 @@ enable_service dstat
 enable_plugin gnocchi https://github.com/openstack/gnocchi master
 GNOCCHI_USE_KEYSTONE=True
 COLLECTD_GNOCCHI_ENABLED=True
+COLLECTD_GNOCCHI_VERBOSE=True
 
 # Setup collectd-ceilometer plugin
 COLLECTD_INSTALL=True
