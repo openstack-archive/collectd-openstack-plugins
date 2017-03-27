@@ -49,9 +49,9 @@ CEILOMETER_TIMEOUT
 
 
 COLLECTD_CEILOMETER_VERBOSE
-    (True|False) Set this to True to make collectd-{ceilometer,gnocchi}
-    debugging messages visible as info messagges. This is useful when running
-    the plugin inside a collectd compiled without debug message support.
+    (True|False) Set this to True to make collectd-ceilometer debugging messages
+    visible as info messagges. This is useful when running the plugin inside a
+    collectd compiled without debug message support.
     Default: False
 
 
@@ -94,12 +94,22 @@ COLLECTD_GNOCCHI_ENABLED
 
     Default: True
 
+COLLECTD_GNOCCHI_VERBOSE
+    (True|False) Set this to True to make collectd-gnocchi debugging messages
+    visible as info messages. This is useful when running the plugin inside a
+    collectd compiled without debug message support.
+    Default: $COLLECTD_CEILOMETER_VERBOSE
 
 COLLECTD_AODH_ENABLED
     (True|False) Toggles whether collectd-aodh-plugin is enabled.
 
     Default: False
 
+COLLECTD_AODH_VERBOSE
+    (True|False) Set this to True to make collectd-aodh debugging messages
+    visible as info messages. This is useful when running the plugin inside
+    a collectd compiled without debug message support.
+    Default: $COLLECTD_CEILOMETER_VERBOSE
 
 COLLECTD_INSTALL_TYPE
     (source|binary) Specify whether the collectd installation should use the
