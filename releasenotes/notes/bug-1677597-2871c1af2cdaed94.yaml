@@ -1,0 +1,6 @@
+---
+fixes:
+  - Fixes 'bug 1677597 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1677597'
+    This change checks that the alarm is created before adding its name to the
+    alarm names dictionary. This allows the creation of the alarm again if
+    something goes wrong with the initial attempt.

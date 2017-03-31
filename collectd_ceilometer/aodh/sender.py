@@ -204,10 +204,11 @@ class Sender(object):
             endpoint = self._get_endpoint("aodh")
             if alarm_name not in self._alarm_names:
                 LOGGER.warn('No known ID for %s', alarm_name)
-                self._alarm_names.append(alarm_name)
-                self._alarm_ids[alarm_name] = \
+                alarm_created, self._alarm_ids[alarm_name] = \
                     self._create_alarm(endpoint, severity,
                                        metername, alarm_name, message)
+                if alarm_created is True:
+                    self._alarm_names.append(alarm_name)
             return None
 
     def _create_alarm(self, endpoint, severity, metername,
@@ -226,7 +227,10 @@ class Sender(object):
         result = self._perform_post_request(url, payload, self._auth_token)
         alarm_id = json.loads(result.text)['alarm_id']
         LOGGER.debug("alarm_id=%s", alarm_id)
-        return alarm_id
+        if alarm_id is not None:
+            return True, alarm_id
+        else:
+            return False, alarm_id
 
     def _get_alarm_state(self, message):
         """Get the state of the alarm."""
