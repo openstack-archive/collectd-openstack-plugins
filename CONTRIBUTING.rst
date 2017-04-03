@@ -1,3 +1,26 @@
+..
+      Licensed under the Apache License, Version 2.0 (the "License"); you may
+      not use this file except in compliance with the License. You may obtain
+      a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+      WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+      License for the specific language governing permissions and limitations
+      under the License.
+      Convention for heading levels in collectd-ceilometer-plugin documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+      Avoid deeper levels because they do not render well.
+
+=========================
 Contributing to Openstack
 =========================
 
@@ -20,19 +43,19 @@ Bugs should be filed on Launchpad, not GitHub:
    https://bugs.launchpad.net/collectd-ceilometer-plugin
 
 Contributing to collectd-ceilometer-plugin
-==========================================
+------------------------------------------
 
 As well as following the OpenStack contribution guidelines, there are a few
 guidelines that should be observed for this project.
 
 Blueprints
-----------
+~~~~~~~~~~
 Blueprints are generally not required for features. A bug should be opened in
 launchpad instead and tagged as "rfe".
 
 
 Feature development
--------------------
+~~~~~~~~~~~~~~~~~~~
 Each feature should consist of a number of components (below), which can be submitted
 in separate, dependant patches.
 
@@ -67,7 +90,7 @@ The patches should include the following:
 
 
 Bug Fixes
----------
+~~~~~~~~~
 A bug fix will typically be a single patch, with any relevant changes to
 documantation, configuration, etc included.
 

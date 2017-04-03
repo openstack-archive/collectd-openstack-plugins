@@ -1,3 +1,26 @@
+..
+      Licensed under the Apache License, Version 2.0 (the "License"); you may
+      not use this file except in compliance with the License. You may obtain
+      a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+      WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+      License for the specific language governing permissions and limitations
+      under the License.
+
+      Convention for heading levels in collectd-ceilometer-plugin documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+      Avoid deeper levels because they do not render well.
+
 =============================
 Getting Started with Collectd
 =============================
@@ -12,11 +35,8 @@ Pre-requisites
 - A working Openstack environment
 - Keystone and Ceilometer services enabled
 
-Linux Configuration
--------------------
-
 Collectd Set-up
-===============
+---------------
 
 Ensure that the binary packages for your Linux distribution are installed
 and up-to-date.
@@ -52,7 +72,7 @@ Now, install collectd.
 | sudo make install
 
 Set and Configure Collectd as a Service
-=======================================
+---------------------------------------
 
 To enable collectd as a service on your system copy the .service onto your
 system. This file is located in the "/collectd/contrib/" directory of the repo.
@@ -72,7 +92,7 @@ For further information on enabling collectd as a service:
  https://collectd.org/wiki/index.php/First_steps#Starting_the_daemon
 
 Installation and Configuration of collectd-ceilometer-plugin
-============================================================
+------------------------------------------------------------
 
 Clone the collectd-ceilometer-plugin code.
 
@@ -139,10 +159,10 @@ To verify that ceilometer is working with collectd use the ceilometer client.
   |  ceilometer sample-list --meter cpu.cpu
 
 Additional Features
-===================
+-------------------
 
 Customized Units
-----------------
+~~~~~~~~~~~~~~~~
 
 This feature enables you to customize the units of the data being collected. It
 can be used to update existing units or add in new units by updating the plugin
@@ -175,7 +195,7 @@ or the sample-list and check the units of the meter that you changed.
 | ceilometer sample-list | grep <meter_name>
 
 Troubleshooting
-===============
+---------------
 
 If you are unable to verify that ceilometer is working with collectd, try
 restarting the service, then check the meter list again.

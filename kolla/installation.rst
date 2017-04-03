@@ -1,17 +1,41 @@
-Introduction
-============
+..
+      Licensed under the Apache License, Version 2.0 (the "License"); you may
+      not use this file except in compliance with the License. You may obtain
+      a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+      WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+      License for the specific language governing permissions and limitations
+      under the License.
+
+      Convention for heading levels in networking-ovs-dpdk documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+      Avoid deeper levels because they do not render well.
+
+===============================================
+Deploying collectd-ceilometer-plugin with Kolla
+===============================================
 
 This document describes the steps required to install, configure and verify the
 operation of collectd with ceilometer plugin with Kolla.
 
 Pre-requisites
-==============
+--------------
 
 - Access to the internet
 - Keystaone and Ceilometer enabled
 
 Installation of Kolla
-=====================
+---------------------
 
 Please refer to this doc for instructions about how to install kolla.
 
@@ -21,7 +45,7 @@ For the simplest installation follow the instructions for evaluation and
 development purposes.
 
 Install Collectd with Kolla
-===========================
+---------------------------
 
 To install collectd with kolla, edit the ``globals.yml`` file and change the
 following settings:
@@ -70,7 +94,7 @@ Run the following command to build the container.
     kolla-build --template-override <path_to_template_override_file>
 
 Verification of Collectd
-========================
+------------------------
 
 To verify the successful build of the collectd image run the following command.
 
@@ -89,7 +113,7 @@ is up and running.
 The status of the collectd container should be "Up".
 
 Configure collectd-ceilometer-plugin
-====================================
+------------------------------------
 
 Edit the ``/kolla/etc/collectd-ceilometer-plugin.conf`` file and replace the
 varaiables with appropriate values. The passwords and endpoints will be
@@ -125,7 +149,7 @@ Restart the collectd container for the changes to take affect.
 Verify the container is up and running.
 
 Verification of collectd-ceilometer-plugin
-==========================================
+------------------------------------------
 
 To verify that the plugin is working, use the ceilometer client.
 

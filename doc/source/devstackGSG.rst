@@ -1,3 +1,26 @@
+..
+      Licensed under the Apache License, Version 2.0 (the "License"); you may
+      not use this file except in compliance with the License. You may obtain
+      a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+      WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+      License for the specific language governing permissions and limitations
+      under the License.
+
+      Convention for heading levels in collectd-ceilometer-plugin documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+      Avoid deeper levels because they do not render well.
+
 ===================================================
 Installing Collectd-ceilometer-plugin with Devstack
 ===================================================
@@ -11,7 +34,7 @@ Pre-requisites
 - Access to the internet
 
 Installation of Devstack
-========================
+------------------------
 
 Follow the instructions provided in the following document to set up your own
 Devstack deployment.
@@ -22,7 +45,7 @@ Once Devstack is ready to be deployed, follow the configuration steps in the
 next section to allow the installation of the plugin during deployment.
 
 Configuration of Devstack
-=========================
+-------------------------
 
 These configuration instructions only allow for the minimal installation of
 collectd, ceilometer and the plugin. The sample local.conf provided must be
@@ -47,7 +70,7 @@ Finally, build your devstack environment.
 | ./stack.sh
 
 Verfication of Collectd-ceilometer-plugin
-=========================================
+-----------------------------------------
 
 Confirm that the collectd service is up and running.
 
@@ -60,10 +83,10 @@ working with ceilometer.
 | ceilometer sample-list --meter cpu.cpu
 
 Addtional Features
-==================
+------------------
 
 Custom Units Feature
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 This feature enables users to define new units for existing meter values.
 To enable this feature execute the following instructions:
@@ -79,7 +102,7 @@ To enable this feature execute the following instructions:
 | COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 Gnocchi
-=======
+-------
 
 To deploy with gnocchi using devstack, add the following to you local.conf:
 
