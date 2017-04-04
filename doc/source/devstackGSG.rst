@@ -78,6 +78,17 @@ To enable this feature execute the following instructions:
 
 | COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
+Custom Packages Feature
+------------------------
+
+This feature enables users to define new packages to be installed when building
+collectd. To enable this feature execute the following line instruction:
+
+* To include your new packages, add the following line with your chosen
+  packages to your local.conf file.
+
+| COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
+
 Gnocchi
 =======
 
