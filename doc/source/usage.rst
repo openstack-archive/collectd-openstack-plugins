@@ -130,6 +130,14 @@ COLLECTD_PREFIX
 
     Default: /usr/
 
+COLLECTD_ADDITIONAL_PACKAGES
+    Specifies additional packages to be installed before collectd is
+    built/installed. This is usefull when building a custom collectd plugin it
+    will make sure the packages are installed. There is no need for manual
+    installation. A space separates packages.
+
+    Example: COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
+
 
 Authenticating using Identity Server API v3
 ===========================================
