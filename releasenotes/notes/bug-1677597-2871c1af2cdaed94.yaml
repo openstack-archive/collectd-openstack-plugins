@@ -1,0 +1,5 @@
+:
+  - Fixes 'bug 1677597 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1677597'
+    Refactored the update_alarm and create_alarm functions to allow for error
+    checking. This allows for retries if updating or creating an alarm fails.
+    Updated the corresponding tests for this refactor.

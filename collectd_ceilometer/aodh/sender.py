@@ -131,20 +131,16 @@ class Sender(object):
         # Create alarm name
         alarm_name = self._get_alarm_name(metername, resource_id)
 
-        # check for and/or get alarm_id
-        alarm_id = self._get_alarm_id(alarm_name, severity, metername, message)
-
-        if alarm_id is not None:
-            result = self._update_alarm(alarm_id, message, auth_token)
-        else:
-            result = None
-
-        if result is None:
-            return
+        # Update or create this alarm
+        result = self._update_or_create_alarm(alarm_name, message, auth_token,
+                                              severity, metername)
 
         LOGGER.info('Result: %s %s',
                     six.text_type(result.status_code),
                     result.text)
+
+        if result is None:
+            return
 
         # if the request failed due to an auth error
         if result.status_code == HTTP_UNAUTHORIZED:
@@ -159,27 +155,22 @@ class Sender(object):
             auth_token = self._authenticate()
 
             if auth_token is not None:
-                if alarm_id is not None:
-                    result = self._update_alarm(alarm_id, message, auth_token)
-                else:
-                    result = None
+                result = self._update_or_create_alarm(alarm_name, message,
+                                                      auth_token, severity,
+                                                      metername)
 
         if result.status_code == HTTP_NOT_FOUND:
-            LOGGER.debug("Received 404 error when submitting %s sample, \
-                         creating a new metric",
+            LOGGER.debug("Received 404 error when submitting %s notification, \
+                         creating a new alarm",
                          alarm_name)
 
             # check for and/or get alarm_id
-            alarm_id = self._get_alarm_id(alarm_name, severity,
-                                          metername, message)
-
-            LOGGER.info('alarmname: %s, alarm_id: %s', alarm_name, alarm_id)
-            if alarm_id is not None:
-                result = self._update_alarm(alarm_id, message, auth_token)
-            else:
-                result = None
+            result = self._update_or_create_alarm(alarm_name, message,
+                                                  auth_token, severity,
+                                                  metername)
 
         if result.status_code == HTTP_CREATED:
+            self._alarm_names.append(alarm_name)
             LOGGER.debug('Result: %s', HTTP_CREATED)
         else:
             LOGGER.info('Result: %s %s',
@@ -193,22 +184,24 @@ class Sender(object):
             Config.instance().CEILOMETER_URL_TYPE)
         return endpoint
 
-    def _get_alarm_id(self, alarm_name, severity, metername, message):
-        """Check for existing alarm and its id or create a new one."""
+    def _update_or_create_alarm(self, alarm_name, message, auth_token,
+                                severity, metername):
+        # check for an alarm and update
         try:
-            return self._alarm_ids[alarm_name]
+            alarm_id = self._alarm_ids[alarm_name]
+            result = self._update_alarm(alarm_id, message, auth_token)
 
+        # or create a new alarm
         except KeyError as ke:
             LOGGER.warn(ke)
 
             endpoint = self._get_endpoint("aodh")
             if alarm_name not in self._alarm_names:
                 LOGGER.warn('No known ID for %s', alarm_name)
-                self._alarm_names.append(alarm_name)
-                self._alarm_ids[alarm_name] = \
+                result, self._alarm_ids[alarm_name] = \
                     self._create_alarm(endpoint, severity,
                                        metername, alarm_name, message)
-            return None
+        return result
 
     def _create_alarm(self, endpoint, severity, metername,
                       alarm_name, message):
@@ -226,7 +219,7 @@ class Sender(object):
         result = self._perform_post_request(url, payload, self._auth_token)
         alarm_id = json.loads(result.text)['alarm_id']
         LOGGER.debug("alarm_id=%s", alarm_id)
-        return alarm_id
+        return result, alarm_id
 
     def _get_alarm_state(self, message):
         """Get the state of the alarm."""
