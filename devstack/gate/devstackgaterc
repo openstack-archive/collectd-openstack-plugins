@@ -1,0 +1,37 @@
+#!/bin/bash -xe
+
+# maybe not need this stuff at all
+#case "$ZUUL_BRANCH" in
+#    "stable/mitaka") export OVERRIDE_COLLECT_CEILOMETER_PLUGIN_PROJECT_BRANCH="stable/mitaka";;
+#    "stable/newton") export OVERRIDE_COLLECT_CEILOMETER_PLUGIN_PROJECT_BRANCH="stable/newton";;
+#    "stable/ocata")  export OVERRIDE_COLLECT_CEILOMETER_PLUGIN_PROJECT_BRANCH="stable/ocata";;
+#    *)               export OVERRIDE_COLLECT_CEILOMETER_PLUGIN_PROJECT_BRANCH="master";;
+#esac
+
+
+
+export DEVSTACK_GATE_LIBVIRT_TYPE=kvm
+export DEVSTACK_GATE_TEMPEST=0
+export PROJECTS="openstack/ceilometer openstack/gnocchi $PROJECTS"
+
+export DEVSTACK_LOCAL_CONFIG='
+enable_plugin gnocchi git://git.openstack.org/openstack/gnocchi
+#enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer
+#enable_plugin collectd-ceilometer-plugin git://git.openstack.org/openstack/collectd-ceilometer-plugin
+
+#disable_all_services
+#enable_service key
+#enable_service mysql
+#enable_service rabbit
+#enable_service dstat
+#OVERRIDE_ENABLED_SERVICES="mysql,key,rabbit,dstat"
+
+COLLECTD_INSTALL=True
+COLLECTD_CEILOMETER_VERBOSE=True
+COLLECTD_CEILOMETER_ENABLED=True
+COLLECTD_GNOCCHI_ENABLED=True
+CEILOMETER_BACKEND=mysql
+GNOCCHI_USE_KEYSTONE=True
+'
+
+
