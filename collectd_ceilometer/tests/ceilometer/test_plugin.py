@@ -19,16 +19,15 @@
 """
 
 from collections import namedtuple
+
 import logging
+import mock
 import requests
 import unittest
 
-import mock
-
 from collectd_ceilometer.ceilometer import plugin
-from collectd_ceilometer.ceilometer import sender
 from collectd_ceilometer.common import keystone_light
-
+from collectd_ceilometer.common import sender as common_sender
 from collectd_ceilometer.tests import match
 
 
@@ -144,7 +143,7 @@ class TestPlugin(unittest.TestCase):
         collectd.register_shutdown.assert_called_once_with(instance.shutdown)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config(BATCH_SIZE=2)
     @mock_value()
@@ -155,7 +154,7 @@ class TestPlugin(unittest.TestCase):
         auth_client.get_service_endpoint.return_value =\
             'https://test-ceilometer.tld'
 
-        post.return_value.status_code = sender.HTTP_CREATED
+        post.return_value.status_code = common_sender.Sender.HTTP_CREATED
         post.return_value.text = 'Created'
 
         # init instance
@@ -236,7 +235,7 @@ class TestPlugin(unittest.TestCase):
             timeout=1.0)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
@@ -259,8 +258,8 @@ class TestPlugin(unittest.TestCase):
         post.assert_not_called()
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
-    @mock.patch.object(sender, 'LOGGER', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -290,7 +289,7 @@ class TestPlugin(unittest.TestCase):
         post.assert_not_called()
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -307,9 +306,9 @@ class TestPlugin(unittest.TestCase):
         # write the value
         self.assertRaises(requests.RequestException, instance.write, data)
 
-    @mock.patch.object(sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -362,7 +361,7 @@ class TestPlugin(unittest.TestCase):
             ])
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
@@ -416,7 +415,7 @@ class TestPlugin(unittest.TestCase):
             timeout=1.0)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Writer', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()

@@ -15,7 +15,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.ceilometer.sender import Sender
+from collectd_ceilometer.ceilometer import sender as ceilometer_sender
 from collections import defaultdict
 from collections import namedtuple
 import json
@@ -89,7 +89,7 @@ class Writer(object):
     def __init__(self, meters, config):
         self._meters = meters
         self._samples = SampleContainer()
-        self._sender = Sender()
+        self._sender = ceilometer_sender.Sender()
         self._config = config
 
     def write(self, vl, data):
