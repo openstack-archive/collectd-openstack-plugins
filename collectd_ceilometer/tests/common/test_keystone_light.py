@@ -18,9 +18,9 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer import keystone_light
-from collectd_ceilometer.keystone_light import ClientV3
-from collectd_ceilometer.keystone_light import MissingServices
+from collectd_ceilometer.common import keystone_light
+from collectd_ceilometer.common.keystone_light import ClientV3
+from collectd_ceilometer.common.keystone_light import MissingServices
 import mock
 import unittest
 
@@ -99,7 +99,7 @@ class KeystoneLightTestV3(unittest.TestCase):
             'X-Subject-Token': "c5bbb1c9a27e470fb482de2a718e08c2"
         }
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_refresh(self, mock_post):
         """Test refresh"""
 
@@ -140,7 +140,7 @@ class KeystoneLightTestV3(unittest.TestCase):
             headers=expected_args['headers'],
         )
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_getservice_endpoint(self, mock_post):
         """Test getservice endpoint"""
 
@@ -163,7 +163,7 @@ class KeystoneLightTestV3(unittest.TestCase):
         with self.assertRaises(MissingServices):
             client.get_service_endpoint('badname')
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_getservice_endpoint_error(self, mock_post):
         """Test getservice endpoint error"""
 
@@ -216,7 +216,7 @@ class KeystoneLightTestV3(unittest.TestCase):
         with self.assertRaises(MissingServices):
             client.get_service_endpoint('ceilometer')
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_invalidresponse_missing_token(self, mock_post):
         """Test invalid response: missing access"""
 
@@ -235,7 +235,7 @@ class KeystoneLightTestV3(unittest.TestCase):
         with self.assertRaises(keystone_light.InvalidResponse):
             client.refresh()
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_invalidresponse_missing_catalog(self, mock_post):
         """Test invalid response: missing catalog"""
 
@@ -279,7 +279,7 @@ class KeystoneLightTestV3(unittest.TestCase):
         with self.assertRaises(keystone_light.InvalidResponse):
             client.refresh()
 
-    @mock.patch('collectd_ceilometer.keystone_light.requests.post')
+    @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_invalidresponse_missing_token_http_header(self, mock_post):
         """Test invalid response: missing token in header"""
 

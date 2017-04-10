@@ -36,7 +36,8 @@ class CollectdMock(object):
     def get_dataset(self, string):
         pass
 
-collectd_class = 'collectd_ceilometer.tests.test_meters_base.CollectdMock'
+collectd_class = \
+    'collectd_ceilometer.tests.common.test_meters_base.CollectdMock'
 
 
 class MetersTest(TestCase):
