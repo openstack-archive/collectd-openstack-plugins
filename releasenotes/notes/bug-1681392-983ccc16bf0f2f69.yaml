@@ -1,0 +1,12 @@
+---
+fixes:
+ - |
+   Fixes 'bug 1681392 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1681392'.
+   Changed the way the state of the alarm is set to depend on the severity of
+   the notification sent. Messages are subject to change based on the collectd
+   plugin that sent the notification. This is a more reliable method to set the
+   state of an alarm.
+ - |
+   Fixes 'bug 1672301 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1672301'.
+   Changed the why the state of an alarm is set thus reducing the possibility
+   that it will result in an "insufficient data" state.

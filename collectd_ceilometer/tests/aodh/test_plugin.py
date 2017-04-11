@@ -159,16 +159,15 @@ class TestPlugin(unittest.TestCase):
 
         _get_alarm_name.return_value = 'my-alarm'
         meter_name = meter.meter_name.return_value
-        message = meter.message.return_value
         severity = meter.severity.return_value
         resource_id = meter.resource_id.return_value
 
         # send the values
-        instance.send(meter_name, severity, resource_id, message)
+        instance.send(meter_name, severity, resource_id)
 
         # check that the function is called
         _update_or_create_alarm.assert_called_once_with(
-            instance, 'my-alarm', message, auth_client.auth_token,
+            instance, 'my-alarm', auth_client.auth_token,
             severity, meter_name)
 
         # reset function
@@ -177,11 +176,11 @@ class TestPlugin(unittest.TestCase):
         # run test again for failed attempt
         _update_or_create_alarm.return_value = None
 
-        instance.send(meter_name, severity, resource_id, message)
+        instance.send(meter_name, severity, resource_id)
 
         # and values that have been sent
         _update_or_create_alarm.assert_called_once_with(
-            instance, 'my-alarm', message, auth_client.auth_token,
+            instance, 'my-alarm', auth_client.auth_token,
             severity, meter_name)
 
         # reset post method
@@ -209,17 +208,16 @@ class TestPlugin(unittest.TestCase):
 
         # init values to send
         _get_alarm_id.return_value = 'my-alarm-id'
-        message = meter.message.return_value
         metername = meter.meter_name.return_value
         severity = meter.severity.return_value
         rid = meter.resource_id.return_value
 
         # send the values
-        instance.send(metername, severity, rid, message)
+        instance.send(metername, severity, rid)
 
         # update the alarm
         _update_alarm.assert_called_once_with(
-            instance, 'my-alarm-id', message, auth_client.auth_token)
+            instance, 'my-alarm-id', severity, auth_client.auth_token)
 
         # reset method
         _update_alarm.reset_mock()
@@ -229,11 +227,11 @@ class TestPlugin(unittest.TestCase):
         _create_alarm.return_value = requests.Response(), 'my-alarm-id'
 
         # send the values
-        instance.send(metername, severity, rid, message)
+        instance.send(metername, severity, rid)
 
         _create_alarm.assert_called_once_with(
             instance, 'https://test-aodh.tld', severity, metername,
-            'my-alarm', message)
+            'my-alarm')
 
         _create_alarm.reset_mock()
 
@@ -267,6 +265,97 @@ class TestPlugin(unittest.TestCase):
 
         # no requests method has been called
         put.assert_not_called()
+
+    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    def test_low_severity(self, severity, _get_alarm_state):
+        """Test _get_alarm_state if severity is 'low'
+
+        Set-up: create a sender instance, set severity to low
+        Test: call _get_alarm_state method with severity=low
+        Expected-behaviour: returned state value should equal 'ok'
+            and won't equal 'alarm' or insufficient data'
+        """
+        instance = sender.Sender()
+
+        # run test for moderate severity
+        severity.return_value = 'low'
+        _get_alarm_state.return_value = 'ok'
+
+        self.assertEqual(instance._get_alarm_state('low'), 'ok')
+
+        self.assertNotEqual(instance._get_alarm_state('low'), 'alarm')
+
+        self.assertNotEqual(instance._get_alarm_state('low'),
+                            'insufficient data')
+
+    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    def test_moderate_severity(self, severity, _get_alarm_state):
+        """Test _get_alarm_state if severity is 'moderate'
+
+        Set-up: create a sender instance, set severity to moderate
+        Test: call _get_alarm_state method with severity=moderate
+        Expected-behaviour: returned state value should equal 'alarm'
+            and won't equal 'ok' or insufficient data'
+        """
+        instance = sender.Sender()
+
+        # run test for moderate severity
+        severity.return_value = 'moderate'
+        _get_alarm_state.return_value = 'alarm'
+
+        self.assertEqual(instance._get_alarm_state('moderate'), 'alarm')
+
+        self.assertNotEqual(instance._get_alarm_state('moderate'), 'ok')
+
+        self.assertNotEqual(instance._get_alarm_state('moderate'),
+                            'insufficient data')
+
+    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    def test_critical_severity(self, severity, _get_alarm_state):
+        """Test _get_alarm_state if severity is 'critical'
+
+        Set-up: create a sender instance, set severity to critical
+        Test: call _get_alarm_state method with severity=critical
+        Expected-behaviour: returned state value should equal 'alarm'
+            and won't equal 'ok' or 'insufficient data'
+        """
+        instance = sender.Sender()
+
+        # run test for moderate severity
+        severity.return_value = 'critical'
+        _get_alarm_state.return_value = 'alarm'
+
+        self.assertEqual(instance._get_alarm_state('critical'), 'alarm')
+
+        self.assertNotEqual(instance._get_alarm_state('critical'), 'ok')
+
+        self.assertNotEqual(instance._get_alarm_state('critical'),
+                            'insufficient data')
+
+    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    def test_other_severity(self, severity, _get_alarm_state):
+        """Test _get_alarm_state if severity is not low/moderate/critical
+
+        Set-up: create a sender instance, set severity to None
+        Test: call _get_alarm_state method with severity=None
+        Expected-behaviour: returned state value should equal
+            'insufficient data' and won't equal 'ok' or 'alarm'
+        """
+        instance = sender.Sender()
+
+        # run test for moderate severity
+        severity.return_value = None
+        _get_alarm_state.return_value = 'insufficient data'
+
+        self.assertEqual(instance._get_alarm_state(None), 'insufficient data')
+
+        self.assertNotEqual(instance._get_alarm_state('critical'), 'ok')
+
+        self.assertNotEqual(instance._get_alarm_state('critical'), 'alarm')
 
     @mock.patch.object(sender.Sender, '_perform_post_request', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
@@ -315,15 +404,14 @@ class TestPlugin(unittest.TestCase):
 
         alarm_name = _get_alarm_name.return_value
         meter_name = meter.meter_name.return_value
-        message = meter.message.return_value
         severity = meter.severity.return_value
         resource_id = meter.resource_id.return_value
 
         # send the data
-        instance.send(meter_name, severity, resource_id, message)
+        instance.send(meter_name, severity, resource_id)
 
         _update_or_create_alarm.assert_called_once_with(
-            instance, alarm_name, message, client.auth_token,
+            instance, alarm_name, client.auth_token,
             severity, meter_name)
 
         # de-assert the request
@@ -343,10 +431,10 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'Test auth token'
 
         # send the data
-        instance.send(meter_name, severity, resource_id, message)
+        instance.send(meter_name, severity, resource_id)
 
         _update_or_create_alarm.assert_called_once_with(
-            instance, alarm_name, message, client.auth_token,
+            instance, alarm_name, client.auth_token,
             severity, meter_name)
 
         # update/create response is unauthorized -> new token needs
@@ -358,7 +446,7 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'New test auth token'
 
         # send the data again
-        instance.send(meter_name, severity, resource_id, message)
+        instance.send(meter_name, severity, resource_id)
 
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Notifier', autospec=True)
