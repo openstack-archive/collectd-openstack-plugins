@@ -1,0 +1,5 @@
+---
+fixes:
+ - |
+   Fixes 'bug 1669814 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1669814'.
+   Included the _update_alarm function test.
