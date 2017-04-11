@@ -187,6 +187,56 @@ class TestPlugin(unittest.TestCase):
         # reset post method
         _update_or_create_alarm.reset_mock()
 
+    @mock.patch.object(sender.Sender, '_create_alarm', autospec=True)
+    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(sender.Sender, '_update_alarm', autospec=True)
+    @mock.patch.object(base, 'Meter', autospec=True)
+    @mock.patch.object(sender.Sender, '_get_alarm_name', autospec=True)
+    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock_collectd()
+    @mock_config()
+    @mock_value()
+    def test_update_alarm(self, data, config, collectd, ClientV3,
+                          _get_alarm_name, meter, _update_alarm,
+                          _get_alarm_id, _create_alarm):
+        """Test the update alarm function."""
+        auth_client = ClientV3.return_value
+        auth_client.get_service_endpoint.return_value = \
+            'https://test-aodh.tld'
+
+        # init instance
+        instance = sender.Sender()
+
+        # init values to send
+        _get_alarm_id.return_value = 'my-alarm-id'
+        message = meter.message.return_value
+        metername = meter.meter_name.return_value
+        severity = meter.severity.return_value
+        rid = meter.resource_id.return_value
+
+        # send the values
+        instance.send(metername, severity, rid, message)
+
+        # update the alarm
+        _update_alarm.assert_called_once_with(
+            instance, 'my-alarm-id', message, auth_client.auth_token)
+
+        # reset method
+        _update_alarm.reset_mock()
+
+        _get_alarm_id.side_effect = KeyError()
+        _get_alarm_name.return_value = 'my-alarm'
+        _create_alarm.return_value = requests.Response(), 'my-alarm-id'
+
+        # send the values
+        instance.send(metername, severity, rid, message)
+
+        _create_alarm.assert_called_once_with(
+            instance, 'https://test-aodh.tld', severity, metername,
+            'my-alarm', message)
+
+        _create_alarm.reset_mock()
+
     @mock.patch.object(requests, 'put', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock.patch.object(sender, 'LOGGER', autospec=True)
