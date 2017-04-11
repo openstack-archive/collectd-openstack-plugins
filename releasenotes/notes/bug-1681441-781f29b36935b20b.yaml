@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes 'bug #1681441 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1681441'
+    and enables the common tests to run. Tests now run for
+    common/{keystone_light,logger,meters/base}.py.
