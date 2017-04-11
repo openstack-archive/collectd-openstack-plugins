@@ -187,6 +187,86 @@ class TestPlugin(unittest.TestCase):
         # reset post method
         _update_or_create_alarm.reset_mock()
 
+    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(requests, 'put', spec=callable)
+    @mock.patch.object(base, 'Meter', autospec=True)
+    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock_collectd()
+    @mock_config()
+    def test_update_alarm(self, config, collectd, ClientV3,
+                          meter, put, _get_alarm_id):
+        """Test the update alarm function.
+
+        Set-up: create a sender object and get an alarm-id for it
+        Test: update an alarm when there is an alarm-id and when there isn't
+        Expected behaviour:
+         - If alarm-id present a put/update request is called
+        """
+        auth_client = ClientV3.return_value
+        auth_client.get_service_endpoint.return_value = \
+            'https://test-aodh.tld'
+
+        # init instance
+        instance = sender.Sender()
+
+        # init values to send
+        _get_alarm_id.return_value = 'my-alarm-id'
+        message = meter.message.return_value
+        metername = meter.meter_name.return_value
+        severity = meter.severity.return_value
+        rid = meter.resource_id.return_value
+
+        # send the values
+        instance.send(metername, severity, rid, message)
+
+        # update the alarm
+        put.assert_called_once_with(
+            'https://test-aodh.tld' +
+            '/v2/alarms/my-alarm-id/state',
+            data='"insufficient data"',
+            headers={'Content-type': 'application/json',
+                     'X-Auth-Token': auth_client.auth_token},
+            timeout=1.0)
+
+        # reset method
+        put.reset_mock()
+
+    @mock.patch.object(sender.Sender, '_create_alarm', autospec=True)
+    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(requests, 'put', spec=callable)
+    @mock.patch.object(base, 'Meter', autospec=True)
+    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock_collectd()
+    @mock_config()
+    def test_alarm_not_updated(self, config, collectd, ClientV3,
+                               meter, put, _get_alarm_id, _create_alarm):
+        """Test if an alarm is created, hence it will not be updated
+
+        Set-up: create a sender object and create an alarm
+        Test: alarm won't be updated if one is created
+        Expected behaviour:
+         - No alarm exists alarm-id throws a KeyError and a put/update request
+           isn't called
+        """
+        # init instance
+        instance = sender.Sender()
+
+        # init values to send
+        _get_alarm_id.return_value = None
+        _get_alarm_id.side_effect = KeyError()
+        _create_alarm.return_value = requests.Response(), 'my-alarm-id'
+        message = meter.message.return_value
+        metername = meter.meter_name.return_value
+        severity = meter.severity.return_value
+        rid = meter.resource_id.return_value
+
+        # send the values again
+        instance.send(metername, severity, rid, message)
+
+        put.assert_not_called()
+
+        put.reset_mock()
+
     @mock.patch.object(requests, 'put', spec=callable)
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock.patch.object(sender, 'LOGGER', autospec=True)
