@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixes 'bug 1680013 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1680013'
+    Hostname in collectd is now set to match the system's hostname.
