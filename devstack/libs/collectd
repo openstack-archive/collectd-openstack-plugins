@@ -120,6 +120,10 @@ function adapt_collectd_conf {
         sudo -E mkdir -p "$COLLECTD_CONF_DIR"
     fi
 
+    # Configure collectd hostname
+    CONF_FILE=$(sudo find /etc -name "collectd.conf")
+    sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname '$(hostname)'|g' $CONF_FILE
+
     # Configure collectd-ceilometer-plugin
     if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
         sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
