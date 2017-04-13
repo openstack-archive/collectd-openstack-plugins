@@ -208,7 +208,7 @@ class Sender(object):
         rule = {'event_type': metername, }
         payload = json.dumps({'state': self._get_alarm_state(severity),
                               'name': alarm_name,
-                              'severity': severity,
+                              'severity': "moderate",
                               'type': "event",
                               'event_rule': rule,
                               })
