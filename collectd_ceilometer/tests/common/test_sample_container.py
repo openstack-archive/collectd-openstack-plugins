@@ -57,6 +57,25 @@ class TestSampleContainer(unittest.TestCase):
         self.assertEqual(retval, None)
         self.assertEqual(["value1", ], container._data["key1"])
 
+    def test_sample_container_add_invalid_type(self):
+        """Test adding a non-list element to the SampleContainer
+
+        Set-up: Create a container, and add some valid items to it.
+        Test: add invalid items for an existing key and a new key.
+        Expected behaviour: The invalid items won't be added.
+        """
+        container = SampleContainer()
+        expected = {"key1": ["in a list", ]}
+
+        container.add("key1", ["in a list", ], 42)
+
+        self.assertEqual(expected, container._data)
+
+        container.add("key1", "not a list", 42)
+        container.add("key2", "also not a list", 42)
+
+        self.assertEqual(expected, container._data)
+
     def test_sample_container_add_exceeds_limit(self):
         """Test adding an element to the Containeri so len > limit.
 
