@@ -20,6 +20,7 @@ import logging
 import threading
 
 import requests
+
 import six
 
 from collectd_ceilometer.common.keystone_light import ClientV3
@@ -65,7 +66,6 @@ class Sender(object):
 
     def _authenticate(self):
         """Authenticate and renew the authentication token"""
-
         # if auth_token is available, just return it
         if self._auth_token is not None:
             return self._auth_token
@@ -124,8 +124,7 @@ class Sender(object):
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Ceilometer/Gnocchi"""
-
+        """Send the payload to Ceilometer/Gnocchi/Aodh"""
         # get the auth_token
         auth_token = self._authenticate()
         LOGGER.info('Auth_token: %s', auth_token)
@@ -142,13 +141,16 @@ class Sender(object):
 
         # create request URL
         url = self._create_request_url(metername, **kwargs)
+
+        alarm_payload = None
         if url is None:
             LOGGER.debug("_create_request_url returned None, aborting send")
             return
 
-        # send the POST request
         try:
-            return self._perform_request(url, payload, auth_token)
+            # try and perform the appropriate request
+            return self._perform_request(payload, url, auth_token, **kwargs)
+
         except requests.exceptions.HTTPError as exc:
             response = exc.response
 
@@ -167,17 +169,29 @@ class Sender(object):
                 auth_token = self._authenticate()
 
                 if auth_token is not None:
-                    # and try to repost
-                    return self._perform_request(url, payload, auth_token)
+                    # and try to repost/re-update
+                    return self._perform_request(payload, url,
+                                                 auth_token, **kwargs)
             else:
                 # This is an error and it has to be forwarded
-                self._handle_http_error(exc, metername, payload,
-                                        auth_token, **kwargs)
+                if alarm_payload is None:
+                    self._handle_http_error(exc, metername, payload,
+                                            auth_token, **kwargs)
+                else:
+                    self._handle_http_error(exc, metername, alarm_payload,
+                                            auth_token, **kwargs)
+
+    def _perform_request(self, payload, url, auth_token, **kwargs):
+        """Perform the appropriate update/post request"""
+        if payload is not None:
+            return self._perform_post_request(url, payload, auth_token)
+        else:
+            alarm_payload = self._get_alarm_payload(**kwargs)
+            return self._perform_update_request(url, auth_token, alarm_payload)
 
     @classmethod
-    def _perform_request(cls, url, payload, auth_token):
+    def _perform_post_request(cls, url, payload, auth_token):
         """Perform the POST request"""
-
         LOGGER.debug('Performing request to %s', url)
 
         # request headers
@@ -188,6 +202,35 @@ class Sender(object):
             url, data=payload, headers=headers,
             timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
 
+        # Raises exception if there was an error
+        try:
+            response.raise_for_status()
+        # pylint: disable=broad-except
+        except Exception:
+            exc_info = 1
+            raise
+        else:
+            exc_info = 0
+        finally:
+            # Log out the result of the request for debugging purpose
+            LOGGER.debug(
+                'Result: %s, %d, %r',
+                get_status_name(response.status_code),
+                response.status_code, response.text, exc_info=exc_info)
+        return response
+
+    @classmethod
+    def _perform_update_request(cls, url, auth_token, payload):
+        """Perform the PUT/update request."""
+        LOGGER.debug('Performing request to %s', url)
+
+        # request headers
+        headers = {'X-Auth-Token': auth_token,
+                   'Content-type': 'application/json'}
+        # perform request and return its result
+        response = requests.put(
+            url, data=payload, headers=headers,
+            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
         # Raises exception if there was an error
         try:
             response.raise_for_status()
