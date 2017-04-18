@@ -44,7 +44,7 @@ class Sender(common_sender.Sender):
         pass
 
     def _create_request_url(self, metername, **kwargs):
-        return self._url_base % metername
+        return "post", self._url_base % metername
 
     def _handle_http_error(self, exc, metername, payload, auth_token, **kwargs):
         raise exc

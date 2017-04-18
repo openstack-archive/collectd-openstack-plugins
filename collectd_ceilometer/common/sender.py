@@ -124,7 +124,7 @@ class Sender(object):
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Ceilometer/Gnocchi"""
+        """Send the payload to Ceilometer/Gnocchi/Aodh"""
 
         # get the auth_token
         auth_token = self._authenticate()
@@ -141,41 +141,93 @@ class Sender(object):
             return
 
         # create request URL
-        url = self._create_request_url(metername, **kwargs)
+        request_type, url = self._create_request_url(metername, **kwargs)
         if url is None:
             LOGGER.debug("_create_request_url returned None, aborting send")
             return
 
-        # send the POST request
-        try:
-            return self._perform_request(url, payload, auth_token)
-        except requests.exceptions.HTTPError as exc:
-            response = exc.response
+        if request_type == 'post':
+            # send the POST request
+            try:
+                if payload is not None:
+                    return self._perform_post_request(url, payload, auth_token)
+                else:
+                    return None
 
-            # if the request failed due to an auth error
-            if response.status_code == Sender.HTTP_UNAUTHORIZED:
-                LOGGER.info('Renewing authentication.')
+            except requests.exceptions.HTTPError as exc:
+                response = exc.response
 
-                # reset the auth token in order to force the subsequent
-                # _authenticate() call to renew it
-                # Here, it can happen that the token is reset right after
-                # another thread has finished the authentication and thus
-                # the authentication may be performed twice
-                self._auth_token = None
+                # if the request failed due to an auth error
+                if response.status_code == Sender.HTTP_UNAUTHORIZED:
+                    LOGGER.info('Renewing authentication.')
 
-                # renew the authentication token
-                auth_token = self._authenticate()
+                    # reset the auth token in order to force the subsequent
+                    # _authenticate() call to renew it
+                    # Here, it can happen that the token is reset right after
+                    # another thread has finished the authentication and thus
+                    # the authentication may be performed twice
+                    self._auth_token = None
 
-                if auth_token is not None:
-                    # and try to repost
-                    return self._perform_request(url, payload, auth_token)
-            else:
-                # This is an error and it has to be forwarded
-                self._handle_http_error(exc, metername, payload,
-                                        auth_token, **kwargs)
+                    # renew the authentication token
+                    auth_token = self._authenticate()
+
+                    if auth_token is not None:
+                        # and try to repost
+                        if payload is not None:
+                            return self._perform_post_request(
+                                url, payload, auth_token)
+                        else:
+                            return None
+                else:
+                    # This is an error and it has to be forwarded
+                    self._handle_http_error(exc, metername, payload,
+                                            auth_token, **kwargs)
+
+        elif request_type == 'update':
+            # send the POST request
+            try:
+                if payload is None:
+                    payload = self._get_payload(request_type,
+                                                metername, **kwargs)
+                    return self._perform_update_request(url,
+                                                        auth_token, payload)
+                else:
+                    return self._perform_update_request(url,
+                                                        auth_token, payload)
+            except requests.exceptions.HTTPError as exc:
+                response = exc.response
+
+                # if the request failed due to an auth error
+                if response.status_code == Sender.HTTP_UNAUTHORIZED:
+                    LOGGER.info('Renewing authentication.')
+
+                    # reset the auth token in order to force the subsequent
+                    # _authenticate() call to renew it
+                    # Here, it can happen that the token is reset right after
+                    # another thread has finished the authentication and thus
+                    # the authentication may be performed twice
+                    self._auth_token = None
+
+                    # renew the authentication token
+                    auth_token = self._authenticate()
+
+                    if auth_token is not None:
+                        # and try to repost
+                        if payload is None:
+                            payload = self._get_payload(request_type,
+                                                        metername, **kwargs)
+                            return self._perform_update_request(
+                                url, auth_token, payload)
+                        else:
+                            return self._perform_update_request(
+                                url, auth_token, payload)
+                else:
+                    # This is an error and it has to be forwarded
+                    self._handle_http_error(exc, metername, payload,
+                                            auth_token, **kwargs)
 
     @classmethod
-    def _perform_request(cls, url, payload, auth_token):
+    def _perform_post_request(cls, url, payload, auth_token):
         """Perform the POST request"""
 
         LOGGER.debug('Performing request to %s', url)
@@ -188,6 +240,35 @@ class Sender(object):
             url, data=payload, headers=headers,
             timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
 
+        # Raises exception if there was an error
+        try:
+            response.raise_for_status()
+        # pylint: disable=broad-except
+        except Exception:
+            exc_info = 1
+            raise
+        else:
+            exc_info = 0
+        finally:
+            # Log out the result of the request for debugging purpose
+            LOGGER.debug(
+                'Result: %s, %d, %r',
+                get_status_name(response.status_code),
+                response.status_code, response.text, exc_info=exc_info)
+        return response
+
+    @classmethod
+    def _perform_update_request(cls, url, auth_token, payload):
+        """Perform the PUT/update request."""
+        LOGGER.debug('Performing request to %s', url)
+
+        # request headers
+        headers = {'X-Auth-Token': auth_token,
+                   'Content-type': 'application/json'}
+        # perform request and return its result
+        response = requests.put(
+            url, data=payload, headers=headers,
+            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
         # Raises exception if there was an error
         try:
             response.raise_for_status()

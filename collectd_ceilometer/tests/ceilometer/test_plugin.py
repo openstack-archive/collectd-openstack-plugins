@@ -306,7 +306,8 @@ class TestPlugin(unittest.TestCase):
         # write the value
         self.assertRaises(requests.RequestException, instance.write, data)
 
-    @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender.Sender,
+                       '_perform_post_request', spec=callable)
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()

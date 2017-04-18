@@ -47,7 +47,7 @@ class Sender(common_sender.Sender):
     def _create_request_url(self, metername, **kwargs):
         unit = kwargs['unit']
         metric_id = self._get_metric_id(metername, unit)
-        return self._url_base % (metric_id)
+        return "post", self._url_base % (metric_id)
 
     def _handle_http_error(self, exc, metername,
                            payload, auth_token, **kwargs):
@@ -66,7 +66,7 @@ class Sender(common_sender.Sender):
             url = self._url_base % (metric_id)
             # TODO(emma-l-foley): Add error checking
             # Submit the sample
-            result = self._perform_request(url, payload, auth_token)
+            result = self._perform_post_request(url, payload, auth_token)
             if result.status_code == common_sender.Sender.HTTP_CREATED:
                 LOGGER.debug('Result: %s', common_sender.Sender.HTTP_CREATED)
             else:
@@ -104,7 +104,7 @@ class Sender(common_sender.Sender):
                               "name": metername,
                               "unit": unit,
                               })
-        result = self._perform_request(url, payload, self._auth_token)
+        result = self._perform_post_request(url, payload, self._auth_token)
         metric_id = json.loads(result.text)['id']
         LOGGER.debug("metric_id=%s", metric_id)
         return metric_id
