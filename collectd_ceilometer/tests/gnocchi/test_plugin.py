@@ -18,8 +18,11 @@
 """Plugin tests"""
 
 import logging
+
 import mock
+
 import requests
+
 import unittest
 
 from collectd_ceilometer.common.keystone_light import KeystoneException
@@ -33,52 +36,52 @@ Logger = logging.getLoggerClass()
 
 
 def mock_collectd(**kwargs):
-    "Returns collecd module with collecd logging hooks."
+    """Returns collecd module with collecd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedCollectd.__name__, specs=True,
         get_dataset=mock.MagicMock(side_effect=Exception), **kwargs)
 
 
 class MockedCollectd(object):
-    "Mocked collectd module specifications."
+    """Mocked collectd module specifications."""
 
     def debug(self, record):
-        "Hook for debug messages"
+        """Hook for debug messages"""
 
     def info(self, record):
-        "Hook for info messages"
+        """Hook for info messages"""
 
     def warning(self, record):
-        "Hook for warning messages"
+        """Hook for warning messages"""
 
     def error(self, record):
-        "Hook for error messages"
+        """Hook for error messages"""
 
     def register_init(self, hook):
-        "Register an hook for init."
+        """Register an hook for init."""
 
     def register_config(self, hook):
-        "Register an hook for config."
+        """Register an hook for config."""
 
     def register_write(self, hook):
-        "Register an hook for write."
+        """Register an hook for write."""
 
     def register_shutdown(self, hook):
-        "Register an hook for shutdown."
+        """Register an hook for shutdown."""
 
     def get_dataset(self, s):
-        "Gets a dataset."
+        """Gets a dataset."""
 
 
 def mock_config(BATCH_SIZE=1, **kwargs):
-    "Returns collecd module with collecd logging hooks."
+    """Returns collecd module with collecd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
         BATCH_SIZE=BATCH_SIZE, **kwargs)
 
 
 class MockedConfig(object):
-    "Mocked config class."
+    """Mocked config class."""
 
     BATCH_SIZE = 1
 
@@ -88,7 +91,6 @@ def mock_value(
         _type='freq', type_instance=None, time=123456789, values=(1234,),
         **kwargs):
     """Create a mock value"""
-
     return mock.patch(
         __name__ + '.' + MockedValue.__name__, specs=True,
         host=host, plugin=plugin, plugin_instance=plugin_instance, type=_type,
@@ -120,7 +122,6 @@ class TestPlugin(unittest.TestCase):
     def test_callbacks(
             self, collectd, ROOT_LOGGER, CollectdLogHandler, Config, Plugin):
         """Verify that the callbacks are registered properly"""
-
         # When plugin function is called
         plugin.register_plugin(collectd=collectd)
 
@@ -147,7 +148,6 @@ class TestPlugin(unittest.TestCase):
     @mock_value()
     def test_write(self, data, config, collectd, ClientV3, post, get_metric_id):
         """Test collectd data writing"""
-
         auth_client = ClientV3.return_value
         auth_client.get_service_endpoint.return_value = \
             'https://test-gnocchi.tld'
@@ -227,7 +227,6 @@ class TestPlugin(unittest.TestCase):
     def test_write_auth_failed(
             self, data, config, collectd, LOGGER, ClientV3, post):
         """Test authentication failure"""
-
         # tell the auth client to rise an exception
         ClientV3.side_effect = KeystoneException(
             "Missing name 'xxx' in received services",
@@ -250,7 +249,8 @@ class TestPlugin(unittest.TestCase):
         # no requests method has been called
         post.assert_not_called()
 
-    @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender.Sender,
+                       '_perform_request', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
@@ -258,7 +258,6 @@ class TestPlugin(unittest.TestCase):
     def test_request_error(
             self, data, config, collectd, ClientV3, perf_req):
         """Test error raised by underlying requests module"""
-
         # tell POST request to raise an exception
         perf_req.side_effect = requests.RequestException('Test POST exception')
 
@@ -337,7 +336,6 @@ class TestPlugin(unittest.TestCase):
     def test_exception_value_error(self, data, config, collectd,
                                    LOGGER, Writer, ClientV3, post):
         """Test exception raised during write and shutdown"""
-
         writer = Writer.return_value
         writer.write.side_effect = ValueError('Test write error')
 
@@ -356,7 +354,6 @@ class TestPlugin(unittest.TestCase):
     def test_exception_runtime_error(self, data, config, collectd,
                                      LOGGER, Writer, ClientV3, post):
         """Test exception raised during write and shutdown"""
-
         writer = Writer.return_value
         writer.flush.side_effect = RuntimeError('Test shutdown error')
 

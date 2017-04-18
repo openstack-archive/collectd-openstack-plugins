@@ -14,15 +14,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Plugin tests
-
-"""
+"""Plugin tests"""
 
 from collections import namedtuple
 
 import logging
+
 import mock
+
 import requests
+
 import unittest
 
 from collectd_ceilometer.ceilometer import plugin
@@ -35,52 +36,52 @@ Logger = logging.getLoggerClass()
 
 
 def mock_collectd(**kwargs):
-    "Returns collecd module with collecd logging hooks."
+    """Returns collecd module with collecd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedCollectd.__name__, specs=True,
         get_dataset=mock.MagicMock(side_effect=Exception), **kwargs)
 
 
 class MockedCollectd(object):
-    "Mocked collectd module specifications."
+    """Mocked collectd module specifications."""
 
     def debug(self, record):
-        "Hook for debug messages"
+        """Hook for debug messages"""
 
     def info(self, record):
-        "Hook for info messages"
+        """Hook for info messages"""
 
     def warning(self, record):
-        "Hook for warning messages"
+        """Hook for warning messages"""
 
     def error(self, record):
-        "Hook for error messages"
+        """Hook for error messages"""
 
     def register_init(self, hook):
-        "Register an hook for init."
+        """Register an hook for init."""
 
     def register_config(self, hook):
-        "Register an hook for config."
+        """Register an hook for config."""
 
     def register_write(self, hook):
-        "Register an hook for write."
+        """Register an hook for write."""
 
     def register_shutdown(self, hook):
-        "Register an hook for shutdown."
+        """Register an hook for shutdown."""
 
     def get_dataset(self, s):
-        "Gets a dataset."
+        """Gets a dataset."""
 
 
 def mock_config(BATCH_SIZE=1, **kwargs):
-    "Returns collecd module with collecd logging hooks."
+    """Returns collecd module with collecd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
         BATCH_SIZE=BATCH_SIZE, **kwargs)
 
 
 class MockedConfig(object):
-    "Mocked config class."
+    """Mocked config class."""
 
     BATCH_SIZE = 1
     OS_AUTH_URL = "http://test-url"
@@ -91,7 +92,6 @@ def mock_value(
         _type='freq', type_instance=None, time=123456789, values=(1234,),
         **kwargs):
     """Create a mock value"""
-
     return mock.patch(
         __name__ + '.' + MockedValue.__name__, specs=True,
         host=host, plugin=plugin, plugin_instance=plugin_instance, type=_type,
@@ -123,7 +123,6 @@ class TestPlugin(unittest.TestCase):
     def test_callbacks(
             self, collectd, ROOT_LOGGER, CollectdLogHandler, Config, Plugin):
         """Verify that the callbacks are registered properly"""
-
         # When plugin function is called
         plugin.register_plugin(collectd=collectd)
 
@@ -149,7 +148,6 @@ class TestPlugin(unittest.TestCase):
     @mock_value()
     def test_write(self, data, config, collectd, ClientV3, post):
         """Test collectd data writing"""
-
         auth_client = ClientV3.return_value
         auth_client.get_service_endpoint.return_value =\
             'https://test-ceilometer.tld'
@@ -243,7 +241,6 @@ class TestPlugin(unittest.TestCase):
     def test_write_auth_failed(
             self, data, config, collectd, LOGGER, ClientV3, post):
         """Test authentication failure"""
-
         ClientV3.auth_url = "http://tst-url"
         # tell the auth client to rise an exception
         ClientV3.side_effect = RuntimeError('Test Client() exception')
@@ -266,7 +263,6 @@ class TestPlugin(unittest.TestCase):
     def test_write_auth_failed2(
             self, data, config, collectd, LOGGER, ClientV3, post):
         """Test authentication failure2"""
-
         ClientV3.side_effect = keystone_light.KeystoneException(
             "Missing name 'xxx' in received services",
             "exception",
@@ -296,7 +292,6 @@ class TestPlugin(unittest.TestCase):
     def test_request_error(
             self, data, config, collectd, ClientV3, post):
         """Test error raised by underlying requests module"""
-
         # tell POST request to raise an exception
         post.side_effect = requests.RequestException('Test POST exception')
 
@@ -306,7 +301,8 @@ class TestPlugin(unittest.TestCase):
         # write the value
         self.assertRaises(requests.RequestException, instance.write, data)
 
-    @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender.Sender,
+                       '_perform_request', spec=callable)
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
@@ -315,7 +311,6 @@ class TestPlugin(unittest.TestCase):
     def test_reauthentication(self, data, config, collectd,
                               ClientV3, post, perf_req):
         """Test re-authentication"""
-
         # response returned on success
         response_ok = requests.Response()
         response_ok.status_code = requests.codes["OK"]
@@ -341,7 +336,7 @@ class TestPlugin(unittest.TestCase):
         # verify the auth token
         perf_req.assert_called_once_with(
             mock.ANY, mock.ANY,
-            'Test auth token')
+            'Test auth token', 'post')
 
         # set a new auth token
         client.auth_token = 'New test auth token'
@@ -355,9 +350,9 @@ class TestPlugin(unittest.TestCase):
         # verify the auth token
         perf_req.assert_has_calls([
             mock.call(mock.ANY, mock.ANY,
-                      'Test auth token'),
+                      'Test auth token', 'post'),
             mock.call(mock.ANY, mock.ANY,
-                      'New test auth token')
+                      'New test auth token', 'post')
             ])
 
     @mock.patch.object(requests, 'post', spec=callable)
@@ -424,7 +419,6 @@ class TestPlugin(unittest.TestCase):
     def test_exceptions(
             self, data, config, collectd, LOGGER, Writer, ClientV3, post):
         """Test exception raised during write and shutdown"""
-
         writer = Writer.return_value
         writer.write.side_effect = ValueError('Test write error')
         writer.flush.side_effect = RuntimeError('Test shutdown error')
@@ -439,7 +433,6 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     def test_log_debug_to_collectd(self, collectd, ROOT_LOGGER):
         """Verify that debug messages are sent to collectd."""
-
         plugin.register_plugin(collectd=collectd)
 
         # When log messages are produced
@@ -452,7 +445,6 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     def test_log_infos_to_collectd(self, collectd, ROOT_LOGGER):
         """Verify that the callbacks are registered properly"""
-
         plugin.register_plugin(collectd=collectd)
 
         # When log messages are produced
@@ -465,7 +457,6 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     def test_log_errors_to_collectd(self, collectd, ROOT_LOGGER):
         """Verify that the callbacks are registered properly"""
-
         plugin.register_plugin(collectd=collectd)
 
         # When log messages are produced
@@ -478,7 +469,6 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     def test_log_fatal_to_collectd(self, collectd, ROOT_LOGGER):
         """Verify that the callbacks are registered properly"""
-
         plugin.register_plugin(collectd=collectd)
 
         # When log messages are produced
@@ -491,7 +481,6 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     def test_log_exceptions_to_collectd(self, collectd, ROOT_LOGGER):
         """Verify that the callbacks are registered properly"""
-
         plugin.register_plugin(collectd=collectd)
 
         # When exception is logged
