@@ -250,7 +250,8 @@ class TestPlugin(unittest.TestCase):
         # no requests method has been called
         post.assert_not_called()
 
-    @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender.Sender,
+                       '_perform_post_request', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
