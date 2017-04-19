@@ -1,0 +1,6 @@
+---
+ - features:
+   This feature allows the user to specify the severity of any alarm created by
+   a meter/metric. This can be specified in the local.conf using the
+   configuration option "COLLECTD_AODH_SEVERITYS" and will configure this on
+   deployment. If left unset the an alarms severity will default to "moderate".

@@ -167,6 +167,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
+        config_custom_severitys "aodh" "$COLLECTD_ALARM_SEVERITYS"
     fi
 
     # Configure collectd logfile plugin
@@ -193,9 +194,26 @@ function config_custom_units {
         OIFS=$IFS
         IFS=','
 
-        for UNIT in $custom_units
+        for UNIT in $custom_units;
         do
                 sudo sed -i '/<UNITS>/a\       UNIT '"$UNIT"'' $COLLECTD_CONF_DIR/collectd-$service_name-plugin.conf
+        done
+    IFS=$OIFS
+    fi
+}
+
+# Check for severitys defined by the user
+function config_custom_severitys {
+    service_name=$1
+    custom_severitys=$2
+    if [[ $custom_severitys != none ]]; then
+
+        OIFS=$IFS
+        IFS=','
+
+        for ALARM_SEVERITYS in $custom_severitys;
+        do
+                sudo sed -i '/<ALARM_SEVERITYS>/a\            ALARM_SEVERITY '"$ALARM_SEVERITYS"'' $COLLECTD_CONF_DIR/collectd-$service_name-plugin.conf
         done
     IFS=$OIFS
     fi
