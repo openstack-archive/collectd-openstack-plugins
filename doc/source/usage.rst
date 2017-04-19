@@ -174,6 +174,19 @@ COLLECTD_PREFIX
     Default: /usr/
 
 
+COLLECTD_AODH_SEVERITIES
+~~~~~~~~~~~~~~~~~~~~~~~
+    (meter=severity) a comma seperated list of pairs, defining meters and the
+    severity of the alarms they will trigger if their value goes above a
+    certain threshold. The meter is generally in the form of "plugin.type"
+    where plugin and plugin type are attributes of the collectd data. There are
+    three severity options available "low", "moderate" and "critical".
+    If this configuration option is left unset for any alarm the default
+    severity is "moderate".
+
+    Example: COLLECTD_AODH_SEVERITIES='"<meter>" <severity>, "<meter>" <severity>'
+
+
 Authenticating using Identity Server API v3
 -------------------------------------------
 

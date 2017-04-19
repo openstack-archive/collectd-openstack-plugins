@@ -110,7 +110,7 @@ class Sender(object):
 
         return self._auth_token
 
-    def send(self, metername, severity, resource_id):
+    def send(self, metername, severity, resource_id, alarm_severity):
         """Send the payload to Aodh."""
         # get the auth_token
         auth_token = self._authenticate()
@@ -132,7 +132,8 @@ class Sender(object):
 
         # Update or create this alarm
         result = self._update_or_create_alarm(alarm_name, auth_token,
-                                              severity, metername)
+                                              severity, metername,
+                                              alarm_severity)
 
         if result is None:
             return
@@ -156,7 +157,7 @@ class Sender(object):
             if auth_token is not None:
                 result = self._update_or_create_alarm(alarm_name,
                                                       auth_token, severity,
-                                                      metername)
+                                                      metername, alarm_severity)
 
         if result.status_code == HTTP_NOT_FOUND:
             LOGGER.debug("Received 404 error when submitting %s notification, \
@@ -166,7 +167,7 @@ class Sender(object):
             # check for and/or get alarm_id
             result = self._update_or_create_alarm(alarm_name,
                                                   auth_token, severity,
-                                                  metername)
+                                                  metername, alarm_severity)
 
         if result.status_code == HTTP_CREATED:
             LOGGER.debug('Result: %s', HTTP_CREATED)
@@ -183,7 +184,7 @@ class Sender(object):
         return endpoint
 
     def _update_or_create_alarm(self, alarm_name, auth_token,
-                                severity, metername):
+                                severity, metername, alarm_severity):
         # check for an alarm and update
         try:
             alarm_id = self._get_alarm_id(alarm_name)
@@ -197,18 +198,18 @@ class Sender(object):
             LOGGER.warn('No known ID for %s', alarm_name)
             result, self._alarm_ids[alarm_name] = \
                 self._create_alarm(endpoint, severity,
-                                   metername, alarm_name)
+                                   metername, alarm_name, alarm_severity)
         return result
 
     def _create_alarm(self, endpoint, severity, metername,
-                      alarm_name):
+                      alarm_name, alarm_severity):
         """Create a new alarm with a new alarm_id."""
         url = "{}/v2/alarms/".format(endpoint)
 
         rule = {'event_type': metername, }
         payload = json.dumps({'state': self._get_alarm_state(severity),
                               'name': alarm_name,
-                              'severity': severity,
+                              'severity': alarm_severity,
                               'type': "event",
                               'event_rule': rule,
                               })
@@ -219,7 +220,7 @@ class Sender(object):
         return result, alarm_id
 
     def _get_alarm_id(self, alarm_name):
-        """Try and return an alarm_id for an collectd notification"""
+        """Try and return an alarm_id for a collectd notification."""
         return self._alarm_ids[alarm_name]
 
     def _get_alarm_state(self, severity):
