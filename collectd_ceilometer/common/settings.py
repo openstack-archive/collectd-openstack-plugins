@@ -75,6 +75,7 @@ class Config(object):
         # dictionary for user-defined units
         self._user_units = {}
         self._units = UNITS.copy()
+        self._alarm_severities = {}
 
     def read(self, cfg):
         """Read the collectd configuration
@@ -106,6 +107,22 @@ class Config(object):
                 return unit
         return self._units.get(plugin, "None")
 
+    def alarm_severity(self, plugin, meter):
+        """Get alarm_severity for a meter."""
+        try:
+            # check for an user-defined alarm severity
+            alarm_severity = self._alarm_severities[meter]
+            if (alarm_severity == 'low' or alarm_severity == 'moderate' or
+               alarm_severity == 'critical'):
+                return alarm_severity
+            else:
+                LOGGER.warn('The alarm severity specified is invalid')
+                return None
+        except KeyError as ke:
+            LOGGER.info(ke)
+            LOGGER.info('There is no user-defined severity for this alarm')
+        return None
+
     def _read_node(self, node):
         """Read a configuration node
 
@@ -117,6 +134,11 @@ class Config(object):
         # if the node is 'UNITS' call the units function
         if key == 'UNITS':
             self._read_units(node.children)
+            return
+
+        # if the node is 'ALARM_SEVERITYS call the alarm severitys function
+        if key == 'ALARM_SEVERITYS':
+            self._read_alarm_severities(node.children)
             return
 
         # if we have a root node read only all its children
@@ -172,3 +194,23 @@ class Config(object):
                 LOGGER.error(
                     'Invalid unit configuration: %s', node.key.upper())
         self._units.update(self._user_units)
+
+    def _read_alarm_severitys(self, nodes):
+        """Read in any user-defined severity settings for alarms."""
+        for node in nodes:
+            if node.key.upper() == 'ALARM_SEVERITY':
+                if len(node.values) == 2:
+                    key, val = node.values
+                    self._alarm_severities[key] = val
+                    LOGGER.info(
+                        'Got user-defined severity "%s" for "%s" alarm',
+                        val, key)
+                else:
+                    LOGGER.error(
+                        'Invalid alarm severity configuration:\
+                        severity %s' % ' '.join(
+                            ['"%s"' % i for i in node.values]))
+            else:
+                LOGGER.error(
+                    'Invalid alarm severity configuration: %s',
+                    node.key.upper())
