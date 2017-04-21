@@ -36,8 +36,8 @@ Pre-requisites
 Installation of Devstack
 ------------------------
 
-Follow the instructions provided in the following document to set up your own
-Devstack deployment.
+Follow the instructions provided in the following documentation to set up your
+own Devstack deployment.
 
     http://docs.openstack.org/developer/devstack/guides/single-machine.html
 
@@ -54,39 +54,47 @@ edited to enable additional services.
 To configure Devstack for to install the plugin, download the sample local.conf
 from the collectd-ceilometer-plugin repo into your devstack directory.
 
-| cd devstack
-| wget https://github.com/openstack/collectd-ceilometer-plugin/blob/master/collectd_ceilometer/doc/source/examples/local.conf.minimal
+::
+
+  cd devstack
+  wget https://github.com/openstack/collectd-ceilometer-plugin/blob/master/collectd_ceilometer/doc/source/examples/local.conf.minimal
 
 Edit the "HOST_IP" varible to appropriately match your environment.
 
-Also include your chosen "CEILOMETER_BACKEND", as there is no default backend for
+Include your chosen "CEILOMETER_BACKEND", as there is no default backend for
 ceilometer. The options for this backend include mysql,es,postgresql or mongodb.
 
 If you wish to enable any extra features please follow the instructions in the
 "Additional Features" section below before moving on to the next step.
 
-Finally, build your devstack environment.
+Build your devstack environment:
 
-| ./stack.sh
+::
 
-Verfication of Collectd-ceilometer-plugin
+  ./stack.sh
+
+Verfication of collectd-ceilometer-plugin
 -----------------------------------------
 
-Confirm that the collectd service is up and running.
+Confirm that the collectd service is up and running:
 
-| sudo systemctl status collectd.service
+::
+
+  sudo systemctl status collectd.service
 
 By default collectd enables the "cpu.cpu" meter. Check that the statistics for
 this meter are being sent to ceilometer, thus confirming that collectd is
 working with ceilometer.
 
-| ceilometer sample-list --meter cpu.cpu
+::
 
-Addtional Features
-------------------
+  ceilometer sample-list --meter cpu.cpu
+
+Additional Features
+-------------------
 
 Custom Units Feature
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 This feature enables users to define new units for existing meter values.
 To enable this feature execute the following instructions:
@@ -94,17 +102,23 @@ To enable this feature execute the following instructions:
 * To include your new units, add the following line with your chosen units to
   your local.conf file.
 
-| COLLECTD_CUSTOM_UNITS="<meter> <unit>"
+  ::
+
+    COLLECTD_CUSTOM_UNITS="<meter> <unit>"
 
   If you would like to add more than one new unit include them in the same line
   and seperate each meter and its unit with a comma, as shown below.
 
-| COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
+  ::
+
+    COLLECTD_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 Gnocchi
 -------
 
 To deploy with gnocchi using devstack, add the following to you local.conf:
+
+::
 
     enable_plugin collectd-ceilometer-plugin http://github.com/openstack/collectd-ceilometer-plugin
 
@@ -117,7 +131,7 @@ To deploy with gnocchi using devstack, add the following to you local.conf:
     COLLECTD_GNOCCHI_ENABLED=True
 
 Aodh
-====
+----
 
 Aodh is an alarming service that allows an alarm to be created and/or updated
 if there is something unusual happening with the system. When this service is
@@ -125,6 +139,8 @@ enabled via the collectd-ceilometer-plugin, it allows alarms to be
 created/updated for all notifications sent from collectd. All notifications
 sent from collectd are configured as event alarms in Aodh.
 To enable aodh with collectd, add the following to your local.conf:
+
+::
 
    #AODH
    enable_plugin aodh https://git.openstack.org/openstack/aodh
@@ -139,6 +155,8 @@ doc/source/alarms_guide.rst.
 
 Finally an alarm can also be created in a heat template. The instructions for
 this are provided in:
+
 See :doc:`<heat_scaling_guide.rst>`
+
 This enables you to scale a resource that you define based on the triggering of
 an alarm.

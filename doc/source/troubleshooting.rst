@@ -49,21 +49,30 @@ the information below can help diagnose the problem:
      you that.
 
 - Is the correct OS_AUTH_URL is used?
-  $ openstack catalog show keystone
-  $ grep "OS_AUTH_URL" /path/to/collectd.conf.d/collectd-ceilometer-plugin.conf
+
+  ::
+
+    openstack catalog show keystone
+    grep "OS_AUTH_URL" /path/to/collectd.conf.d/collectd-ceilometer-plugin.conf
 
 - Is collectd-ceilometer-plugin.conf being parsed?
   - Does the collectd.conf have an Include block/directive?
+
     ::
+
        Include "/etc/collectd/collectd.conf.d/*.conf"
+
     OR
+
     ::
+
        <Include /etc/collectd/collectd.conf.d/>
          Filter "*.conf"
        </Include>
 
 - Enable the logfile plugin in collectd for better information (sample
-  configuration at `../etc/collectd.conf.d/logging.conf`_)
+  configuration at `../etc/collectd.conf.d/logging.conf`_).
+
   - Make sure to set the LogLevel to “debug” for maximum information
   - Use "VERBOSE True" in collectd-ceilometer-plugin.conf, in order to elevate
     debug messages to LogLevel info.
