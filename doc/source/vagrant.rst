@@ -29,6 +29,7 @@ This project is distributed with a Vagrantfile intended to be used by
 developers to run functional tests on a Linux virtual machine.
 
 The software provided by the appliance are:
+
 - Ubuntu Server 16.04 LTS appliance running inside Virtual Box
 - The collectd provided by Ubuntu
 - Python 2.7 and 3.4 provided by Ubuntu
@@ -37,6 +38,7 @@ The software provided by the appliance are:
 
 To use Vagrant to test this plugin you have to install following software
 up to date software on your host machine:
+
 - Vagrant
 - VirtualBox 5
 
@@ -59,6 +61,7 @@ Virtual Box
 -----------
 
 Virtual Box version greater than 5 should works fine.
+
 
 Many Linux distributions should provide a valid version of VirtualBox.
 
