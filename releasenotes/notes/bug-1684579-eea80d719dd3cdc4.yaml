@@ -1,0 +1,8 @@
+---
+ fixes:
+  - |
+    Fixes 'bug 1684579 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1684579'.
+    Removed the creation of a back-up directory for all of the .conf files,
+    instead renamed them to .conf.b. This prevents that back-ups being read
+    if the original is deleted, thus preventing that service to run when it is
+    not configured properly.
