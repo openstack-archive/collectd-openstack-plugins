@@ -27,13 +27,16 @@ Welcome to collectd-ceilometer-plugin's documentation!
 
 Contents:
 
-.. toctree::
-   :maxdepth: 2
+.. [TOC]:
 
    readme
    installation
    usage
    contributing
+   devstackGSG
+   GSG
+   vagrant
+   troubleshooting
 
 Indices and tables
 ------------------
