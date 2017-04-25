@@ -1,0 +1,7 @@
+---
+ fixes:
+   - |
+     Fixes 'bug 1672296 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1672296'.
+     Included a delete_alarms tool so that alarms can be delete manually before
+     collectd is restarted. This prevents duplicate alarms from being created.
+     Updated devstackGSG.rst to include instructions on using this tool.
