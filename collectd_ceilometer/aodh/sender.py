@@ -24,6 +24,7 @@ from collectd_ceilometer.common.settings import Config
 
 import json
 import logging
+import os
 import requests
 from requests.exceptions import RequestException
 import six
@@ -226,6 +227,15 @@ class Sender(object):
         result = self._perform_post_request(url, payload, self._auth_token)
         alarm_id = json.loads(result.text)['alarm_id']
         LOGGER.debug("alarm_id=%s", alarm_id)
+        # If the alarm has been created then write to a file so that they can
+        # be deleted by the delete_alarms tool
+        if alarm_id is not None:
+            filepath = \
+                os.path.join(
+                    "/opt/stack/collectd-ceilometer/collectd_ceilometer/aodh",
+                    "alarms.txt")
+            alarm_ids = open(filepath, 'a')
+            alarm_ids.write(alarm_id + '\n')
         return alarm_id
 
     def _get_alarm_state(self, message):
