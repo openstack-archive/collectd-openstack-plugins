@@ -22,6 +22,7 @@ from collectd_ceilometer.common.settings import Config
 
 import json
 import logging
+import os
 
 LOGGER = logging.getLogger(__name__)
 ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
@@ -107,4 +108,10 @@ class Sender(common_sender.Sender):
         result = self._perform_request(url, payload, self._auth_token)
         metric_id = json.loads(result.text)['id']
         LOGGER.debug("metric_id=%s", metric_id)
+        if metric_id is not None:
+            path = "/opt/stack/collectd-ceilometer/collectd_ceilometer/gnocchi"
+            filepath = \
+                os.path.join(path, "metrics.txt")
+            metric_ids = open(filepath, 'a')
+            metric_ids.write(metric_id + '\n')
         return metric_id
