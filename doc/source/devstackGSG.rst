@@ -116,6 +116,22 @@ To deploy with gnocchi using devstack, add the following to you local.conf:
     GNOCCHI_USE_KEYSTONE=True
     COLLECTD_GNOCCHI_ENABLED=True
 
+Gnocchi Tools
+~~~~~~~~~~~~~
+
+ * delete_metrics
+   When collectd is restarted duplicate metrics can be created if the same
+   configuration is used. A delete metrics tool has been provided to prevent
+   this from happening. This tool has to be used manually.
+   See :doc:`<tools/delete_metrics.sh>`
+   To delete all of the pre-existing metrics, just run the following command
+   prior to restarting collectd:
+
+     ::
+
+       $ . tools/delete_metrics.sh
+       $ sudo service collectd restart
+
 Aodh
 ====
 
