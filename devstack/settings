@@ -43,3 +43,27 @@ fi
 #Custom units feature
 COLLECTD_CEILOMETER_UNITS=${COLLECTD_CEILOMETER_CUSTOM_UNITS:-none}
 COLLECTD_GNOCCHI_UNITS=${COLLECTD_GNOCCHI_CUSTOM_UNITS:-none}
+
+# User defined requirements
+COLLECTD_ADDITIONAL_PACKAGES=${COLLECTD_ADDITIONAL_PACKAGES:-''}
+COLLECTD_REQUIREMENTS=''
+
+# Definition for requirements
+ubuntu_bin_requirements="libvirt-bin libvirt-dev python-libvirt"
+ubuntu_src_requirements="$ubuntu_bin_requirements byacc flex bison build-essential automake libgcrypt20 libtool"
+centos_bin_requirements="libvirt libvirt-devel libvirt-python"
+centos_src_requirements="$centos_bin_requirements flex bison automake autoconf libtool"
+
+if is_ubuntu; then
+   if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+        COLLECTD_REQUIREMENTS="$ubuntu_src_requirements"
+   else
+        COLLECTD_REQUIREMENTS="$ubuntu_bin_requirements"
+   fi
+elif is_fedora; then
+  if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
+        COLLECTD_REQUIREMENTS="$centos_src_requirements"
+  else
+        COLLECTD_REQUIREMENTS="$centos_bin_requirements"
+  fi
+fi

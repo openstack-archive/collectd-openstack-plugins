@@ -21,17 +21,8 @@ function stop_collectd {
 function install_requirements {
     echo "Installing pre-resquisites"
 
-    if is_ubuntu; then
-        install_package libvirt-bin libvirt-dev python-libvirt
-        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
-            install_package byacc flex bison build-essential automake libgcrypt20 libtool
-        fi
-
-    elif is_fedora; then
-        install_package libvirt libvirt-devel libvirt-python
-        if [[ "$COLLECTD_INSTALL_TYPE" == "source" ]]; then
-            install_package flex bison automake autoconf libtool
-        fi
+    if [[ ! -z "$COLLECTD_REQUIREMENTS" ]]; then
+        install_package $COLLECTD_REQUIREMENTS $COLLECTD_ADDITIONAL_PACKAGES
     else
         echo "Unsupported distros"
     fi
