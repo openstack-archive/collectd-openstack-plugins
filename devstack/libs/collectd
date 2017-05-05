@@ -175,9 +175,9 @@ function adapt_collectd_conf {
     sudo sed -i 's|File.*$|File "'$COLLECTD_LOG_FILE'"|g' $COLLECTD_CONF_DIR/01-logfile.conf
 
     # Create a backup for all of the .conf files
-    sudo mkdir -p "$COLLECTD_CONF_DIR/backup"
+    sudo mkdir -p $COLLECTD_CONF_DIR/backup
     sudo cp $COLLECTD_CONF_DIR/*.conf $COLLECTD_CONF_DIR/backup/
-
+    sudo rename 's|\.conf$|.conf.bak|' $COLLECTD_CONF_DIR/backup/*.conf
 }
 
 function config_custom_units {
