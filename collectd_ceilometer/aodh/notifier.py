@@ -48,9 +48,9 @@ class Notifier(object):
             'Writing: plugin="%s", message="%s", severity="%s", time="%s',
             vl.plugin, message, severity, timestamp)
 
-        self._send_data(metername, severity, resource_id, message)
+        self._send_data(metername, severity, resource_id)
 
-    def _send_data(self, metername, severity, resource_id, message):
+    def _send_data(self, metername, severity, resource_id):
         """Send data to Aodh."""
         LOGGER.debug('Sending alarm for %s',  metername)
-        self._sender.send(metername, severity, resource_id, message)
+        self._sender.send(metername, severity, resource_id)
