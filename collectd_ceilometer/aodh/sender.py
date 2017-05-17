@@ -110,7 +110,7 @@ class Sender(object):
 
         return self._auth_token
 
-    def send(self, metername, severity, resource_id, message):
+    def send(self, metername, severity, resource_id):
         """Send the payload to Aodh."""
         # get the auth_token
         auth_token = self._authenticate()
@@ -131,7 +131,7 @@ class Sender(object):
         alarm_name = self._get_alarm_name(metername, resource_id)
 
         # Update or create this alarm
-        result = self._update_or_create_alarm(alarm_name, message, auth_token,
+        result = self._update_or_create_alarm(alarm_name, auth_token,
                                               severity, metername)
 
         if result is None:
@@ -154,7 +154,7 @@ class Sender(object):
             auth_token = self._authenticate()
 
             if auth_token is not None:
-                result = self._update_or_create_alarm(alarm_name, message,
+                result = self._update_or_create_alarm(alarm_name,
                                                       auth_token, severity,
                                                       metername)
 
@@ -164,7 +164,7 @@ class Sender(object):
                          alarm_name)
 
             # check for and/or get alarm_id
-            result = self._update_or_create_alarm(alarm_name, message,
+            result = self._update_or_create_alarm(alarm_name,
                                                   auth_token, severity,
                                                   metername)
 
@@ -182,12 +182,12 @@ class Sender(object):
             Config.instance().CEILOMETER_URL_TYPE)
         return endpoint
 
-    def _update_or_create_alarm(self, alarm_name, message, auth_token,
+    def _update_or_create_alarm(self, alarm_name, auth_token,
                                 severity, metername):
         # check for an alarm and update
         try:
             alarm_id = self._get_alarm_id(alarm_name)
-            result = self._update_alarm(alarm_id, message, auth_token)
+            result = self._update_alarm(alarm_id, severity, auth_token)
 
         # or create a new alarm
         except KeyError as ke:
@@ -197,16 +197,16 @@ class Sender(object):
             LOGGER.warn('No known ID for %s', alarm_name)
             result, self._alarm_ids[alarm_name] = \
                 self._create_alarm(endpoint, severity,
-                                   metername, alarm_name, message)
+                                   metername, alarm_name)
         return result
 
     def _create_alarm(self, endpoint, severity, metername,
-                      alarm_name, message):
+                      alarm_name):
         """Create a new alarm with a new alarm_id."""
         url = "{}/v2/alarms/".format(endpoint)
 
         rule = {'event_type': metername, }
-        payload = json.dumps({'state': self._get_alarm_state(message),
+        payload = json.dumps({'state': self._get_alarm_state(severity),
                               'name': alarm_name,
                               'severity': severity,
                               'type': "event",
@@ -222,12 +222,11 @@ class Sender(object):
         """Try and return an alarm_id for an collectd notification"""
         return self._alarm_ids[alarm_name]
 
-    def _get_alarm_state(self, message):
+    def _get_alarm_state(self, severity):
         """Get the state of the alarm."""
-        message = message.split()
-        if 'above' in message:
+        if severity == 'critical' or severity == 'moderate':
             alarm_state = "alarm"
-        elif 'within' in message:
+        elif severity == 'low':
             alarm_state = "ok"
         else:
             alarm_state = "insufficient data"
@@ -238,11 +237,11 @@ class Sender(object):
         alarm_name = metername + "(" + resource_id + ")"
         return alarm_name
 
-    def _update_alarm(self, alarm_id, message, auth_token):
+    def _update_alarm(self, alarm_id, severity, auth_token):
         """Perform the alarm update."""
         url = self._url_base % (alarm_id)
         # create the payload and update the state of the alarm
-        payload = json.dumps(self._get_alarm_state(message))
+        payload = json.dumps(self._get_alarm_state(severity))
         return self._perform_update_request(url, auth_token, payload)
 
     @classmethod
