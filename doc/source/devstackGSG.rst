@@ -168,3 +168,19 @@ this are provided in :doc:`<heat_scaling_guide.rst>`
 
 This enables you to scale a resource that you define based on the triggering of
 an alarm.
+
+Aodh Tools
+~~~~~~~~~
+
+ * delete_alarms
+   When collectd is restarted duplicate alarms can be created if the same
+   configuration is used. A delete alarms tool has been provided to allow
+   deletion of all alarms before collectd restart.
+   See :doc:`</tools/delete_alarms.sh>`
+   To delete all of the alarms, just run the following command prior to
+   restarting collectd:
+
+     ::
+
+       $ . tools/delete_alarms.sh
+       $ sudo service collectd restart
