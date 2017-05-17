@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 
 from collectd_ceilometer.common.settings import Config
+
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -72,10 +73,15 @@ class Meter(object):
         """Get the notification message."""
         return vl.message
 
-    def severity(self, vl):
+    def collectd_severity(self, vl):
         """Get the notification severity and translate to Aodh severity type."""
         collectd_severity = {self._collectd.NOTIF_FAILURE: 'critical',
                              self._collectd.NOTIF_WARNING: 'moderate',
                              self._collectd.NOTIF_OKAY: 'low',
                              }.get(vl.severity)
         return collectd_severity
+
+    def alarm_severity(self, meter_name):
+        """Get the user-defined severity for the alarm, or use default."""
+        # pylint: disable=no-self-use
+        return Config.instance().alarm_severity(meter_name)
