@@ -18,8 +18,11 @@
 """Plugin tests."""
 
 import logging
+
 import mock
+
 import requests
+
 import unittest
 
 from collectd_ceilometer.aodh import plugin
@@ -159,16 +162,17 @@ class TestPlugin(unittest.TestCase):
 
         _get_alarm_name.return_value = 'my-alarm'
         meter_name = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         resource_id = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         # check that the function is called
         _update_or_create_alarm.assert_called_once_with(
             instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # reset function
         _update_or_create_alarm.reset_mock()
@@ -176,12 +180,12 @@ class TestPlugin(unittest.TestCase):
         # run test again for failed attempt
         _update_or_create_alarm.return_value = None
 
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         # and values that have been sent
         _update_or_create_alarm.assert_called_once_with(
             instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # reset post method
         _update_or_create_alarm.reset_mock()
@@ -211,11 +215,12 @@ class TestPlugin(unittest.TestCase):
         # init values to send
         _get_alarm_id.return_value = 'my-alarm-id'
         metername = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         rid = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values
-        instance.send(metername, severity, rid)
+        instance.send(metername, severity, rid, alarm_severity)
 
         # update the alarm
         put.assert_called_once_with(
@@ -254,11 +259,12 @@ class TestPlugin(unittest.TestCase):
         _get_alarm_id.side_effect = KeyError()
         _create_alarm.return_value = requests.Response(), 'my-alarm-id'
         metername = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         rid = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values again
-        instance.send(metername, severity, rid)
+        instance.send(metername, severity, rid, alarm_severity)
 
         put.assert_not_called()
 
@@ -296,7 +302,7 @@ class TestPlugin(unittest.TestCase):
         put.assert_not_called()
 
     @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_low_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'low'
 
@@ -319,7 +325,7 @@ class TestPlugin(unittest.TestCase):
                             'insufficient data')
 
     @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_moderate_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'moderate'
 
@@ -342,7 +348,7 @@ class TestPlugin(unittest.TestCase):
                             'insufficient data')
 
     @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_critical_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'critical'
 
@@ -365,7 +371,7 @@ class TestPlugin(unittest.TestCase):
                             'insufficient data')
 
     @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_other_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is not low/moderate/critical
 
@@ -414,7 +420,6 @@ class TestPlugin(unittest.TestCase):
                               ClientV3, meter, _get_alarm_name,
                               _update_or_create_alarm):
         """Test re-authentication for update request."""
-
         # response returned on success
         response_ok = requests.Response()
         response_ok.status_code = requests.codes["OK"]
@@ -433,15 +438,16 @@ class TestPlugin(unittest.TestCase):
 
         alarm_name = _get_alarm_name.return_value
         meter_name = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         resource_id = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the data
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         _update_or_create_alarm.assert_called_once_with(
             instance, alarm_name, client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # de-assert the request
         _update_or_create_alarm.reset_mock()
@@ -460,11 +466,11 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'Test auth token'
 
         # send the data
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         _update_or_create_alarm.assert_called_once_with(
             instance, alarm_name, client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # update/create response is unauthorized -> new token needs
         # to be acquired
@@ -475,7 +481,7 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'New test auth token'
 
         # send the data again
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Notifier', autospec=True)

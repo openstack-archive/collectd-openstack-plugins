@@ -40,17 +40,21 @@ class Notifier(object):
         # prepare all data related to the sample
         metername = notification.meter_name(vl)
         message = notification.message(vl)
-        severity = notification.severity(vl)
+        severity = notification.collectd_severity(vl)
         resource_id = notification.resource_id(vl)
         timestamp = datetime.datetime.utcfromtimestamp(vl.time).isoformat()
+        if notification.alarm_severity(metername) is not None:
+            alarm_severity = notification.alarm_severity(metername)
+        else:
+            alarm_severity = 'moderate'
 
         LOGGER.debug(
             'Writing: plugin="%s", message="%s", severity="%s", time="%s',
             vl.plugin, message, severity, timestamp)
 
-        self._send_data(metername, severity, resource_id)
+        self._send_data(metername, severity, resource_id, alarm_severity)
 
-    def _send_data(self, metername, severity, resource_id):
+    def _send_data(self, metername, severity, resource_id, alarm_severity):
         """Send data to Aodh."""
         LOGGER.debug('Sending alarm for %s',  metername)
-        self._sender.send(metername, severity, resource_id)
+        self._sender.send(metername, severity, resource_id, alarm_severity)

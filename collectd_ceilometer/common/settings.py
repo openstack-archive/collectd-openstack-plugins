@@ -17,24 +17,27 @@ from __future__ import unicode_literals
 
 from collectd_ceilometer.common.singleton import Singleton
 from collectd_ceilometer.common.units import UNITS
+
 from collections import namedtuple
+
 import logging
+
 import six
 
 LOGGER = logging.getLogger(__name__)
 
 
 class BadConfigError(Exception):
-    """Configuration exception"""
+    """Configuration exception."""
+
     pass
 
 
 class CfgParam(namedtuple('CfgParam', ['key', 'default', 'data_type'])):
-    """Configuration parameter definition"""
+    """Configuration parameter definition."""
 
     def value(self, data):
-        """Convert a string to the parameter type"""
-
+        """Convert a string to the parameter type."""
         try:
             return self.data_type(data)
         except (ValueError, TypeError) as exc:
@@ -66,8 +69,7 @@ class Config(object):
     _config_keys = _config_dict.keys()
 
     def __init__(self):
-        """Set the default values"""
-
+        """Set the default values."""
         # init all parameters to default values
         for cfg in self._configuration:
             setattr(self, cfg.key, cfg.default)
@@ -76,10 +78,13 @@ class Config(object):
         self._user_units = {}
         self._units = UNITS.copy()
 
+        # dictionary for user defined severities
+        self._alarm_severities = {}
+
     def read(self, cfg):
         """Read the collectd configuration
 
-        @param cfg configuration provided by collectd
+        @param cfg configuration provided by collectd.
         """
         LOGGER.info('Reading the OS plugin configuration')
         assert 'MODULE' == cfg.key.upper()
@@ -98,25 +103,44 @@ class Config(object):
             LOGGER.info('Configuration OK')
 
     def unit(self, plugin, pltype):
-        """Get unit for plugin and type"""
-
+        """Get unit for plugin and type."""
         if pltype:
             unit = self._units.get('%s.%s' % (plugin, pltype))
             if unit:
                 return unit
         return self._units.get(plugin, "None")
 
+    def alarm_severity(self, meter):
+        """Get alarm_severity for a meter."""
+        try:
+            # check for an user-defined alarm severity
+            alarm_severity = self._alarm_severities[meter]
+            if (alarm_severity == 'low' or alarm_severity == 'moderate' or
+               alarm_severity == 'critical'):
+                return alarm_severity
+            else:
+                LOGGER.warn('The alarm severity specified is invalid')
+                return None
+        except KeyError as ke:
+            LOGGER.info(ke)
+            LOGGER.info('There is no user-defined severity for this alarm')
+        return None
+
     def _read_node(self, node):
         """Read a configuration node
 
-        @param node collectd configuration node
+        @param node collectd configuration node.
         """
-
         key = node.key.upper()
 
         # if the node is 'UNITS' call the units function
         if key == 'UNITS':
             self._read_units(node.children)
+            return
+
+        # if the node is 'ALARM_SEVERITYS call the alarm severitys function
+        if key == 'ALARM_SEVERITIES':
+            self._read_alarm_severities(node.children)
             return
 
         # if we have a root node read only all its children
@@ -155,7 +179,7 @@ class Config(object):
     def _read_units(self, nodes):
         """Read user-defined units
 
-        @param node collectd configuration nodes
+        @param node collectd configuration nodes.
         """
         for node in nodes:
             if node.key.upper() == 'UNIT':
@@ -172,3 +196,23 @@ class Config(object):
                 LOGGER.error(
                     'Invalid unit configuration: %s', node.key.upper())
         self._units.update(self._user_units)
+
+    def _read_alarm_severities(self, nodes):
+        """Read in any user-defined severity settings for alarms."""
+        for node in nodes:
+            if node.key.upper() == 'ALARM_SEVERITY':
+                if len(node.values) == 2:
+                    key, val = node.values
+                    self._alarm_severities[key] = val
+                    LOGGER.info(
+                        'Got user-defined severity "%s" for "%s" alarm',
+                        val, key)
+                else:
+                    LOGGER.error(
+                        'Invalid alarm severity configuration:\
+                        severity %s' % ' '.join(
+                            ['"%s"' % i for i in node.values]))
+            else:
+                LOGGER.error(
+                    'Invalid alarm severity configuration: %s',
+                    node.key.upper())
