@@ -26,6 +26,7 @@ import mock
 
 class Values(object):
     """Stub class to replace collectd.Values"""
+
     def __init__(self, plugin="my_plugin", type="my_type"):
         self.plugin = plugin
         self.type = type
@@ -33,8 +34,10 @@ class Values(object):
 
 class CollectdMock(object):
     """Model for the collectd class to be mocked"""
+
     def get_dataset(self, string):
         pass
+
 
 collectd_class = \
     'collectd_ceilometer.tests.common.test_meters_base.CollectdMock'
@@ -96,3 +99,51 @@ class MetersTest(TestCase):
         self._collectd.get_dataset.assert_called_once()
         LOGGER.warning.assert_called_once()
         self.assertEqual("gauge", actual)
+
+    @mock.patch.object(Meter, 'alarm_severity', spec=callable)
+    def test_low_alarm_severity(self, alarm_severity):
+        """Test the 'low' severity setting.
+
+        Set-up: set the return value for severity
+                Call the alarm_severity method and its pre-requistites
+        Test: Compare the configured severity to the result of alarm_severity()
+        Expected behaviour: Result will be True
+        """
+        alarm_severity.return_value = 'low'
+
+        meter_name = self.meter.meter_name(self.vl)
+        result = alarm_severity(self.vl, meter_name)
+
+        self.assertEqual('low', result)
+
+    @mock.patch.object(Meter, 'alarm_severity', spec=callable)
+    def test_moderate_alarm_severity(self, alarm_severity):
+        """Test the 'moderate' severity setting.
+
+        Set-up: set the return value for severity
+                Call the alarm_severity method and its pre-requistites
+        Test: Compare the configured severity to the result of alarm_severity()
+        Expected behaviour: Result will be True
+        """
+        alarm_severity.return_value = 'moderate'
+
+        meter_name = self.meter.meter_name(self.vl)
+        result = alarm_severity(self.vl, meter_name)
+
+        self.assertEqual('moderate', result)
+
+    @mock.patch.object(Meter, 'alarm_severity', spec=callable)
+    def test_critical_alarm_severity(self, alarm_severity):
+        """Test the 'critical' severity setting.
+
+        Set-up: set the return value for severity
+                Call the alarm_severity method and its pre-requistites
+        Test: Compare the configured severity to the result of alarm_severity()
+        Expected behaviour: Result will be True.
+        """
+        alarm_severity.return_value = 'critical'
+
+        meter_name = self.meter.meter_name(self.vl)
+        result = self.meter.alarm_severity(self.vl, meter_name)
+
+        self.assertEqual('critical', result)
