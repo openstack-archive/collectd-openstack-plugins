@@ -1,0 +1,8 @@
+---
+ - features:
+   Included a new feature that allows you to specify the severity of any alarm
+   created by a meter/metric. This can be specified in the local.conf using the
+   configuration option "COLLECTD_AODH_SEVERITIES" and will be configured on
+   deployment with devStack. If left unset the an alarms severity will default
+   to "moderate". Included more detailed usage instructions in devStackGSG.rst
+   for this new feature.

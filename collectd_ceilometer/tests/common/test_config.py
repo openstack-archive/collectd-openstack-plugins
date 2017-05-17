@@ -26,11 +26,14 @@ from collectd_ceilometer.common import settings
 
 
 def config_module(
-        values, units=None, module_name="collectd_ceilometer.ceilometer.plugin"):
+        values, units=None, severities=None,
+        module_name="collectd_ceilometer.ceilometer.plugin"):
     children = [config_value(key, value)
                 for key, value in six.iteritems(values)]
     if units:
         children.append(config_units(units))
+    elif severities:
+        children.append(config_severities(severities))
     return config_node('MODULE', children=children, value=module_name)
 
 
@@ -38,6 +41,12 @@ def config_units(units):
     children = [config_value('UNIT', key, value)
                 for key, value in six.iteritems(units)]
     return config_node('UNITS', children)
+
+
+def config_severities(severities):
+    children = [config_value('ALARM_SEVERITY', key, value)
+                for key, value in six.iteritems(severities)]
+    return config_node('ALARM_SEVERITIES', children)
 
 
 def config_node(key, children, value=None):
@@ -234,3 +243,112 @@ class TestConfig(TestCase):
             'Invalid unit configuration: %s',"NOT_UNITS")
         self.assertEqual('None', config.unit('age', None))
 
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities(self, LOGGER):
+        """Test if a user enters a severity for a specific meter
+
+        Set-up: Create a node with some user defined severities
+                Configure the node
+        Test: Read the configured node and compare the results
+              of the method to the severities configured in the node
+        Expected-behaviour: Valid mapping metric names are mapped correctly
+                            to severities, and invalid values return None.
+        """
+        node = config_module(
+            values=self.default_values,
+            severities={'age': 'low',
+                        'star.distance': 'moderate',
+                        'star.temperature': 'critical',
+                        'lemons': None})
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        LOGGER.error.assert_not_called()
+        self.assertEqual('low', config.alarm_severity('age'))
+        self.assertEqual('moderate', config.alarm_severity('star.distance'))
+        self.assertEqual('critical', config.alarm_severity('star.temperature'))
+        self.assertEqual(None, config.alarm_severity('monty'))
+        self.assertEqual(None, config.alarm_severity('python'))
+        self.assertEqual(None, config.alarm_severity('lemons'))
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities_invalid(self, LOGGER):
+        """Test invalid user defined severities
+
+        Set-up: Configure the node with one defined severity
+                Set a configuration to have 3 entries instead of the 2
+                which are expected
+        Test: Try to read the configuration node with incorrect configurations
+              Compare the configuration to the response on the method
+        Expected-behaviour: alarm_severity will return None
+                            Log will be written that severities were
+                            incorrectly configured
+        """
+
+        node = config_module(values=self.default_values,
+                             severities=dict(age='low'))
+        # make some alarm severity entry invalid
+        for child in node.children:
+            if child.key == 'ALARM_SEVERITIES':
+                child.children[0].values = (1, 2, 3)
+                break
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        self.assertEqual(None, config.alarm_severity('age'))
+        LOGGER.error.assert_called_with(
+            'Invalid alarm severity configuration:            \
+            severity "1" "2" "3"')
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities_invalid_node(self, LOGGER):
+        """Test invalid node with severities configuration
+
+        Set-up: Set up a configuration node with a severity defined
+                Configure the node with an incorrect module title
+        Test: Read the incorrect configuration node
+        Expected-behaviour: Error will be recorded in the log
+                            Severity configuration will return None
+        """
+
+        node = config_module(values=self.default_values,
+                             severities=dict(age='moderate'))
+        # make some alarm severity entry invalid
+        for child in node.children:
+            if child.key == 'ALARM_SEVERITIES':
+                child.children[0].key = 'NOT_SEVERITIES'
+                break
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        LOGGER.error.assert_called_with(
+            'Invalid alarm severity configuration: %s', "NOT_SEVERITIES")
+        self.assertEqual(None, config.alarm_severity('age'))
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_read_alarm_severities(self, LOGGER):
+        """Test reading in user defined alarm severities method
+
+        Set-up: Set up a node configured with a severities dictionary defined
+        Test: Read the node for the ALARM_SEVERITY configuration
+        Expected-behaviour: Info log will be recorded
+                            Severities are correctly configured
+        """
+        node = config_module(values=self.default_values,
+                             severities=dict(age='low'))
+
+        for n in node.children:
+            if n.key.upper() == 'ALARM_SEVERITY':
+                if len(n.values) == 2:
+                    key, val = n.values
+                    break
+        config = settings.Config._decorated()
+
+        config._read_node(node)
+
+        self.assertEqual('low', config.alarm_severity('age'))
+        LOGGER.info.assert_called_with(
+            'Got user-defined severity "%s" for "%s" alarm', "low", "age")
