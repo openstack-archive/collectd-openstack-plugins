@@ -141,6 +141,18 @@ To deploy with gnocchi using DevStack, add the following to you local.conf:
       GNOCCHI_USE_KEYSTONE=True
       COLLECTD_GNOCCHI_ENABLED=True
 
+Gnocchi Tools
+~~~~~~~~~~~~
+
+ * delete_metrics
+   A delete metrics tool is available to delete all metrics. This tool has to
+   be used manually. See :doc:`<tools/delete_metrics.sh>`
+   To delete all of the pre-existing metrics, just run the following command:
+
+     ::
+
+       $ . tools/delete_metrics.sh
+
 Aodh
 ----
 
