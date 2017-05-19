@@ -1,0 +1,5 @@
+---
+Fixes:
+ - |
+   Fixes 'bug 1668210 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1668210',
+   included the aodh sender class into the common sender class.   
