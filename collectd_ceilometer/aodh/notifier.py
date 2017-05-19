@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.aodh.sender import Sender
+from collectd_ceilometer.aodh import sender as aodh_sender
 
 import datetime
 import logging
@@ -30,7 +30,7 @@ class Notifier(object):
     def __init__(self, meters, config):
         """Initialize Notifier."""
         self._meters = meters
-        self._sender = Sender()
+        self._sender = aodh_sender.Sender()
         self._config = config
 
     def notify(self, vl, data):
@@ -57,4 +57,6 @@ class Notifier(object):
     def _send_data(self, metername, severity, resource_id, alarm_severity):
         """Send data to Aodh."""
         LOGGER.debug('Sending alarm for %s',  metername)
-        self._sender.send(metername, severity, resource_id, alarm_severity)
+        self._sender.send(metername, None, severity=severity,
+                          resource_id=resource_id,
+                          alarm_severity=alarm_severity)
