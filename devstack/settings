@@ -67,3 +67,6 @@ elif is_fedora; then
         COLLECTD_REQUIREMENTS="$centos_bin_requirements"
   fi
 fi
+
+# Libvirt meter is deprecated
+LIBVIRT_METER_ENABLED=$(trueorfalse False LIBVIRT_METER_ENABLED)

@@ -26,7 +26,8 @@ from collectd_ceilometer.common import settings
 
 
 def config_module(
-        values, units=None, module_name="collectd_ceilometer.ceilometer.plugin"):
+        values, units=None, libvirt_meter=False,
+        module_name="collectd_ceilometer.ceilometer.plugin"):
     children = [config_value(key, value)
                 for key, value in six.iteritems(values)]
     if units:
@@ -81,7 +82,8 @@ class TestConfig(TestCase):
             CEILOMETER_TIMEOUT=1000,
             OS_USERNAME='tester',
             OS_PASSWORD='testpasswd',
-            OS_TENANT_NAME='service')
+            OS_TENANT_NAME='service',
+            LIBVIRT_METER_ENABLED=False)
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_default_configuration(self, LOGGER):
@@ -231,6 +233,58 @@ class TestConfig(TestCase):
         config.read(node)
 
         LOGGER.error.assert_called_with(
-            'Invalid unit configuration: %s',"NOT_UNITS")
+            'Invalid unit configuration: %s', "NOT_UNITS")
         self.assertEqual('None', config.unit('age', None))
 
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_libvirt_meter_enabled(self, LOGGER):
+        """Test configuration change when enabling the libvirt meter"""
+
+        node = config_module(values=self.default_values)
+        config = settings.Config._decorated()
+
+        # read default configuration
+        config.read(node)
+
+        # compare the configuration values with the default values
+        for key, value in six.iteritems(self.default_values):
+            self.assertEqual(value, getattr(config, key))
+
+        # test configuration change for enabling the libvirt meter
+        self.assertEqual(False, config.LIBVIRT_METER_ENABLED)
+        config.read(config_module(values=dict(LIBVIRT_METER_ENABLED=True)))
+        self.assertEqual(True, config.LIBVIRT_METER_ENABLED)
+        LOGGER.error.assert_not_called()
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_libvirt_meter_default_config(self, LOGGER):
+        """Test default configuration for enabling the libvirt meter"""
+
+        node = config_module(values=self.default_values)
+        config = settings.Config._decorated()
+
+        for child in node.children:
+            if child.key == 'LIBVIRT_METER_ENABLED':
+                config.libvirt_meter = getattr(config, child.key)
+
+        config.read(node)
+
+        self.assertEqual(False, config.libvirt_meter)
+        LOGGER.error.assert_not_called()
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_libvirt_meter_enabled_config(self, LOGGER):
+        """Test enabling the libvirt meter"""
+
+        node = config_module(values=self.default_values)
+
+        config = settings.Config._decorated()
+
+        for child in node.children:
+            if child.key == 'LIBVIRT_METER_ENABLED':
+                config.libvirt_meter = True
+
+        config.read(node)
+
+        self.assertEqual(True, config.libvirt_meter)
+        LOGGER.error.assert_not_called()

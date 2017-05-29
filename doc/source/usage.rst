@@ -183,6 +183,13 @@ COLLECTD_ADDITIONAL_PACKAGES
     Example: COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
 
 
+LIBVIRT_METER_ENABLED
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Deprecating the libvirt meter. This configuration option
+    allows you to enable it before it is removed.
+
+    Default: False
+
 Authenticating using Identity Server API v3
 -------------------------------------------
 

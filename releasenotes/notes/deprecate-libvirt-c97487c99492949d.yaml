@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Deprecated the LibvirtMeter. Included deployment code to configure it for
+    for now, by default it is not enabled. In future releases it will be
+    removed.

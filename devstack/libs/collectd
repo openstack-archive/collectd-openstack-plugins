@@ -128,6 +128,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+        sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
         config_custom_units "ceilometer" "$COLLECTD_CEILOMETER_UNITS"
     fi
@@ -146,6 +147,8 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+        sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+
         config_custom_units "gnocchi" "$COLLECTD_GNOCCHI_UNITS"
     fi
 
@@ -162,6 +165,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|CEILOMETER_TIMEOUT.*$|CEILOMETER_TIMEOUT "'$CEILOMETER_TIMEOUT'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
+        sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
     fi
 
     # Configure collectd logfile plugin
