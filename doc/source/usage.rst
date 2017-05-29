@@ -183,6 +183,18 @@ COLLECTD_ADDITIONAL_PACKAGES
     Example: COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
 
 
+LIBVIRT_METER_ENABLED
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) HostnameFormat needs to be set to UUID so that VMs can be
+    tracked across migrations and across multi-host deployments. This is
+    important if you want to use the network plugin, and only run
+    collectd-{ceilometer, gnocchi, aodh} on the "collectd server", as we query
+    nova on the local node that is being monitored, to map instance name to
+    UUID. Unless you are enabling the collectd virt plugin when setting up a
+    multi-node deployment, this should be set to True.
+
+    Default: False
+
 Authenticating using Identity Server API v3
 -------------------------------------------
 

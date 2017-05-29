@@ -31,6 +31,9 @@ CEILOMETER_TIMEOUT=${CEILOMETER_TIMEOUT:-1000}
 OS_AUTH_URL="$KEYSTONE_SERVICE_URI/v$IDENTITY_API_VERSION"
 OS_IDENTITY_API_VERSION=${IDENTITY_API_VERSION:-3}
 
+# Libvirt meter is deprecated
+LIBVIRT_METER_ENABLED=$(trueorfalse False LIBVIRT_METER_ENABLED)
+
 # Fall back to default conf dir if option is unset
 if [ -z $COLLECTD_CONF_DIR ]; then
     if is_ubuntu; then
