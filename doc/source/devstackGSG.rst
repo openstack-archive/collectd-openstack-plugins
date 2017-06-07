@@ -196,3 +196,37 @@ Aodh Tools
 
        $ . tools/delete_alarms.sh
        $ sudo service collectd restart
+
+Multi-Node Deployment
+---------------------
+
+The collectd-ceilometer-plugin can be used in a multi-node deployment. The
+following is description of deployment options and configurations for a multi-
+node setup:
+
+ * Set-up:
+   To collect metrics from all of the nodes on your deployment collectd must be
+   installed on each node. But the collectd-ceilometer-plugin only needs to be
+   configured on the controller node.
+ * Configuration options:
+    - "LIBVIRT_METER_ENABLED=False" (Default):
+      This set-up requires you to enable the collectd network plugin on all of
+      your compute nodes that data is being collected from. Configure this
+      plugin as follows:
+
+     ::
+
+         LoadPlugin network
+         <Plugin network>
+                 Server "<CONTROLLER_NODE_HOST_IP>"
+         </Plugin>
+
+    - "LIBVIRT_METER_ENABLED=True":
+      This option utilizes the deprecated libvirt meter available via the plugin
+      itself. No further configuration is required.
+
+  .. note::
+
+       Please refer to the following guide for more collectd network plugin
+       configuration options:
+       https://collectd.org/wiki/index.php/Plugin:Network

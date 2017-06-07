@@ -187,6 +187,7 @@ LIBVIRT_METER_ENABLED
 ~~~~~~~~~~~~~~~~~~~~~
     (True|False) Deprecating the libvirt meter. This configuration option
     allows you to enable it before it is removed.
+    If this is false the virt meter for collectd is enabled on deployment.
 
     Default: False
 

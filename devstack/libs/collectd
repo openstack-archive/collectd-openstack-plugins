@@ -115,6 +115,30 @@ function adapt_collectd_conf {
     CONF_FILE=$(sudo find /etc -name "collectd.conf")
     sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname "'$(hostname)'"|g' $CONF_FILE
 
+    if [[ "$LIBVIRT_METER_ENABLED" == "False" ]]; then
+        # Load the network and virt plugins for a multi-node deployment
+        sudo sed -E -i 's|(^\|^#)LoadPlugin network.*$|LoadPlugin network|g' $CONF_FILE
+        sudo sed -E -i 's|(^\|^#)LoadPlugin virt.*$|LoadPlugin virt|g' $CONF_FILE
+
+        # Configure the network plugin
+        sudo sed -E -i 's|(^\|^#)<Plugin network>.*$|<Plugin network>|g' $CONF_FILE
+        sudo sed -E -i 's|Listen "ff18::efc0:4a42" "25826"|Listen "::"|g' $CONF_FILE
+        sudo sed -E -i '/Listen "::"/s/^#//g' $CONF_FILE
+        sudo sed -E -i '/<Plugin.*network>/,/^#<\/Plugin>/{s|(^\|^#)#</Plugin>.*$|</Plugin>|g}' $CONF_FILE
+
+        # Check and configure the virt plugin
+        sudo sed -E -i 's|(^\|^#)<Plugin virt>.*$|<Plugin virt>|g' $CONF_FILE
+        MANUFACTURER=$(sudo dmidecode -s chassis-manufacturer)
+        HYPERVISOR_URI=$(sudo virsh uri)
+        if [[ $MANUFACTURER == "XEN" || $MANUFACTURER == "QEMU" || $MANUFACTURER == "KVM" ]]; then
+            sudo sed -E -i 's|Connection "xen:///".*$|Connection "'$HYPERVISOR_URI'"|' $CONF_FILE
+            sudo sed -E -i '/Connection /s/^#*//g' $CONF_FILE
+        else
+            echo $LINENO "Hypervisor is not supported."
+        fi
+    fi
+
+    sudo sed -E -i '/<Plugin.*virt>/,/^#<\/Plugin>/{s|(^\|^#)#</Plugin>.*$|</Plugin>|g}' $CONF_FILE
     # Configure collectd-ceilometer-plugin
     if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
         sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
