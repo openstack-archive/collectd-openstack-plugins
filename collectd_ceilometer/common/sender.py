@@ -20,6 +20,7 @@ import logging
 import threading
 
 import requests
+
 import six
 
 from collectd_ceilometer.common.keystone_light import ClientV3
@@ -65,7 +66,6 @@ class Sender(object):
 
     def _authenticate(self):
         """Authenticate and renew the authentication token"""
-
         # if auth_token is available, just return it
         if self._auth_token is not None:
             return self._auth_token
@@ -125,7 +125,6 @@ class Sender(object):
 
     def send(self, metername, payload, **kwargs):
         """Send the payload to Ceilometer/Gnocchi"""
-
         # get the auth_token
         auth_token = self._authenticate()
         LOGGER.info('Auth_token: %s', auth_token)
@@ -148,7 +147,9 @@ class Sender(object):
 
         # send the POST request
         try:
+            # try and perform the appropriate request
             return self._perform_request(url, payload, auth_token)
+
         except requests.exceptions.HTTPError as exc:
             response = exc.response
 
@@ -167,26 +168,31 @@ class Sender(object):
                 auth_token = self._authenticate()
 
                 if auth_token is not None:
-                    # and try to repost
-                    return self._perform_request(url, payload, auth_token)
+                    # and try to repost/re-update
+                    return self._perform_request(url, payload,
+                                                 auth_token)
             else:
                 # This is an error and it has to be forwarded
                 self._handle_http_error(exc, metername, payload,
                                         auth_token, **kwargs)
 
     @classmethod
-    def _perform_request(cls, url, payload, auth_token):
-        """Perform the POST request"""
-
+    def _perform_request(cls, url, payload, auth_token, req_type="post"):
+        """Perform the POST/PUT request"""
         LOGGER.debug('Performing request to %s', url)
 
         # request headers
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
-        response = requests.post(
-            url, data=payload, headers=headers,
-            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        if req_type == "put":
+            response = requests.put(
+                url, data=payload, headers=headers,
+                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        else:
+            response = requests.post(
+                url, data=payload, headers=headers,
+                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
 
         # Raises exception if there was an error
         try:
