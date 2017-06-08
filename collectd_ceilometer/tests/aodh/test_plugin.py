@@ -18,17 +18,16 @@
 """Plugin tests."""
 
 import logging
-
 import mock
-
 import requests
-
 import unittest
 
 from collectd_ceilometer.aodh import plugin
-from collectd_ceilometer.aodh import sender
+from collectd_ceilometer.aodh import sender as aodh_sender
+
 from collectd_ceilometer.common.keystone_light import KeystoneException
 from collectd_ceilometer.common.meters import base
+from collectd_ceilometer.common import sender as common_sender
 
 Logger = logging.getLoggerClass()
 
@@ -140,89 +139,37 @@ class TestPlugin(unittest.TestCase):
         collectd.register_notification.assert_called_once_with(instance.notify)
         collectd.register_shutdown.assert_called_once_with(instance.shutdown)
 
-    @mock.patch.object(sender.Sender, '_update_or_create_alarm', autospec=True)
-    @mock.patch.object(sender.Sender, '_get_alarm_name', autospec=True)
-    @mock.patch.object(base, 'Meter', autospec=True)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', autospec=True)
+    @mock.patch.object(requests, 'put', spec=callable)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
-    def test_update_or_create_alarm(self, data, config, collectd,
-                                    ClientV3, meter,
-                                    _get_alarm_name, _update_or_create_alarm):
-        """Test the update/create alarm function"""
-        auth_client = ClientV3.return_value
-        auth_client.get_service_endpoint.return_value = \
-            'https://test-aodh.tld'
-
-        _update_or_create_alarm.return_value = requests.Response()
-
-        # init sender instance
-        instance = sender.Sender()
-
-        _get_alarm_name.return_value = 'my-alarm'
-        meter_name = meter.meter_name.return_value
-        severity = meter.collectd_severity.return_value
-        resource_id = meter.resource_id.return_value
-        alarm_severity = meter.alarm_severity.return_value
-
-        # send the values
-        instance.send(meter_name, severity, resource_id, alarm_severity)
-
-        # check that the function is called
-        _update_or_create_alarm.assert_called_once_with(
-            instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name, alarm_severity)
-
-        # reset function
-        _update_or_create_alarm.reset_mock()
-
-        # run test again for failed attempt
-        _update_or_create_alarm.return_value = None
-
-        instance.send(meter_name, severity, resource_id, alarm_severity)
-
-        # and values that have been sent
-        _update_or_create_alarm.assert_called_once_with(
-            instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name, alarm_severity)
-
-        # reset post method
-        _update_or_create_alarm.reset_mock()
-
-    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
-    @mock.patch.object(requests, 'put', spec=callable)
-    @mock.patch.object(base, 'Meter', autospec=True)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
-    @mock_collectd()
-    @mock_config()
-    def test_update_alarm(self, config, collectd, ClientV3,
-                          meter, put, _get_alarm_id):
+    def test_update_alarm(self, data, config, collectd, ClientV3,
+                          put, _get_alarm_state, _get_alarm_id):
         """Test the update alarm function.
 
-        Set-up: create a sender object and get an alarm-id for it
-        Test: update an alarm when there is an alarm-id and when there isn't
+        Set-up: get an alarm-id for some notification values to be sent
+        Test: perform an update request
         Expected behaviour:
-         - If alarm-id present a put/update request is called
+         - If alarm-id is present a put request is performed
         """
         auth_client = ClientV3.return_value
         auth_client.get_service_endpoint.return_value = \
             'https://test-aodh.tld'
 
         # init instance
-        instance = sender.Sender()
+        instance = plugin.Plugin(collectd=collectd, config=config)
 
         # init values to send
         _get_alarm_id.return_value = 'my-alarm-id'
-        metername = meter.meter_name.return_value
-        severity = meter.collectd_severity.return_value
-        rid = meter.resource_id.return_value
-        alarm_severity = meter.alarm_severity.return_value
+        _get_alarm_state.return_value = 'insufficient data'
 
-        # send the values
-        instance.send(metername, severity, rid, alarm_severity)
+        # notify aodh of the update
+        instance.notify(data)
 
-        # update the alarm
+        # update the alarm with a put request
         put.assert_called_once_with(
             'https://test-aodh.tld' +
             '/v2/alarms/my-alarm-id/state',
@@ -234,45 +181,43 @@ class TestPlugin(unittest.TestCase):
         # reset method
         put.reset_mock()
 
-    @mock.patch.object(sender.Sender, '_create_alarm', autospec=True)
-    @mock.patch.object(sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_create_alarm', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_id', autospec=True)
     @mock.patch.object(requests, 'put', spec=callable)
-    @mock.patch.object(base, 'Meter', autospec=True)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
-    def test_alarm_not_updated(self, config, collectd, ClientV3,
-                               meter, put, _get_alarm_id, _create_alarm):
-        """Test if an alarm is created, hence it will not be updated
+    @mock_value()
+    def test_alarm_not_updated(self, data, config, collectd, ClientV3,
+                               put, _get_alarm_id, _create_alarm):
+        """Test if the is no alarm id the alarm won't be updated.
 
-        Set-up: create a sender object and create an alarm
-        Test: alarm won't be updated if one is created
+        Set-up: create a client and an instance to send an update to
+                throw a side-effect when looking for an id
+        Test: send a notification for a new alarm
         Expected behaviour:
-         - No alarm exists alarm-id throws a KeyError and a put/update request
-           isn't called
+         - if an alarm is create an update request is not performed
         """
-        # init instance
-        instance = sender.Sender()
+        auth_client = ClientV3.return_value
+        auth_client.get_service_endpoint.return_value = \
+            'https://test-aodh.tld'
+
+        instance = plugin.Plugin(collectd=collectd, config=config)
 
         # init values to send
         _get_alarm_id.return_value = None
-        _get_alarm_id.side_effect = KeyError()
-        _create_alarm.return_value = requests.Response(), 'my-alarm-id'
-        metername = meter.meter_name.return_value
-        severity = meter.collectd_severity.return_value
-        rid = meter.resource_id.return_value
-        alarm_severity = meter.alarm_severity.return_value
+        _create_alarm.return_value = 'my-alarm-id'
 
-        # send the values again
-        instance.send(metername, severity, rid, alarm_severity)
+        # try and perform an update without an id
+        instance.notify(data)
 
         put.assert_not_called()
 
         put.reset_mock()
 
     @mock.patch.object(requests, 'put', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
-    @mock.patch.object(sender, 'LOGGER', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -301,7 +246,7 @@ class TestPlugin(unittest.TestCase):
         # no requests method has been called
         put.assert_not_called()
 
-    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', spec=callable)
     @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_low_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'low'
@@ -311,7 +256,7 @@ class TestPlugin(unittest.TestCase):
         Expected-behaviour: returned state value should equal 'ok'
             and won't equal 'alarm' or insufficient data'
         """
-        instance = sender.Sender()
+        instance = aodh_sender.Sender()
 
         # run test for moderate severity
         severity.return_value = 'low'
@@ -324,7 +269,7 @@ class TestPlugin(unittest.TestCase):
         self.assertNotEqual(instance._get_alarm_state('low'),
                             'insufficient data')
 
-    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', spec=callable)
     @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_moderate_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'moderate'
@@ -334,7 +279,7 @@ class TestPlugin(unittest.TestCase):
         Expected-behaviour: returned state value should equal 'alarm'
             and won't equal 'ok' or insufficient data'
         """
-        instance = sender.Sender()
+        instance = aodh_sender.Sender()
 
         # run test for moderate severity
         severity.return_value = 'moderate'
@@ -347,7 +292,7 @@ class TestPlugin(unittest.TestCase):
         self.assertNotEqual(instance._get_alarm_state('moderate'),
                             'insufficient data')
 
-    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', spec=callable)
     @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_critical_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is 'critical'
@@ -357,7 +302,7 @@ class TestPlugin(unittest.TestCase):
         Expected-behaviour: returned state value should equal 'alarm'
             and won't equal 'ok' or 'insufficient data'
         """
-        instance = sender.Sender()
+        instance = aodh_sender.Sender()
 
         # run test for moderate severity
         severity.return_value = 'critical'
@@ -370,7 +315,7 @@ class TestPlugin(unittest.TestCase):
         self.assertNotEqual(instance._get_alarm_state('critical'),
                             'insufficient data')
 
-    @mock.patch.object(sender.Sender, '_get_alarm_state', spec=callable)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', spec=callable)
     @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_other_severity(self, severity, _get_alarm_state):
         """Test _get_alarm_state if severity is not low/moderate/critical
@@ -380,7 +325,7 @@ class TestPlugin(unittest.TestCase):
         Expected-behaviour: returned state value should equal
             'insufficient data' and won't equal 'ok' or 'alarm'
         """
-        instance = sender.Sender()
+        instance = aodh_sender.Sender()
 
         # run test for moderate severity
         severity.return_value = None
@@ -392,8 +337,8 @@ class TestPlugin(unittest.TestCase):
 
         self.assertNotEqual(instance._get_alarm_state('critical'), 'alarm')
 
-    @mock.patch.object(sender.Sender, '_perform_post_request', spec=callable)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_perform_request', spec=callable)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
@@ -409,16 +354,15 @@ class TestPlugin(unittest.TestCase):
         #  the value
         self.assertRaises(requests.RequestException, instance.notify, data)
 
-    @mock.patch.object(sender.Sender, '_update_or_create_alarm', autospec=True)
-    @mock.patch.object(sender.Sender, '_get_alarm_name', autospec=True)
-    @mock.patch.object(base, 'Meter', autospec=True)
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_state', autospec=True)
+    @mock.patch.object(aodh_sender.Sender, '_get_alarm_id', autospec=True)
+    @mock.patch.object(requests, 'put', spec=callable)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
     def test_reauthentication(self, data, config, collectd,
-                              ClientV3, meter, _get_alarm_name,
-                              _update_or_create_alarm):
+                              ClientV3, put, _get_alarm_id, _get_alarm_state):
         """Test re-authentication for update request."""
         # response returned on success
         response_ok = requests.Response()
@@ -428,62 +372,32 @@ class TestPlugin(unittest.TestCase):
         response_unauthorized = requests.Response()
         response_unauthorized.status_code = requests.codes["UNAUTHORIZED"]
 
-        _update_or_create_alarm.return_value = response_ok
-
+        # set-up client
         client = ClientV3.return_value
         client.auth_token = 'Test auth token'
+        client.get_service_endpoint.return_value = \
+            'https://test-aodh.tld'
 
         # init instance attempt to update/create alarm
-        instance = sender.Sender()
+        instance = plugin.Plugin(collectd=collectd, config=config)
 
-        alarm_name = _get_alarm_name.return_value
-        meter_name = meter.meter_name.return_value
-        severity = meter.collectd_severity.return_value
-        resource_id = meter.resource_id.return_value
-        alarm_severity = meter.alarm_severity.return_value
+        put.return_value = response_ok
+        _get_alarm_id.return_value = 'my-alarm-id'
+        _get_alarm_state.return_value = 'insufficient data'
 
-        # send the data
-        instance.send(meter_name, severity, resource_id, alarm_severity)
+        # send notification to aodh
+        instance.notify(data)
 
-        _update_or_create_alarm.assert_called_once_with(
-            instance, alarm_name, client.auth_token,
-            severity, meter_name, alarm_severity)
+        # put/update is called
+        put.assert_called_once_with(
+            'https://test-aodh.tld' +
+            '/v2/alarms/my-alarm-id/state',
+            data='"insufficient data"',
+            headers={u'Content-type': 'application/json',
+                     u'X-Auth-Token': 'Test auth token'},
+            timeout=1.0)
 
-        # de-assert the request
-        _update_or_create_alarm.reset_mock()
-
-        # response returned on success
-        response_ok = requests.Response()
-        response_ok.status_code = requests.codes["OK"]
-
-        # response returned on failure
-        response_unauthorized = requests.Response()
-        response_unauthorized.status_code = requests.codes["UNAUTHORIZED"]
-
-        _update_or_create_alarm.return_value = response_ok
-
-        client = ClientV3.return_value
-        client.auth_token = 'Test auth token'
-
-        # send the data
-        instance.send(meter_name, severity, resource_id, alarm_severity)
-
-        _update_or_create_alarm.assert_called_once_with(
-            instance, alarm_name, client.auth_token,
-            severity, meter_name, alarm_severity)
-
-        # update/create response is unauthorized -> new token needs
-        # to be acquired
-        _update_or_create_alarm.side_effect = [response_unauthorized,
-                                               response_ok]
-
-        # set a new auth token
-        client.auth_token = 'New test auth token'
-
-        # send the data again
-        instance.send(meter_name, severity, resource_id, alarm_severity)
-
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Notifier', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
@@ -500,7 +414,7 @@ class TestPlugin(unittest.TestCase):
 
         self.assertRaises(ValueError, instance.notify, data)
 
-    @mock.patch.object(sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
