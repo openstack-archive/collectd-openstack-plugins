@@ -42,17 +42,21 @@ COLLECTD_BRANCH
 
     Default: collectd-5.7
 
+
 COLLECTD_CONF_DIR
 ~~~~~~~~~~~~~~~~~
     (directory) Specify a directory where collectd conf files reside.
     This is required if you use a distro other than Ubuntu or Fedora, or if
     the config file is in a non default location. This config directory will
     be created if it doesn't already exist.
+
     Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collectd.d (Fedora)
+
 
 COLLECTD_DIR
 ~~~~~~~~~~~~
     (directory) Destination of the cloned collectd source code.
+
     Default: $DEST/collectd-$COLLECTD_BRANCH/
 
 
@@ -68,18 +72,21 @@ COLLECTD_INSTALL
 COLLECTD_BATCH_SIZE
 ~~~~~~~~~~~~~~~~~~~
     Set the amount of samples to be buffered before sending.
+
     Default: 1 i.e. no batching/buffering.
 
 
 CEILOMETER_TIMEOUT
 ~~~~~~~~~~~~~~~~~~
     Sets the ceilometer's request timeout. The value is passed in milliseconds.
+
     Default: 1000 i.e. 1 sec.
 
 
 COLLECTD_LOG_FILE
 ~~~~~~~~~~~~~~~~~
     (file) The path of the collectd log file.
+
     Default: /opt/stack/logs/collectd.log
 
 
@@ -87,6 +94,7 @@ COLLECTD_LOG_LEVEL
 ~~~~~~~~~~~~~~~~~~
     (debug|info|notice|warning|err) All log messages with lower log level than
     this are going to be filtered out from the log file.
+
     Default: info
 
 
@@ -116,17 +124,20 @@ COLLECTD_CEILOMETER_ENABLED
 
     Default: False
 
+
 COLLECTD_GNOCCHI_ENABLED
 ~~~~~~~~~~~~~~~~~~~~~~~~
     (True|False) Toggles whether collectd-gnocchi-plugin is enabled.
 
     Default: True
 
+
 COLLECTD_AODH_ENABLED
 ~~~~~~~~~~~~~~~~~~~~~
     (True|False) Toggles whether collectd-aodh-plugin is enabled.
 
     Default: False
+
 
 COLLECTD_CEILOMETER_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,6 +147,7 @@ COLLECTD_CEILOMETER_VERBOSE
 
     Default: False
 
+
 COLLECTD_GNOCCHI_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~~~~
     (True|False) Set this to True to make collectd-gnocchi debugging messages
@@ -144,6 +156,7 @@ COLLECTD_GNOCCHI_VERBOSE
 
     Default: $COLLECTD_CEILOMETER_VERBOSE
 
+
 COLLECTD_AODH_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~
     (True|False) Set this to True to make collectd-aodh debugging messages
@@ -151,6 +164,7 @@ COLLECTD_AODH_VERBOSE
     a collectd compiled without debug message support.
 
     Default: $COLLECTD_CEILOMETER_VERBOSE
+
 
 COLLECTD_INSTALL_TYPE
 ~~~~~~~~~~~~~~~~~~~~~
@@ -174,6 +188,7 @@ COLLECTD_PREFIX
     Default: /usr/
 
 COLLECTD_ADDITIONAL_PACKAGES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Specify additional packages to be installed before collectd is
     built/installed. This is useful when building collectd from source it
     will make sure the packages are installed. Collectd plugins are
@@ -186,26 +201,31 @@ COLLECTD_ADDITIONAL_PACKAGES
 Authenticating using Identity Server API v3
 -------------------------------------------
 
-following environment variables are used in this plugin for authentication
+The following environment variables are used in this plugin for authentication
 to Keystone API v3
 
 OS_IDENTITY_API_VERSION
 ~~~~~~~~~~~~~~~~~~~~~~~
-    specifies version of keystone API used, should be set to 3 as 2.0 is
+    Specifies version of keystone API used, should be set to 3 as 2.0 is
     deprecated.
+
     Default: 3
 
 OS_AUTH_URL
 ~~~~~~~~~~~
     url where keystone is listening
+
     Default: based on $KEYSTONE_AUTH_URI/v$IDENTITY_API_VERSION
 
 OS_PASSWORD
 ~~~~~~~~~~~
-    password for service tenant used for keystone authentication
+    Password for service tenant used for keystone authentication
+
     Default: based on $SERVICE_PASSWORD
+
 
 OS_TENANT_NAME
 ~~~~~~~~~~~~~~
-    name of service tenant used for keystone authentication
+    Name of service tenant used for keystone authentication
+
     Default: based on $SERVICE_TENANT_NAME
