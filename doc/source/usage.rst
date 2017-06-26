@@ -35,6 +35,31 @@ To use collectd-ceilometer-plugin in collectd::
 local.conf settings
 -------------------
 
+CEILOMETER_TIMEOUT
+~~~~~~~~~~~~~~~~~~
+    Sets the ceilometer's request timeout. The value is passed in milliseconds.
+
+    Default: 1000 i.e. 1 sec.
+
+
+COLLECTD_ADDITIONAL_PACKAGES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Specify additional packages to be installed before collectd is
+    built/installed. This is useful when building collectd from source it
+    will make sure the packages are installed. Collectd plugins are
+    automatically installed/built if requirements are met, so there is no need
+    for manual installation. A space separates packages.
+
+    Example: COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
+
+
+COLLECTD_AODH_ENABLED
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Toggles whether collectd-aodh-plugin is enabled.
+
+    Default: False
+
+
 COLLECTD_AODH_SEVERITIES
 ~~~~~~~~~~~~~~~~~~~~~~~
     ("meter" severity) a comma seperated list of pairs, defining meters and the
@@ -47,6 +72,23 @@ COLLECTD_AODH_SEVERITIES
 
     Example: COLLECTD_AODH_SEVERITIES='"<meter>" <severity>, "<meter>" <severity>'
 
+
+COLLECTD_AODH_VERBOSE
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Set this to True to make collectd-aodh debugging messages
+    visible as info messages. This is useful when running the plugin inside
+    a collectd compiled without debug message support.
+
+    Default: $COLLECTD_CEILOMETER_VERBOSE
+
+
+COLLECTD_BATCH_SIZE
+~~~~~~~~~~~~~~~~~~~
+    Set the amount of samples to be buffered before sending.
+
+    Default: 1 i.e. no batching/buffering.
+
+
 COLLECTD_BRANCH
 ~~~~~~~~~~~~~~~
     (<git branch>) Indicates which branch of collectd to checkout before
@@ -54,52 +96,12 @@ COLLECTD_BRANCH
 
     Default: collectd-5.7
 
-COLLECTD_CONF_DIR
-~~~~~~~~~~~~~~~~~
-    (directory) Specify a directory where collectd conf files reside.
-    This is required if you use a distro other than Ubuntu or Fedora, or if
-    the config file is in a non default location. This config directory will
-    be created if it doesn't already exist.
-    Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collectd.d (Fedora)
 
-COLLECTD_DIR
-~~~~~~~~~~~~
-    (directory) Destination of the cloned collectd source code.
-    Default: $DEST/collectd-$COLLECTD_BRANCH/
+COLLECTD_CEILOMETER_ENABLED
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
 
-
-COLLECTD_INSTALL
-~~~~~~~~~~~~~~~~
-    (True|False) Indicates whether to install collectd.
-    Set this to False if you are running a pre-built version of collectd or do
-    not want to upgrade installed version.
-
-    Default: True
-
-
-COLLECTD_BATCH_SIZE
-~~~~~~~~~~~~~~~~~~~
-    Set the amount of samples to be buffered before sending.
-    Default: 1 i.e. no batching/buffering.
-
-
-CEILOMETER_TIMEOUT
-~~~~~~~~~~~~~~~~~~
-    Sets the ceilometer's request timeout. The value is passed in milliseconds.
-    Default: 1000 i.e. 1 sec.
-
-
-COLLECTD_LOG_FILE
-~~~~~~~~~~~~~~~~~
-    (file) The path of the collectd log file.
-    Default: /opt/stack/logs/collectd.log
-
-
-COLLECTD_LOG_LEVEL
-~~~~~~~~~~~~~~~~~~
-    (debug|info|notice|warning|err) All log messages with lower log level than
-    this are going to be filtered out from the log file.
-    Default: info
+    Default: False
 
 
 COLLECTD_CEILOMETER_CUSTOM_UNITS
@@ -112,6 +114,32 @@ COLLECTD_CEILOMETER_CUSTOM_UNITS
     Example: COLLECTD_CEILOMETER_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 
+COLLECTD_CEILOMETER_VERBOSE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Set this to True to make collectd-ceilometer debugging messages
+    visible as info messages. This is useful when running the plugin inside a
+    collectd compiled without debug message support.
+
+    Default: False
+
+
+COLLECTD_CONF_DIR
+~~~~~~~~~~~~~~~~~
+    (directory) Specify a directory where collectd conf files reside.
+    This is required if you use a distro other than Ubuntu or Fedora, or if
+    the config file is in a non default location. This config directory will
+    be created if it doesn't already exist.
+
+    Default: /etc/collectd/collectd.conf.d (Ubuntu) /etc/collectd.d (Fedora)
+
+
+COLLECTD_DIR
+~~~~~~~~~~~~
+    (directory) Destination of the cloned collectd source code.
+
+    Default: $DEST/collectd-$COLLECTD_BRANCH/
+
+
 COLLECTD_GNOCCHI_CUSTOM_UNITS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     (meter=unit) a comma seperated list of pairs, defining meters and their units.
@@ -122,31 +150,12 @@ COLLECTD_GNOCCHI_CUSTOM_UNITS
     Example: COLLECTD_GNOCCHI_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 
-COLLECTD_CEILOMETER_ENABLED
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
-
-    Default: False
-
 COLLECTD_GNOCCHI_ENABLED
 ~~~~~~~~~~~~~~~~~~~~~~~~
     (True|False) Toggles whether collectd-gnocchi-plugin is enabled.
 
     Default: True
 
-COLLECTD_AODH_ENABLED
-~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Toggles whether collectd-aodh-plugin is enabled.
-
-    Default: False
-
-COLLECTD_CEILOMETER_VERBOSE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Set this to True to make collectd-ceilometer debugging messages
-    visible as info messages. This is useful when running the plugin inside a
-    collectd compiled without debug message support.
-
-    Default: False
 
 COLLECTD_GNOCCHI_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,13 +165,15 @@ COLLECTD_GNOCCHI_VERBOSE
 
     Default: $COLLECTD_CEILOMETER_VERBOSE
 
-COLLECTD_AODH_VERBOSE
-~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Set this to True to make collectd-aodh debugging messages
-    visible as info messages. This is useful when running the plugin inside
-    a collectd compiled without debug message support.
 
-    Default: $COLLECTD_CEILOMETER_VERBOSE
+COLLECTD_INSTALL
+~~~~~~~~~~~~~~~~
+    (True|False) Indicates whether to install collectd.
+    Set this to False if you are running a pre-built version of collectd or do
+    not want to upgrade installed version.
+
+    Default: True
+
 
 COLLECTD_INSTALL_TYPE
 ~~~~~~~~~~~~~~~~~~~~~
@@ -170,6 +181,21 @@ COLLECTD_INSTALL_TYPE
     package manager or install from source.
 
     Default: binary
+
+
+COLLECTD_LOG_FILE
+~~~~~~~~~~~~~~~~~
+    (file) The path of the collectd log file.
+
+    Default: /opt/stack/logs/collectd.log
+
+
+COLLECTD_LOG_LEVEL
+~~~~~~~~~~~~~~~~~~
+    (debug|info|notice|warning|err) All log messages with lower log level than
+    this are going to be filtered out from the log file.
+
+    Default: info
 
 
 COLLECTD_REPO
@@ -185,14 +211,6 @@ COLLECTD_PREFIX
 
     Default: /usr/
 
-COLLECTD_ADDITIONAL_PACKAGES
-    Specify additional packages to be installed before collectd is
-    built/installed. This is useful when building collectd from source it
-    will make sure the packages are installed. Collectd plugins are
-    automatically installed/built if requirements are met, so there is no need
-    for manual installation. A space separates packages.
-
-    Example: COLLECTD_ADDITIONAL_PACKAGES="package1 package2 package3"
 
 LIBVIRT_METER_ENABLED
 ~~~~~~~~~~~~~~~~~~~~
@@ -210,26 +228,33 @@ LIBVIRT_METER_ENABLED
 Authenticating using Identity Server API v3
 -------------------------------------------
 
-following environment variables are used in this plugin for authentication
+The following environment variables are used in this plugin for authentication
 to Keystone API v3
-
-OS_IDENTITY_API_VERSION
-~~~~~~~~~~~~~~~~~~~~~~~
-    specifies version of keystone API used, should be set to 3 as 2.0 is
-    deprecated.
-    Default: 3
 
 OS_AUTH_URL
 ~~~~~~~~~~~
     url where keystone is listening
+
     Default: based on $KEYSTONE_AUTH_URI/v$IDENTITY_API_VERSION
+
+
+OS_IDENTITY_API_VERSION
+~~~~~~~~~~~~~~~~~~~~~~~
+    Specifies version of keystone API used, should be set to 3 as 2.0 is
+    deprecated.
+
+    Default: 3
+
 
 OS_PASSWORD
 ~~~~~~~~~~~
-    password for service tenant used for keystone authentication
+    Password for service tenant used for keystone authentication
+
     Default: based on $SERVICE_PASSWORD
+
 
 OS_TENANT_NAME
 ~~~~~~~~~~~~~~
-    name of service tenant used for keystone authentication
+    Name of service tenant used for keystone authentication
+
     Default: based on $SERVICE_TENANT_NAME
