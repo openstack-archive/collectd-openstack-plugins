@@ -207,6 +207,22 @@ LIBVIRT_METER_ENABLED
     Default: False
 
 
+LIBVIRT_TYPE
+~~~~~~~~~~~~
+    (kvm|qemu|xen|lxc) Defines the type of hypervisor being used. The is read
+    from devstack on deployment.
+
+    Default: kvm
+
+
+MULTI_NODE_DEPLOYMENT
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Configures the collectd "network" and "virt" plugins on the
+    controller node of a multi-node deployment.
+
+    Default: False
+
+
 Authenticating using Identity Server API v3
 -------------------------------------------
 
