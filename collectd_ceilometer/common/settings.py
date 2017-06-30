@@ -58,6 +58,7 @@ class Config(object):
         CfgParam('OS_PASSWORD', None, six.text_type),
         CfgParam('OS_TENANT_NAME', None, six.text_type),
         CfgParam('VERBOSE', False, bool),
+        CfgParam('LIBVIRT_METER_ENABLED', False, bool),
 
         CfgParam('LIBVIRT_CONN_URI', 'qemu:///system', six.text_type),
     ]
@@ -75,6 +76,7 @@ class Config(object):
         # dictionary for user-defined units
         self._user_units = {}
         self._units = UNITS.copy()
+        self._libvirt_meter = False
 
         # dictionary for user defined severities
         self._alarm_severities = {}
@@ -119,6 +121,10 @@ class Config(object):
             LOGGER.info(ke)
             LOGGER.info('There is no user-defined severity for this alarm')
         return 'moderate'
+
+    def libvirt_enabled(self):
+        """Check if the libvirt meter is enabled"""
+        return self._libvirt_meter
 
     def _read_node(self, node):
         """Read a configuration node
@@ -168,6 +174,8 @@ class Config(object):
                 val = '*****'
             LOGGER.info(
                 'Got configuration parameter: %s -> "%s"', key, val)
+            if key == 'LIBVIRT_METER_ENABLED':
+                self._libvirt_meter = val
         else:
             LOGGER.error('Unknown configuration parameter "%s"', key)
 
