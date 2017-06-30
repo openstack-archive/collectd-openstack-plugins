@@ -21,6 +21,7 @@ import threading
 
 from collectd_ceilometer.common.meters.base import Meter
 from collectd_ceilometer.common.meters.libvirt import LibvirtMeter
+from collectd_ceilometer.common.settings import Config
 
 
 class MeterStorage(object):
@@ -36,8 +37,11 @@ class MeterStorage(object):
         self._default = Meter(collectd=collectd)
 
         # fill dict with specialized meters classes
-        self._meters = {key: meter_class(collectd=collectd)
-                        for key, meter_class in six.iteritems(self._classes)}
+        if Config.instance().libvirt_enabled() is True:
+            # Deprecated: Enabled manually
+            self._meters = \
+                {key: meter_class(collectd=collectd)
+                 for key, meter_class in six.iteritems(self._classes)}
 
     def get(self, plugin):
         """Get meter for the collectd plugin"""
