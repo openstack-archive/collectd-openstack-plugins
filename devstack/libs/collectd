@@ -115,6 +115,21 @@ function adapt_collectd_conf {
     CONF_FILE=$(sudo find /etc -name "collectd.conf")
     sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname "'$(hostname)'"|g' $CONF_FILE
 
+    if [[ "$MULTI_NODE_DEPLOYMENT" == "True" ]]; then
+        sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/multi-node.conf $COLLECTD_CONF_DIR/
+
+        # Check and configure the virt plugin
+        if [[ $LIBVIRT_TYPE == "qemu" || $LIBVIRT_TYPE == "kvm" ]];then
+            echo $LINENO "No .conf update required"
+        elif [[ $LIBVIRT_TYPE == "xen" ]];then
+            sudo sed -E -i 's|Connection "qemu:///system".*$|Connection "xen:///"|' $COLLECTD_CONF_DIR/multi-node.conf
+        elif [[ $LIBVIRT_TYPE == "lxc" ]];then
+            sudo sed -E -i 's|Connection "qemu:///system".*$|Connection "lxc:///"|' $COLLECTD_CONF_DIR/multi-node.conf
+        else
+            echo $LINENO "Hypervisor is not supported."
+        fi
+    fi
+
     # Configure collectd-ceilometer-plugin
     if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
         sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
@@ -129,6 +144,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
         sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
+        sudo sed -i '/LIBVIRT_METER_ENABLED/a\        LIBVIRT_TYPE '"$LIBVIRT_TYPE"'' $COLLECTD_CONF_DIR/collectd-ceilometer-plugin.conf
 
         config_custom_units "ceilometer" "$COLLECTD_CEILOMETER_UNITS"
     fi
@@ -148,6 +164,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
         sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
+        sudo sed -i '/LIBVIRT_METER_ENABLED/a\        LIBVIRT_TYPE '"$LIBVIRT_TYPE"'' $COLLECTD_CONF_DIR/collectd-gnocchi-plugin.conf
 
         config_custom_units "gnocchi" "$COLLECTD_GNOCCHI_UNITS"
     fi
@@ -166,6 +183,7 @@ function adapt_collectd_conf {
         sudo sed -i 's|OS_PASSWORD.*$|OS_PASSWORD "'$SERVICE_PASSWORD'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|OS_TENANT_NAME.*$|OS_TENANT_NAME "'$SERVICE_TENANT_NAME'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
         sudo sed -i 's|LIBVIRT_METER_ENABLED.*$|LIBVIRT_METER_ENABLED "'$LIBVIRT_METER_ENABLED'"|g' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
+        sudo sed -i '/LIBVIRT_METER_ENABLED/a\        LIBVIRT_TYPE '"$LIBVIRT_TYPE"'' $COLLECTD_CONF_DIR/collectd-aodh-plugin.conf
 
         config_custom_severities "aodh" "$COLLECTD_ALARM_SEVERITIES"
     fi
