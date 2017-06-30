@@ -32,6 +32,9 @@ OS_IDENTITY_API_VERSION=${IDENTITY_API_VERSION:-3}
 # Libvirt meter is deprecated
 LIBVIRT_METER_ENABLED=$(trueorfalse False LIBVIRT_METER_ENABLED)
 
+# Multi-node deployment configurations enabled
+MULTI_NODE_DEPLOYMENT=$(trueorfalse False MULTI_NODE_DEPLOYMENT)
+
 # Fall back to default conf dir if option is unset
 if [ -z $COLLECTD_CONF_DIR ]; then
     if is_ubuntu; then

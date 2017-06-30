@@ -115,6 +115,10 @@ function adapt_collectd_conf {
     CONF_FILE=$(sudo find /etc -name "collectd.conf")
     sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname "'$(hostname)'"|g' $CONF_FILE
 
+    if [[ "$MULTI_NODE_DEPLOYMENT" == "True" ]]; then
+        sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/multi-node.conf $COLLECTD_CONF_DIR/
+    fi
+
     # configure collectd-gnocchi plugin
     if [[ "$COLLECTD_GNOCCHI_ENABLED" == "True" ]]; then
 

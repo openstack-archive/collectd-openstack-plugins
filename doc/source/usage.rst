@@ -183,6 +183,14 @@ LIBVIRT_METER_ENABLED
     Default: False
 
 
+MULTI_NODE_DEPLOYMENT
+~~~~~~~~~~~~~~~~~~~~~
+    (True|False) Configures the collectd "network" plugin on the controller
+    node of a multi-node deployment.
+
+    Default: False
+
+
 Authenticating using Identity Server API v3
 -------------------------------------------
 
