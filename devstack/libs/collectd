@@ -115,6 +115,33 @@ function adapt_collectd_conf {
     CONF_FILE=$(sudo find /etc -name "collectd.conf")
     sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname "'$(hostname)'"|g' $CONF_FILE
 
+    if [[ "$MULTI_NODE_DEPLOYMENT" == "True" ]]; then
+        sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/multi-node.conf $COLLECTD_CONF_DIR/
+
+        sudo sed -E -i 's|(^\|^#)LoadPlugin network.*$|LoadPlugin network|g' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i 's|(^\|^#)LoadPlugin virt.*$|LoadPlugin virt|g' $COLLECTD_CONF_DIR/multi-node.conf
+
+        # Configure the network plugin
+        sudo sed -E -i 's|(^\|^#)<Plugin network>.*$|<Plugin network>|g' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i 's|Listen "ff18::efc0:4a42" "25826"| Listen "::"|g' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i '/Listen "::"/s/^#//g' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i '/<Plugin.*network>/,/^#<\/Plugin>/{s|(^\|^#)#</Plugin>.*$|</Plugin>|g}' $COLLECTD_CONF_DIR/multi-node.conf
+
+        # Check and configure the virt plugin
+        sudo sed -E -i 's|(^\|^#)<Plugin virt>.*$|<Plugin virt>|g' $COLLECTD_CONF_DIR/multi-node.conf
+        MANUFACTURER=$(sudo dmidecode -s chassis-manufacturer)
+        HYPERVISOR_URI=$(sudo virsh uri)
+        if [[ $MANUFACTURER == "XEN" || $MANUFACTURER == "QEMU" || $MANUFACTURER == "KVM" ]]; then
+            sudo sed -E -i 's|Connection "xen:///".*$| Connection "'$HYPERVISOR_URI'"|' $COLLECTD_CONF_DIR/multi-node.conf
+            sudo sed -E -i '/Connection /s/^#*//g' $COLLECTD_CONF_DIR/multi-node.conf
+        else
+            echo $LINENO "Hypervisor is not supported."
+        fi
+        sudo sed -E -i '/<Plugin.*virt>/,/^#<\/Plugin>/{s|(^\|^#)#</Plugin>.*$|</Plugin>|g}' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i 's|HostnameFormat name.*$| HostnameFormat uuid|g' $COLLECTD_CONF_DIR/multi-node.conf
+        sudo sed -E -i '/HostnameFormat uuid/s/^#//g' $COLLECTD_CONF_DIR/multi-node.conf
+    fi
+
     # Configure collectd-ceilometer-plugin
     if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
         sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
