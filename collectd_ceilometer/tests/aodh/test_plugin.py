@@ -17,15 +17,18 @@
 
 """Plugin tests."""
 
+import abc
 import logging
 import mock
 import requests
+import six
 import unittest
 
 from collectd_ceilometer.aodh import plugin
 from collectd_ceilometer.aodh import sender
 from collectd_ceilometer.common.keystone_light import KeystoneException
 from collectd_ceilometer.common.meters import base
+from collectd_ceilometer.common import settings
 
 Logger = logging.getLoggerClass()
 
@@ -79,8 +82,54 @@ def mock_config(**kwargs):
         **kwargs)
 
 
+def config_module(
+        values, severities=None,
+        module_name="collectd_ceilometer.ceilometer.plugin"):
+    children = [config_value(key, value)
+                for key, value in six.iteritems(values)]
+    if severities:
+        children.append(config_severities(severities))
+    return config_node('MODULE', children=children, value=module_name)
+
+
+def config_severities(severities):
+    """Create a mocked collectd config node having severities for alarms."""
+    children = [config_value('ALARM_SEVERITY', key, value)
+                for key, value in six.iteritems(severities)]
+    return config_node('ALARM_SEVERITIES', children)
+
+
+def config_node(key, children, value=None):
+    """Create a mocked collectd config node having given children and value."""
+    return mock.create_autospec(
+        spec=MockedConfig, spec_set=True, instance=True,
+        children=tuple(children), key=key, values=(value,))
+
+
+def config_value(key, *values):
+    """Create a mocked collectd config node having given multiple values."""
+    return mock.create_autospec(
+        spec=MockedConfig, spec_set=True, instance=True,
+        children=tuple(), key=key, values=values)
+
+
 class MockedConfig(object):
     """Mocked config class."""
+
+    @abc.abstractproperty
+    def children(self):
+        """Mocked children method."""
+        pass
+
+    @abc.abstractproperty
+    def key(self):
+        """Mocked key method."""
+        pass
+
+    @abc.abstractproperty
+    def values(self):
+        """Mocked values method."""
+        pass
 
 
 def mock_value(
@@ -110,6 +159,18 @@ class MockedValue(object):
 
 class TestPlugin(unittest.TestCase):
     """Test the collectd plugin."""
+
+    @property
+    def default_values(self):
+        """Default configuration values."""
+        return dict(
+            BATCH_SIZE=1,
+            OS_AUTH_URL='https://test-auth.url.tld/test',
+            CEILOMETER_URL_TYPE='internalURL',
+            CEILOMETER_TIMEOUT=1000,
+            OS_USERNAME='tester',
+            OS_PASSWORD='testpasswd',
+            OS_TENANT_NAME='service')
 
     @mock.patch.object(plugin, 'Plugin', autospec=True)
     @mock.patch.object(plugin, 'Config', autospec=True)
@@ -159,16 +220,17 @@ class TestPlugin(unittest.TestCase):
 
         _get_alarm_name.return_value = 'my-alarm'
         meter_name = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         resource_id = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         # check that the function is called
         _update_or_create_alarm.assert_called_once_with(
             instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # reset function
         _update_or_create_alarm.reset_mock()
@@ -176,12 +238,12 @@ class TestPlugin(unittest.TestCase):
         # run test again for failed attempt
         _update_or_create_alarm.return_value = None
 
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         # and values that have been sent
         _update_or_create_alarm.assert_called_once_with(
             instance, 'my-alarm', auth_client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # reset post method
         _update_or_create_alarm.reset_mock()
@@ -211,11 +273,12 @@ class TestPlugin(unittest.TestCase):
         # init values to send
         _get_alarm_id.return_value = 'my-alarm-id'
         metername = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         rid = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values
-        instance.send(metername, severity, rid)
+        instance.send(metername, severity, rid, alarm_severity)
 
         # update the alarm
         put.assert_called_once_with(
@@ -254,11 +317,12 @@ class TestPlugin(unittest.TestCase):
         _get_alarm_id.side_effect = KeyError()
         _create_alarm.return_value = requests.Response(), 'my-alarm-id'
         metername = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         rid = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the values again
-        instance.send(metername, severity, rid)
+        instance.send(metername, severity, rid, alarm_severity)
 
         put.assert_not_called()
 
@@ -295,7 +359,7 @@ class TestPlugin(unittest.TestCase):
         # no requests method has been called
         put.assert_not_called()
 
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_get_alarm_state_severity_low(self, severity):
         """Test _get_alarm_state if severity is 'low'.
 
@@ -316,7 +380,7 @@ class TestPlugin(unittest.TestCase):
         self.assertNotEqual(instance._get_alarm_state('low'),
                             'insufficient data')
 
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_get_alarm_state_severity_moderate(self, severity):
         """Test _get_alarm_state if severity is 'moderate'.
 
@@ -337,7 +401,7 @@ class TestPlugin(unittest.TestCase):
         self.assertNotEqual(instance._get_alarm_state('moderate'),
                             'insufficient data')
 
-    @mock.patch.object(base.Meter, 'severity', spec=callable)
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
     def test_get_alarm_state_severity_critical(self, severity):
         """Test _get_alarm_state if severity is 'critical'.
 
@@ -405,15 +469,16 @@ class TestPlugin(unittest.TestCase):
 
         alarm_name = _get_alarm_name.return_value
         meter_name = meter.meter_name.return_value
-        severity = meter.severity.return_value
+        severity = meter.collectd_severity.return_value
         resource_id = meter.resource_id.return_value
+        alarm_severity = meter.alarm_severity.return_value
 
         # send the data
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         _update_or_create_alarm.assert_called_once_with(
             instance, alarm_name, client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # de-assert the request
         _update_or_create_alarm.reset_mock()
@@ -432,11 +497,11 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'Test auth token'
 
         # send the data
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
         _update_or_create_alarm.assert_called_once_with(
             instance, alarm_name, client.auth_token,
-            severity, meter_name)
+            severity, meter_name, alarm_severity)
 
         # update/create response is unauthorized -> new token needs
         # to be acquired
@@ -447,7 +512,7 @@ class TestPlugin(unittest.TestCase):
         client.auth_token = 'New test auth token'
 
         # send the data again
-        instance.send(meter_name, severity, resource_id)
+        instance.send(meter_name, severity, resource_id, alarm_severity)
 
     @mock.patch.object(sender, 'ClientV3', autospec=True)
     @mock.patch.object(plugin, 'Notifier', autospec=True)
@@ -477,3 +542,106 @@ class TestPlugin(unittest.TestCase):
         instance = plugin.Plugin(collectd=collectd, config=config)
 
         instance.shutdown
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities(self, LOGGER):
+        """Test if a user enters a severity for a specific meter.
+
+        Set-up: Create a node with some user defined severities
+                Configure the node
+        Test: Read the configured node and compare the results
+              of the method to the severities configured in the node
+        Expected-behaviour: Valid mapping metric names are mapped correctly
+                            to severities, and invalid values return None.
+        """
+        node = config_module(
+            values=self.default_values,
+            severities={'age': 'low',
+                        'star.distance': 'moderate',
+                        'star.temperature': 'critical'})
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        LOGGER.error.assert_not_called()
+        self.assertEqual(config.alarm_severity('age'), 'low')
+        self.assertEqual(config.alarm_severity('star.distance'), 'moderate')
+        self.assertEqual(config.alarm_severity('star.temperature'), 'critical')
+        self.assertEqual(config.alarm_severity('monty'), 'moderate')
+        self.assertEqual(config.alarm_severity('python'), 'moderate')
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities_invalid(self, LOGGER):
+        """Test invalid user defined severities.
+
+        Set-up: Configure the node with one defined severity
+                Set a configuration to have 3 entries instead of the 2
+                which are expected
+        Test: Try to read the configuration node with incorrect configurations
+              Compare the configuration to the response on the method
+        Expected-behaviour: alarm_severity will return None
+                            Log will be written that severities were
+                            incorrectly configured
+        """
+        node = config_module(values=self.default_values,
+                             severities=dict(age='low'))
+        # make some alarm severity entry invalid
+        for child in node.children:
+            if child.key == 'ALARM_SEVERITIES':
+                child.children[0].values = (1, 2, 3)
+                break
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        self.assertEqual(config.alarm_severity('age'), 'moderate')
+        LOGGER.error.assert_called_with(
+            'Invalid alarm severity configuration:            \
+            severity "1" "2" "3"')
+
+    @mock.patch.object(settings, 'LOGGER', autospec=True)
+    def test_user_severities_invalid_node(self, LOGGER):
+        """Test invalid node with severities configuration.
+
+        Set-up: Set up a configuration node with a severity defined
+                Configure the node with an incorrect module title
+        Test: Read the incorrect configuration node
+        Expected-behaviour: Error will be recorded in the log
+                            Severity configuration will return None
+        """
+        node = config_module(values=self.default_values,
+                             severities=dict(age='moderate'))
+        # make some alarm severity entry invalid
+        for child in node.children:
+            if child.key == 'ALARM_SEVERITIES':
+                child.children[0].key = 'NOT_SEVERITIES'
+                break
+        config = settings.Config._decorated()
+
+        config.read(node)
+
+        LOGGER.error.assert_called_with(
+            'Invalid alarm severity configuration: %s', "NOT_SEVERITIES")
+        self.assertEqual(config.alarm_severity('age'), 'moderate')
+
+    def test_read_alarm_severities(self):
+        """Test reading in user defined alarm severities method.
+
+        Set-up: Set up a node configured with a severities dictionary defined
+        Test: Read the node for the ALARM_SEVERITY configuration
+        Expected-behaviour: Info log will be recorded
+                            Severities are correctly configured
+        """
+        node = config_module(values=self.default_values,
+                             severities=dict(age='low'))
+
+        for n in node.children:
+            if n.key.upper() == 'ALARM_SEVERITY':
+                if len(n.values) == 2:
+                    key, val = n.values
+                    break
+        config = settings.Config._decorated()
+
+        config._read_node(node)
+
+        self.assertEqual('low', config.alarm_severity('age'))

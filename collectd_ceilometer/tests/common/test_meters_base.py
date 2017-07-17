@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 
 from collectd_ceilometer.common.meters.base import Meter
 from collectd_ceilometer.tests.base import TestCase
+
 import mock
 
 
@@ -96,3 +97,18 @@ class MetersTest(TestCase):
         self._collectd.get_dataset.assert_called_once()
         LOGGER.warning.assert_called_once()
         self.assertEqual("gauge", actual)
+
+    @mock.patch.object(Meter, 'meter_name', autospec=True)
+    def test_default_alarm_severity(self, metername):
+        """Test the default severity setting.
+
+        Set-up: set the return value for severity
+                Call the alarm_severity method and its pre-requistites
+        Test: Compare the configured severity to the result of alarm_severity()
+        Expected behaviour: Result will be True
+        """
+        metername.return_value = 'my-meter'
+
+        result = self.meter.alarm_severity('my-meter')
+
+        self.assertEqual(result, 'moderate')
