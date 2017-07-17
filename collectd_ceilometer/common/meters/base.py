@@ -32,7 +32,7 @@ class Meter(object):
     def meter_name(self, vl):
         """Return meter name."""
         # pylint: disable=no-self-use
-        resources = [vl.plugin, vl.type]
+        resources = [vl.type, vl.type_instance]
         return '.'.join([i for i in resources if i])
 
     def hostname(self, vl):
@@ -42,7 +42,7 @@ class Meter(object):
 
     def resource_id(self, vl):
         """Get resource ID."""
-        resources = [self.hostname(vl), vl.plugin_instance, vl.type_instance]
+        resources = [self.hostname(vl), vl.plugin, vl.plugin_instance]
         return '-'.join([i for i in resources if i])
 
     def unit(self, vl):
