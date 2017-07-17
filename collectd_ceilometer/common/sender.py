@@ -124,7 +124,7 @@ class Sender(object):
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Ceilometer/Gnocchi"""
+        """Send the payload to Ceilometer/Gnocchi/Aodh"""
 
         # get the auth_token
         auth_token = self._authenticate()
@@ -175,18 +175,22 @@ class Sender(object):
                                         auth_token, **kwargs)
 
     @classmethod
-    def _perform_request(cls, url, payload, auth_token):
-        """Perform the POST request"""
-
+    def _perform_request(cls, url, payload, auth_token, req_type="post"):
+        """Perform the POST/PUT request."""
         LOGGER.debug('Performing request to %s', url)
 
         # request headers
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
-        response = requests.post(
-            url, data=payload, headers=headers,
-            timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        if req_type == "put":
+            response = requests.put(
+                url, data=payload, headers=headers,
+                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        else:
+            response = requests.post(
+                url, data=payload, headers=headers,
+                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
 
         # Raises exception if there was an error
         try:
