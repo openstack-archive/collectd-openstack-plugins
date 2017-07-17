@@ -179,22 +179,22 @@ class TestPlugin(unittest.TestCase):
 
         # and values has been sent
         post.assert_called_once_with(
-            'https://test-ceilometer.tld/v2/meters/cpu.freq',
+            'https://test-ceilometer.tld/v2/meters/freq',
             data=match.json([
                 {"source": "collectd",
-                 "counter_name": "cpu.freq",
+                 "counter_name": "freq",
                  "counter_unit": "jiffies",
                  "counter_volume": 1234,
                  "timestamp": "Thu Nov 29 21:33:09 1973",
-                 "resource_id": "localhost-0",
+                 "resource_id": "localhost-cpu-0",
                  "resource_metadata": None,
                  "counter_type": "gauge"},
                 {"source": "collectd",
-                 "counter_name": "cpu.freq",
+                 "counter_name": "freq",
                  "counter_unit": "jiffies",
                  "counter_volume": 1234,
                  "timestamp": "Thu Nov 29 21:33:09 1973",
-                 "resource_id": "localhost-0",
+                 "resource_id": "localhost-cpu-0",
                  "resource_metadata": None,
                  "counter_type": "gauge"}]),
             headers={'Content-type': 'application/json',
@@ -219,14 +219,14 @@ class TestPlugin(unittest.TestCase):
 
         # previously written value has been sent
         post.assert_called_once_with(
-            'https://test-ceilometer.tld/v2/meters/cpu.freq',
+            'https://test-ceilometer.tld/v2/meters/freq',
             data=match.json([
                 {"source": "collectd",
-                 "counter_name": "cpu.freq",
+                 "counter_name": "freq",
                  "counter_unit": "jiffies",
                  "counter_volume": 1234,
                  "timestamp": "Thu Nov 29 21:33:09 1973",
-                 "resource_id": "localhost-0",
+                 "resource_id": "localhost-cpu-0",
                  "resource_metadata": None,
                  "counter_type": "gauge"}]),
             headers={
@@ -409,7 +409,7 @@ class TestPlugin(unittest.TestCase):
 
         # verify the auth token
         post.assert_called_once_with(
-            'URLBASE/cpu.freq', data=mock.ANY,
+            'URLBASE/freq', data=mock.ANY,
             headers={
                 'Content-type': 'application/json', 'X-Auth-Token': 'TOKEN'},
             timeout=1.0)
