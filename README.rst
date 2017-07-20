@@ -32,12 +32,12 @@ available to Ceilometer which will enable smarter scheduling and environmental
 service assurance monitoring.
 
 * Free software: Apache license
-* Source: http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
+* Source: https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
 * Installation:
-   http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
-* Bugs: http://bugs.launchpad.net/collectd-ceilometer-plugin
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
+* Bugs: https://bugs.launchpad.net/collectd-ceilometer-plugin
 * Usage:
-   http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
 * Contact: E-mail the dev mailing list with the [collectd-ceilometer-plugin] tag
    mailto:openstack-dev@lists.openstack.org?subject=[collectd-ceilometer-plugin]
 
@@ -49,8 +49,8 @@ to provide a clearer view on the need for this plugin, what it does and how it
 works:
 
 * An overview of Ceilometer and its architecture:
-   http://docs.openstack.org/developer/ceilometer/overview.html
-   http://docs.openstack.org/developer/ceilometer/architecture.html
+   https://docs.openstack.org/ceilometer/latest/overview.html
+   https://docs.openstack.org/ceilometer/latest/architecture.html
 * Official collectd website:
    https://collectd.org/
 * Information on how collectd is enabled for Openstack:

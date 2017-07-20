@@ -39,7 +39,7 @@ Installation of Kolla
 
 Please refer to this doc for instructions about how to install kolla.
 
-    http://docs.openstack.org/developer/kolla/quickstart.html
+    https://docs.openstack.org/kolla-ansible/latest/quickstart.html
 
 For the simplest installation follow the instructions for evaluation and
 development purposes.
