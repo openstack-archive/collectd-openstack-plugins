@@ -32,12 +32,12 @@ This allows a more comprehensive set of platform telemetry to be made available
 to OpenStack which enables service assurance, fault management and  monitoring.
 
 * Free software: Apache license
-* Source: http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
+* Source: https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
 * Installation:
-   http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
-* Bugs: http://bugs.launchpad.net/collectd-ceilometer-plugin
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
+* Bugs: https://bugs.launchpad.net/collectd-ceilometer-plugin
 * Usage:
-   http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
 * Contact: E-mail the dev mailing list with the [collectd-ceilometer-plugin] tag
    mailto:openstack-dev@lists.openstack.org?subject=[collectd-ceilometer-plugin]
 

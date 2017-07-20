@@ -39,7 +39,7 @@ Installation of DevStack
 Follow the instructions provided in the following documentation to set up your
 own DevStack.
 
-    http://docs.openstack.org/developer/devstack/guides/single-machine.html
+    https://docs.openstack.org/devstack/latest/guides/single-machine.html
 
 Once DevStack is ready to be deployed, follow the configuration steps in the
 next section to allow the installation of the plugin during deployment.

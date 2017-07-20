@@ -49,13 +49,13 @@ Please follow the steps below to create a heat template that enables auto-scalin
 1. The instructions outlined in the link below will enable you to create a
    simple template that will define your resource, i.e. the cloud application,
    that you want to scale, e.g. OS::Nova::Server.
-   https://docs.openstack.org/developer/heat/template_guide/hot_guide.html
+   https://docs.openstack.org/heat/latest/template_guide/hot_guide.html
 
 2. Define the scaling group for the above resource that you want to scale. At a
    minimum the "desired_capacity", the "min_size" and the "max_size" and the
    resource itself has to be specified.
    For more information on this resource:
-   https://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Heat::AutoScalingGroup
+   https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Heat::AutoScalingGroup
 
   ::
 
@@ -68,7 +68,7 @@ Please follow the steps below to create a heat template that enables auto-scalin
    a separate policy can be defined for each alarm state; "alarm", "ok" and
    "insufficient data".
    For more information on this resource:
-   https://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Heat::ScalingPolicy
+   https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Heat::ScalingPolicy
 
   ::
 
@@ -134,7 +134,7 @@ an OS::Aodh::Alarm resource.
 Define this resource with the ceilometer meter that you want to monitor and
 the threshold you want the alarm to be triggered at.
 For more information on this resource:
-https://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Aodh::Alarm
+https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Aodh::Alarm
 
   ::
 
@@ -151,7 +151,7 @@ OS::Aodh::GnocchiAggregationByMetricsAlarm resource.
 Define this resource with the metric/s from the gnocchi plugin and the
 threshold you want the alarm to be triggered on.
 For more information on this resource:
-https://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Aodh::GnocchiAggregationByMetricsAlarm
+https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Aodh::GnocchiAggregationByMetricsAlarm
 
   ::
 
