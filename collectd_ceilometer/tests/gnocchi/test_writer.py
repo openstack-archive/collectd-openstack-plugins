@@ -16,10 +16,13 @@
 # under the License.
 """Gnocchi Writer tests"""
 
+import json
 import mock
+import requests
 import unittest
 
 from collectd_ceilometer.common.meters import MeterStorage
+from collectd_ceilometer.gnocchi import sender as gnocchi_sender
 from collectd_ceilometer.gnocchi import writer
 
 
@@ -110,3 +113,112 @@ class TestGnocchiWriter(unittest.TestCase):
 
         meters = MeterStorage(collectd=collectd)
         self.writer = writer.Writer(meters=meters, config=config)
+        self.writer._sender._auth_token = "my_auth_token"
+
+    @mock.patch.object(gnocchi_sender.Sender, '_create_request_url')
+    @mock.patch.object(gnocchi_sender.Sender, '_get_endpoint')
+    @mock.patch.object(gnocchi_sender.Sender, '_authenticate')
+    @mock.patch('requests.post', autospec=True)
+    @mock_value()
+    def test_write(self, vl, post, sender_authenticate, sender_get_endpoint,
+                   sender_create_request_url):
+        """Test write with successful results
+
+        Set-up: None
+        Test: call write with expected data
+        Expected behaviour:
+          * POST is called successfully
+          * No error occurs i.e. no error is raised
+        """
+        response_ok = requests.Response()
+        response_ok.status_code = 200
+        post.return_value = response_ok
+
+        self.writer._sender._url_base = "my-url"
+        sender_get_endpoint.return_value = "http://my-endpoint"
+        sender_create_request_url.return_value = \
+            "http://my-endpoint/v1/metrics/my-metric-id/measures"
+        sender_authenticate.return_value = "auth_token"
+        # Force the url to be updated without actually authenticating
+        self.writer._sender._on_authenticated()
+
+        expected_url = "http://my-endpoint/v1/metrics/my-metric-id/measures"
+        expected_payload = json.dumps([
+            {
+                "value": 1234,
+                "timestamp": "1973-11-29T21:33:09"
+                },
+            ])
+
+        expected_kwargs = {"data": expected_payload,
+                           "headers": mock.ANY,
+                           "timeout": mock.ANY}
+
+        self.writer.write(vl, None)
+        post.assert_called_with(expected_url, **expected_kwargs)
+
+    @mock.patch.object(gnocchi_sender.Sender, '_get_endpoint')
+    @mock.patch.object(gnocchi_sender.Sender, '_authenticate')
+    @mock.patch.object(gnocchi_sender.Sender, '_create_metric')
+    @mock.patch('requests.post', autospec=True)
+    @mock_value()
+    def test_write_metric_none(self, vl, post,
+                               sender_create_metric,
+                               sender_authenticate,
+                               sender_get_endpoint):
+        """Test Writer.write() when there is no meter defined.
+
+        Set-up:
+        Test: Sender throws a HTTPError with status=404
+        Expected behaviour:
+            * _create_or_update_resource is called with appropriate args
+        """
+
+        response_not_found = requests.Response()
+        response_not_found.status_code = 404
+
+        response_ok = requests.Response()
+        response_ok.status_code = 200
+
+        # post will be called to submit sample before AND after handling
+        # the error
+        post.side_effect = [response_not_found, response_ok]
+
+        self.writer._sender._url_base = "my-url"
+        sender_get_endpoint.return_value = "http://my-endpoint"
+        sender_authenticate.return_value = "auth_token"
+
+        self.writer.write(vl, data=None)
+
+        sender_create_metric.assert_called()
+
+    @mock.patch.object(gnocchi_sender.Sender, 'send')
+    @mock_value()
+    def test_send_data(self, vl, sender_send):
+        """Test _send_data() to make sure the correct payoad is being sent.
+
+        Set-up: Create a sample
+        Test: call _send_data
+        Expected behaviour:
+         *  Sender.send() is called with the correct payload and args
+        """
+        sample = writer.Sample(value=42, timestamp=0, meta=None,
+                               unit="my-unit", metername="my-metername")
+        # TODO(emma-l-foley): Add docstring to _send_data specifying the inputs.
+        # to_send should be a list of Sample objects
+        to_send = [sample]
+
+        expected_payload = json.dumps([
+            {
+                "value": 42,
+                "timestamp": 0
+                }
+            ])
+
+        expected_args = ("my-metername", expected_payload)
+        expected_kwargs = {"unit": "my-unit"}
+
+        self.writer._send_data("my-metername", to_send,
+                               unit="my-unit",)
+
+        sender_send.assert_called_with(*expected_args, **expected_kwargs)
