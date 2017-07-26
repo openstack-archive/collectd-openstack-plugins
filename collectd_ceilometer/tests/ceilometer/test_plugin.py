@@ -39,18 +39,18 @@ def mock_collectd(**kwargs):
     return mock.patch(
         __name__ + '.' + MockedCollectd.__name__, specs=True,
         get_dataset=mock.MagicMock(side_effect=Exception), **kwargs)
-
-
+    
+   
 class MockedCollectd(object):
     "Mocked collectd module specifications."
-
+  
     def debug(self, record):
         "Hook for debug messages"
 
-    def info(self, record):
+    def info(self, record):   
         "Hook for info messages"
 
-    def warning(self, record):
+    def warning(self, record):  
         "Hook for warning messages"
 
     def error(self, record):
