@@ -25,8 +25,9 @@
 Getting Started with Collectd
 =============================
 
-This is a getting started guide that describes the setup of collectd with
-ceilometer plugin.
+This is a getting started guide that describes the manual setup of collectd
+and the configuration of the plugins contained in this repository
+(Ceilometer, Gnocchi, Aodh).
 
 Pre-requisites
 --------------
@@ -35,160 +36,300 @@ Pre-requisites
 - A working OpenStack environment
 - Keystone and Ceilometer services enabled
 
-Collectd Set-up
----------------
+Collectd Installation
+---------------------
 
-Ensure that the binary packages for your Linux distribution are installed
-and up-to-date.
+This section describes how to install collectd.
 
-  ::
-
-    $ sudo apt-get install build-essential
-
-Install the libraries that allow the plugins to collect the actual values:
+* Ensure that the binary packages for your Linux distribution are installed and
+  up-to-date.
 
   ::
 
-    $ sudo apt-get install flex bison automake pkg-config libtool python-dev
+    $ sudo apt-get update && sudo apt-get upgrade
+    # OR
+    $ sudo yum update
 
-Clone the source code from the repo:
+* Install packages required for the collectd OpenStack plugins
+
+  ::
+
+    $ sudo apt-get install libvirt-bin libvirt-dev python-libvirt
+    # OR
+    $ sudo yum install libvirt libvirt-devel libvirt-python
+
+.. note::
+   The following instructions are for building collectd from source, if you
+   want to install from the package manager instead, then run the following
+   commands instead and jump to `Configuration of collectd openstack plugins`_
+
+     ::
+
+       $ sudo apt-get install collectd
+       # OR
+       $ sudo yum installl collectd
+
+* Install the libraries to are needed to build collectd:
+
+  ::
+
+    $ sudo apt-get install byacc flex bison build-essential automake libgcrypt20 libtool
+    # OR
+    $ sudo yum install flex bison automake autoconf libtool
+
+
+* Install plugin prerequisites.
+  If the requirements for a plugin are installed, collectd will build this
+  plugin. Collectd documentation provides a
+  `list of requirements for each plugin <https://github.com/collectd/collectd/blob/master/README>`_.
+
+* Clone the source code from the repo:
 
   ::
 
     $ git clone http://github.com/collectd/collectd
 
-Currently there are two major versions of collectd; Version 4 and version 5.
-Version 4 is outdated, so version 5 should be used for this setup.
-Checkout the version 5.6 branch:
+The current major version of collectd is version 5
+
+* Checkout the version 5.7 branch (or use master)
 
   ::
 
     $ cd collectd
-    $ git checkout collectd-5.6
+    $ git checkout collectd-5.7
 
-Build this version:
-
-  ::
-
-    $ sudo ./build.sh
-
-Configure collectd:
+* Generate the config script
 
   ::
 
-    $ sudo ./configure --enable-syslog --enable-plugin --enable-logfile --enable-debug --prefix=/usr
+    $ ./build.sh
 
-Install collectd:
+* Configure the build
+
+  ``<COLLECTD_PREFIX>`` is the location where collectd will be built, common
+  values are /usr and /opt/collectd.
+  Substitute it in the following commands.
 
   ::
 
-    $ sudo make -j
+     $ ./configure --enable-python --enable-debug \
+     --enable-logging --enable-syslog --prefix=<COLLECTD_PREFIX>
+
+* Compile and install collectd
+
+  ::
+
+    $ make -j all
     $ sudo make install
 
-Configure Collectd as a Service
--------------------------------
+Configure the Collectd Service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To enable collectd as a service on your system copy the .service onto your
-system. This file is located in the "/collectd/contrib/" directory of the repo.
+This section covers configuring the collectd service if your system uses systemd to
+manage services.
 
-  ::
+To enable collectd to run as a service:
 
-    $ sudo cp contrib/systemd.collectd.service /lib/systemd/system
-
-Start collectd as a service:
-
-  ::
-
-    $ sudo service systemd.collectd start
-
-Check the status of collectd:
+* Add the collectd unit file to your system.
+  This file is located in the "contrib/" directory of the collectd repo.
 
   ::
 
-    $ sudo service systemd.collectd status
+    $ sudo cp contrib/systemd.collectd.service /etc/systemd/system/collectd.service
+
+* Edit the file so that it points to the collectd binary.
+
+  ::
+
+    ExecStart=<COLLECTD_PREFIX>/sbin/collectd -C <COLLECTD_PREFIX>/etc/collectd.conf
+
+* Enable collectd
+
+  ::
+
+    $ sudo systemctl enable collectd
+
+* Start the collectd service:
+
+  ::
+
+    $ sudo systemctl start collectd
+
+* Check the status of collectd
+
+  ::
+
+    $ sudo systemctl status collectd
 
 For further information on enabling collectd as a service:
  https://collectd.org/wiki/index.php/First_steps#Starting_the_daemon
 
-Installation and Configuration of collectd-ceilometer-plugin
-------------------------------------------------------------
+Configuring Collectd
+--------------------
 
-Clone the collectd-ceilometer-plugin code.
+* Locate collectd.conf
+
+  * If you installed collectd from a package manager, ``collectd.conf`` is
+    located in ``/etc/collectd.conf``.
+
+  * If you built from source, ``collectd.conf`` is located at
+    ``<COLLECTD_PREFIX>/etc/collectd.conf``.
+
+* Configure some `collectd plugins <https://collectd.org/documentation/manpages/collectd.conf.5.shtml>`_.
+
+* Update collectd.conf to ensure that the files in the configuration directory are loaded.
+
+  ::
+
+    $ cat << EOF | sudo -E tee -a $<COLLECTD_PREFIX>/etc/collectd.conf
+
+         <Include "<COLLECTD_PREFIX/etc/collectd.conf.d/">
+             Filter "*.conf"
+         </Include>
+      EOF
+
+* Configure some collectd plugins
+
+Collectd openstack plugins
+--------------------------
+This section describes the steps to installing and configuring the collectd
+plugins for Ceiloemter, Gnocchi and Aodh.
+
+* Clone the collectd-ceilometer-plugin code.
 
   ::
 
     $ git clone https://github.com/openstack/collectd-ceilometer-plugin
+    $ cd collectd-ceilometer-plugin
 
-By default, the collectd.conf file is located in "/etc/collectd.conf",
-but because you specified "--prefix=/usr" during configuration it is now
-located "/usr/etc/collectd.conf".
-
-Configurations for the plugin itself are specified in its own .conf file,
-collectd-ceilometer-plugin.conf.
-
-Copy collectd-celiometer-plugin/etc/collectd.conf.d/collectd-ceilometer-plugin.conf
-onto your machine. Include the filepath to this file in your collectd.conf file:
+* Install the module and requirements
 
   ::
 
+    $ sudo pip install .
 
-   Include /path/to/collectd-ceilometer-plugin.conf
+Sample configurations for each of the plugins in this repo are included under
+``collectd-ceilometer-plugin/etc/collectd.conf.d/``
+These files should be copied into the collectd configuration directory
+``<COLLECTD_PREFIX>/etc/collectd.conf.d/``, and updated to reflect your environment
 
-In the collectd-ceilometer-plugin.conf file a few variables have to be changed
-to suit your environment:
+* Copy the sample plugin configurations to the configuration directory:
 
-* Set the "ModulePath" to be the location of your collectd-ceilometer-plugin
-  directory.
+  ::
 
-* You must specify the service endpoint address, "OS_AUTH_URL". In an openstack
-  setup you can use the openstack client to identify this. Look for the keystone
-  internalURL to and use it as your "OS_AUTH_URL".
+    $ sudo cp etc/collectd.conf.d/collectd-*-plugin.conf <COLLECTD_PREFIX>/etc/collectd.conf.d/
+
+* To ensure that logging is enabled before any other plugin, copy the sample log
+  file to the configuration directory
+
+  ::
+
+    $ sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf <COLLECTD_PREFIX>/etc/collectd.conf.d/01-logfile.conf
+
+The following instructions apply to collectd-ceilometer, collect-gnocchi and
+collectd-aodh plugins.
+
+In the collectd-{ceilometer,gnocchi,aodh}-plugin.conf file a few variables
+have to be changed to suit your environment:
+
+* Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
+  directory (this values will be the same for Ceilometer, Gnocchi and Aodh
+  plugins).
+
+  ::
+
+    <Plugin python>
+        ModulePath "/path/to/collectd-ceilometer-plugin"
+        ...
+
+* You must specify the service endpoint address, ``OS_AUTH_URL``. In an openstack
+  setup you can use the openstack client to identify this.
+
+  * Find the keystone service endpoint
 
     ::
 
       $ openstack catalog list
 
-* Finally, set the type of URL used for the ceilometer service to
-  "internalURL".
+  * Update collectd-{ceilometer,gnocchi,aodh}-plugin.conf
 
     ::
 
-      CEILOMETER_URL_TYPE "internalURL"
+      OS_AUTH_URL "http://<KEYSTONE_HOST>/identity/v3"
 
-* If you would like to enable any additional features please follow the
-  instructions provided in the "Additional Features" section below before
-  moving on to the next step.
 
-Restart the collectd service:
+* Modify the credentials for the openstack service that the plugin is using.
+  These will be different for ceilometer, gnocchi and aodh.
+  These values are set when creating the Ceilometer, Aodh and Gnocchi services in OpenStack.
+  If you used an installer, some typical values are shown below.
+
+  ::
+
+        # Service user creds
+        OS_USERNAME "aodh"|"gnocchi"|"ceilometer"|etc
+        OS_PASSWORD <password for the user>
+        OS_TENANT_NAME "service"|"services"|etc
+
+
+If you would like to enable any additional features please follow the
+instructions provided in the `Additional Features`_ section below before moving
+on to the next step.
+
+* Restart the collectd service to load the new configuration:
 
     ::
 
-      $ sudo service systemd.collectd restart
+      $  sudo systemctl restart collectd
 
 Verification
 ------------
 
-To verify that ceilometer is working with collectd use the ceilometer client.
+To verify that the plugins are working with collectd, use the OpenStack client.
 
-* Source the credentials required to use your openstack client.
+* Source the credentials required to use the OpenStack client.
 
     ::
 
       $ source openrc
 
-* To verify that the stats are going through to ceilometer, view the ceilometer
-  meter list.
+The following commands vary, depending on which plugins are configured.
+
+If you are using collectd-ceilometer-plugin:
+
+* Verify that the stats are going through to Ceilometer:
 
     ::
 
       $ ceilometer meter-list
 
-  Specifically, one of the default meters that is enabled by collectd is
-  "cpu.cpu". Check that this meter is enabled.
+* List the samples for on of the meters:
 
     ::
 
-      $ ceilometer sample-list --meter cpu.cpu
+      $ ceilometer sample-list --meter <meter_name>
+
+If you are using collectd-gnocchi-plugin:
+
+* Verify that the metrics are being created in gnocchi:
+
+  ::
+
+    $ openstack metric metric list
+
+* Check on individual metrics:
+
+  ::
+
+    $ openstack metric measures show <metric_ID>
+
+
+If you are using collectd-aodh-plugin, it is harder to verify that this is
+working, as collectd-aodh sends notifications, and not regular metrics.
+
+To verify, you can use the
+`collectd-threshold <https://collectd.org/documentation/manpages/collectd-threshold.5.shtml>`_
+plugin, and set some really low thresholds in order to generate notifications
+for collectd_aodh to send.
 
 Additional Features
 -------------------
@@ -203,10 +344,11 @@ to unit mappings. If you are creating a new meter by enabling a plugin which
 doesn't provide its own unit mappings, this feature can be used to add in the
 new units for this meter.
 
-To utilize this feature you must enable it before restarting the service.
-Follow the instructions below:
+  .. NOTE::
 
-* In your collectd-ceilometer-plugin.conf file add in the following lines
+     This feature is for collectd-gnocchi and collectd_ceilometer.
+
+* In your collectd-{ceilometer,gnocchi}-plugin.conf file add in the following lines
   at the end of the <Module> section. Edit the line to include the name of
   of your chosen meter and its new units.
 
@@ -219,17 +361,23 @@ Follow the instructions below:
 * Additional lines of a similar nature can be added to change the units of
   multiple meters.
 
-* Restart the collectd service and your customized units will
-  have been updated.
+* Restart the collectd service and your customized units will be updated.
 
-To verify that the units have been changed, observe the ceilometer meter-list
-or the sample-list and check the units of the meter that you changed.
+    ::
+
+      $  sudo systemctl restart collectd
+
+* Verify that the units have been changed:
 
   ::
-
+    # For Ceilometer:
     $ ceilometer meter-list | grep <meter_name>
+    # OR
     $ ceilometer sample-list | grep <meter_name>
-
+    # For Gnocchi:
+    $ openstack metric metric list | grep <metric_name>
+    # OR
+    $ openstack metric measures show <metric_id>
 
 Troubleshooting
 ---------------
@@ -239,7 +387,7 @@ restarting the service, then check the meter list again.
 
   ::
 
-    $ systemctl restart systemd.collectd.service
+    $ sudo systemctl restart collectd
 
 Then you can also check the status of the service again or for further details
 you can use the following command.
