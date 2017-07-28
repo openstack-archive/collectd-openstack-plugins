@@ -43,7 +43,7 @@ def get_status_name(status_code):
 
 
 class Sender(object):
-    """Sends the JSON serialized data to Ceilometer"""
+    """Sends the JSON serialized data to Gnocchi/Aodh"""
 
     HTTP_CREATED = requests.codes['CREATED']
     HTTP_UNAUTHORIZED = requests.codes['UNAUTHORIZED']
@@ -124,7 +124,7 @@ class Sender(object):
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Ceilometer/Gnocchi/Aodh"""
+        """Send the payload to Gnocchi/Aodh"""
 
         # get the auth_token
         auth_token = self._authenticate()

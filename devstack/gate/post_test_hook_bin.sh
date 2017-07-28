@@ -17,7 +17,7 @@ export PATH=/usr/sbin:$PATH
 source /opt/stack/new/devstack/openrc admin
 
 while [ "$retry_count" -le "$max_retry_count" ]; do
-    if [ $(openstack metric metric list | grep interface | wc -l) -eq 0 ] || [ $(ceilometer meter-list -l 1000 | grep interface | wc -l) -eq 0 ]; then
+    if [ $(openstack metric metric list | grep interface | wc -l) -eq 0 ]; then
          echo "Testing metric interface not yet visible in db $retry_count/$max_retry_count"
     else
           echo "Testing metric obtained from db"
@@ -33,4 +33,5 @@ echo "Let's check collectd status:"
 sudo service collectd status
 
 exit 1
+
 

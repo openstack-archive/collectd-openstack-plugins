@@ -115,6 +115,7 @@ function adapt_collectd_conf {
     CONF_FILE=$(sudo find /etc -name "collectd.conf")
     sudo sed -E -i 's|(^\|^#)Hostname.*$|Hostname "'$(hostname)'"|g' $CONF_FILE
 
+<<<<<<< HEAD
     # Configure collectd-ceilometer-plugin
     if [[ "$COLLECTD_CEILOMETER_ENABLED" == "True" ]]; then
         sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/collectd-ceilometer-plugin.conf $COLLECTD_CONF_DIR/
@@ -133,6 +134,8 @@ function adapt_collectd_conf {
         config_custom_units "ceilometer" "$COLLECTD_CEILOMETER_UNITS"
     fi
 
+=======
+>>>>>>> 8f15422... Deleting ceilometer from the repository
     # configure collectd-gnocchi plugin
     if [[ "$COLLECTD_GNOCCHI_ENABLED" == "True" ]]; then
 
