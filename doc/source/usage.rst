@@ -102,16 +102,6 @@ COLLECTD_LOG_LEVEL
     Default: info
 
 
-COLLECTD_CEILOMETER_CUSTOM_UNITS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (meter=unit) a comma seperated list of pairs, defining meters and their units.
-    Allows existing units to be changed and new units to be set for new meters.
-    The "meter" is generally in the form of "plugin.type", where plugin and
-    plugin type are attributes of the collectd data.
-
-    Example: COLLECTD_CEILOMETER_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
-
-
 COLLECTD_GNOCCHI_CUSTOM_UNITS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     (meter=unit) a comma seperated list of pairs, defining meters and their units.
@@ -122,14 +112,8 @@ COLLECTD_GNOCCHI_CUSTOM_UNITS
     Example: COLLECTD_GNOCCHI_CUSTOM_UNITS="<meter> <unit>,<meter> <unit>"
 
 
-COLLECTD_CEILOMETER_ENABLED
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
-
-    Default: False
-
-COLLECTD_GNOCCHI_ENABLED
-~~~~~~~~~~~~~~~~~~~~~~~~
+COLLECTD__GNOCCHI_ENABLED
+~~~~~~~~~~~~~~~~~~~~~~~~~
     (True|False) Toggles whether collectd-gnocchi-plugin is enabled.
 
     Default: True
@@ -140,21 +124,13 @@ COLLECTD_AODH_ENABLED
 
     Default: False
 
-COLLECTD_CEILOMETER_VERBOSE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Set this to True to make collectd-ceilometer debugging messages
-    visible as info messages. This is useful when running the plugin inside a
-    collectd compiled without debug message support.
-
-    Default: False
-
 COLLECTD_GNOCCHI_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~~~~
     (True|False) Set this to True to make collectd-gnocchi debugging messages
     visible as info messages. This is useful when running the plugin inside a
     collectd compiled without debug message support.
 
-    Default: $COLLECTD_CEILOMETER_VERBOSE
+    Default: False
 
 COLLECTD_AODH_VERBOSE
 ~~~~~~~~~~~~~~~~~~~~~
@@ -162,7 +138,7 @@ COLLECTD_AODH_VERBOSE
     visible as info messages. This is useful when running the plugin inside
     a collectd compiled without debug message support.
 
-    Default: $COLLECTD_CEILOMETER_VERBOSE
+    Default: $COLLECTD_GNOCCHI_VERBOSE
 
 COLLECTD_INSTALL_TYPE
 ~~~~~~~~~~~~~~~~~~~~~
