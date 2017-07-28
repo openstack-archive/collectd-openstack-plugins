@@ -1,0 +1,11 @@
+---
+deprecations:
+  - |
+    The ceilometer API has been deprecated for several months, and is no
+    longer available. Therefore, the ceilometer plugin should be removed from
+    the repository. 
+    Actions to delete it involved:
+    -remove Collectd_Ceilometer folder
+    -remove Ceilometer specific unit tests
+    -Remove mentions in devstack, doc, and etc folders
+    -Substitute refereces of Ceilometer with Gnocchi/Aodh
