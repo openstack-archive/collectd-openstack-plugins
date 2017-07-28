@@ -171,7 +171,7 @@ class TestConfig(TestCase):
         LOGGER.error.assert_has_calls([
             mock.call('No configuration value found for "%s"', "OS_AUTH_URL"),
             mock.call('Configuration parameter %s not set.', "OS_AUTH_URL"),
-            mock.call('Collectd plugin for Ceilometer will not work properly')])
+            mock.call('Collectd plugin will not work properly')])
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_user_units(self, LOGGER):
