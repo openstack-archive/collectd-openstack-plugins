@@ -96,7 +96,7 @@ class Config(object):
                 error = True
         if error:
             LOGGER.error(
-                'Collectd plugin for Ceilometer will not work properly')
+                'Collectd plugin will not work properly')
         else:
             LOGGER.info('Configuration OK')
 

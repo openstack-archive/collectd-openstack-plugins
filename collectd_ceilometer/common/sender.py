@@ -124,7 +124,7 @@ class Sender(object):
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Ceilometer/Gnocchi/Aodh"""
+        """Send the payload to Gnocchi/Aodh"""
 
         # get the auth_token
         auth_token = self._authenticate()
