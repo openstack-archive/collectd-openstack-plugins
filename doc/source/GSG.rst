@@ -27,14 +27,14 @@ Getting Started with Collectd
 
 This is a getting started guide that describes the manual setup of collectd
 and the configuration of the plugins contained in this repository
-(Ceilometer, Gnocchi, Aodh).
+(Gnocchi, Aodh).
 
 Pre-requisites
 --------------
 
 - Access to the internet
 - A working OpenStack environment
-- Keystone and Ceilometer services enabled
+- Keystone and Gnocchi/Aodh services enabled
 
 Collectd Installation
 ---------------------
@@ -226,14 +226,14 @@ These files should be copied into the collectd configuration directory
 
     $ sudo cp $COLLECTD_CEILOMETER_DIR/etc/collectd.conf.d/logfile.conf <COLLECTD_PREFIX>/etc/collectd.conf.d/01-logfile.conf
 
-The following instructions apply to collectd-ceilometer, collect-gnocchi and
+The following instructions apply to collect-gnocchi and
 collectd-aodh plugins.
 
-In the collectd-{ceilometer,gnocchi,aodh}-plugin.conf file a few variables
+In the collectd-{gnocchi,aodh}-plugin.conf file a few variables
 have to be changed to suit your environment:
 
 * Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
-  directory (this values will be the same for Ceilometer, Gnocchi and Aodh
+  directory (this values will be the same for Gnocchi and Aodh
   plugins).
 
   ::
@@ -251,7 +251,7 @@ have to be changed to suit your environment:
 
       $ openstack catalog list
 
-  * Update collectd-{ceilometer,gnocchi,aodh}-plugin.conf
+  * Update collectd-{gnocchi,aodh}-plugin.conf
 
     ::
 
@@ -259,14 +259,14 @@ have to be changed to suit your environment:
 
 
 * Modify the credentials for the openstack service that the plugin is using.
-  These will be different for ceilometer, gnocchi and aodh.
-  These values are set when creating the Ceilometer, Aodh and Gnocchi services in OpenStack.
+  These will be different for gnocchi and aodh.
+  These values are set when creating the Aodh and Gnocchi services in OpenStack.
   If you used an installer, some typical values are shown below.
 
   ::
 
         # Service user creds
-        OS_USERNAME "aodh"|"gnocchi"|"ceilometer"|etc
+        OS_USERNAME "aodh"|"gnocchi"|etc
         OS_PASSWORD <password for the user>
         OS_TENANT_NAME "service"|"services"|etc
 
@@ -293,20 +293,6 @@ To verify that the plugins are working with collectd, use the OpenStack client.
       $ source openrc
 
 The following commands vary, depending on which plugins are configured.
-
-If you are using collectd-ceilometer-plugin:
-
-* Verify that the stats are going through to Ceilometer:
-
-    ::
-
-      $ ceilometer meter-list
-
-* List the samples for on of the meters:
-
-    ::
-
-      $ ceilometer sample-list --meter <meter_name>
 
 If you are using collectd-gnocchi-plugin:
 
@@ -346,9 +332,9 @@ new units for this meter.
 
   .. NOTE::
 
-     This feature is for collectd-gnocchi and collectd_ceilometer.
+     This feature is for collectd-gnocchi
 
-* In your collectd-{ceilometer,gnocchi}-plugin.conf file add in the following lines
+* In your collectd-{gnocchi}-plugin.conf file add in the following lines
   at the end of the <Module> section. Edit the line to include the name of
   of your chosen meter and its new units.
 
@@ -370,10 +356,6 @@ new units for this meter.
 * Verify that the units have been changed:
 
   ::
-    # For Ceilometer:
-    $ ceilometer meter-list | grep <meter_name>
-    # OR
-    $ ceilometer sample-list | grep <meter_name>
     # For Gnocchi:
     $ openstack metric metric list | grep <metric_name>
     # OR
@@ -382,7 +364,7 @@ new units for this meter.
 Troubleshooting
 ---------------
 
-If you are unable to verify that ceilometer is working with collectd, try
+If you are unable to verify that gnocchi/aodh is working with collectd, try
 restarting the service, then check the meter list again.
 
   ::

@@ -33,12 +33,6 @@ the information below can help diagnose the problem:
      has been deprecated.
    - Support for Keystone V3 API is available for the Newton release and above.
 
-- Is ceilometer-acompute service enabled?
-   - The ceilometer-acompute service provides metrics as well.
-   - If the metrics from ceilometer-acompute are available, then the issue is
-     likely with authentication of collectd-ceilometer-plugin.
-   - If the metrics from ceilometer-acompute are not available, then the issue
-     is with the database/storage engine, since no metrics are being stored.
 
 - Are the credentials in collectd-ceilometer-plugin.conf valid?
    - Export these credentials to your environment as OS_PROJECT_NAME,

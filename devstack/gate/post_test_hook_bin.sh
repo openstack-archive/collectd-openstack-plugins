@@ -7,7 +7,7 @@ date
 echo "Stacking is finished with all endpoints/services running"
 echo "Need to restart collectd, which went into some wrong state"
 echo "or ceilometer-collectd-plugin timeouts before establishing"
-echo "connections to both gnocchi & ceilometer"
+echo "connection to gnocchi"
 sudo service collectd status
 sudo service collectd restart
 
