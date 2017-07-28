@@ -111,18 +111,18 @@ Once the appliance is running connect to the running VM you can type following
 
      $ vagrant ssh
 
-During the provisioning process collectd and ceilometer are going to be
+During the provisioning process collectd is going to be
 installed and launched using devstack. To force updating the project and
 restacking it again please use one of the following commands
 
   ::
 
      # when the machine is down and I want to take it up, update the software
-     # and start all services (including collectd and ceilometer)
+     # and start all services (including collectd )
      $ vagrant up --provision
 
      # when the machine is running and I want to take reboot it, update the
-     # software and re-start all services (including collectd and ceilometer)
+     # software and re-start all services (including collectd)
      $ vagrant reload --provision
 
 
