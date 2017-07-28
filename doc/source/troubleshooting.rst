@@ -33,14 +33,8 @@ the information below can help diagnose the problem:
      has been deprecated.
    - Support for Keystone V3 API is available for the Newton release and above.
 
-- Is ceilometer-acompute service enabled?
-   - The ceilometer-acompute service provides metrics as well.
-   - If the metrics from ceilometer-acompute are available, then the issue is
-     likely with authentication of collectd-ceilometer-plugin.
-   - If the metrics from ceilometer-acompute are not available, then the issue
-     is with the database/storage engine, since no metrics are being stored.
 
-- Are the credentials in collectd-ceilometer-plugin.conf valid?
+- Are the credentials in collectd-{gnocchi,aodh}-plugin.conf valid?
    - Export these credentials to your environment as OS_PROJECT_NAME,
      OS_USERNAME and OS_PASSWORD, and use the openstack client.
    - If the credentials are valid, you should be able to interact with the
@@ -53,7 +47,7 @@ the information below can help diagnose the problem:
     ::
 
       $ openstack catalog show keystone
-      $ grep "OS_AUTH_URL" /path/to/collectd.conf.d/collectd-ceilometer-plugin.conf
+      $ grep "OS_AUTH_URL" /path/to/collectd.conf.d/collectd-{gnocchi,aodh}-plugin.conf
 
 - Is collectd-ceilometer-plugin.conf being parsed?
 
@@ -75,5 +69,5 @@ the information below can help diagnose the problem:
   configuration at `../etc/collectd.conf.d/logging.conf`_).
 
   - Make sure to set the LogLevel to “debug” for maximum information
-  - Use "VERBOSE True" in collectd-ceilometer-plugin.conf, in order to elevate
+  - Use "VERBOSE True" in collectd-{aodh,gnocchi}-plugin.conf, in order to elevate
     debug messages to LogLevel info.

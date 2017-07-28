@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    The ceilometer API has been deprecated for several months, and is no
+    longer available. Therefore, the ceilometer plugin was removed from the
+    repository. The colelctd-ceilometer source code, unit tests, deployment code
+    and sample configurations were removed. Documentation was updated.
