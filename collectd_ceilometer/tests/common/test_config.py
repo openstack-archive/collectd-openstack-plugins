@@ -233,7 +233,7 @@ class TestConfig(TestCase):
         config.read(node)
 
         LOGGER.error.assert_called_with(
-            'Invalid unit configuration: %s',"NOT_UNITS")
+            'Invalid unit configuration: %s', "NOT_UNITS")
         self.assertEqual('None', config.unit('age', None))
 
     def test_libvirt_meter_enabled(self):
