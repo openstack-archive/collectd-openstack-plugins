@@ -76,6 +76,17 @@ UNITS = {
     'dns.dns_octets':   'b/s',
     'dns.dns_rcode':    'Queries/s',
 
+    'dpdkstat.derive':  'Errors',
+    'dpdkstat.errors':  'Errors',
+    'dpdkstat.if_rx_dropped': 'Dropped',
+    'dpdkstat.if_rx_errors': 'Errors',
+    'dpdkstat.if_rx_octets': 'Bytes',
+    'dpdkstat.if_rx_packets': 'Packets',
+    'dpdkstat.if_tx_errors':  'Errors',
+    'dpdkstat.if_tx_octets':  'Bytes',
+    'dpdkstat.if_tx_packets': 'Packets',
+    'dpdkstat.operations':    '',
+
     'entropy': 'b',
 
     'filecount.files': 'Files',
@@ -85,6 +96,14 @@ UNITS = {
     'gps.satellites':            'Satellites',
 
     'hddtemp': '°C',
+
+    'hugepages.bytes': 'Bytes',
+    'hugepages.vmpage_number':   'Pages',
+    'hugepages.percent':         '%',
+
+    'intel_rdt.ipc':  'instructions/s',
+    'intel_rdt.memory_bandwidth':  '%',
+    'intel_rdt.bytes': 'Bytes',
 
     'interface.if_dropped': 'Packets/s',
     'interface.if_errors':  'Errors/s',
