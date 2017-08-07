@@ -26,16 +26,25 @@ Getting Started with Collectd
 =============================
 
 This is a getting started guide that describes the manual setup of collectd
+<<<<<<< HEAD
 and the configuration of the plugins contained in this repository (Gnocchi, Aodh).
+=======
+and the configuration of the plugins contained in this repository
+(ceilometer, gnocchi, aodh).
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 
 Pre-requisites
 --------------
 
 - Access to the internet
 - A working OpenStack environment
+<<<<<<< HEAD
 - Keystone service enabled
 - Gnocchi and/or Aodh service(s) enabled
 
+=======
+- keystone and ceilometer services enabled
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 
 Collectd Installation
 ---------------------
@@ -191,10 +200,10 @@ Configuring Collectd
 
 * Configure some collectd plugins
 
-Collectd openstack plugins
+Collectd OpenStack plugins
 --------------------------
 This section describes the steps to installing and configuring the collectd
-plugins for Ceiloemter, Gnocchi and Aodh.
+plugins for ceiloemter, gnocchi and aodh.
 
 * Clone the collectd-ceilometer-plugin code.
 
@@ -235,7 +244,12 @@ In the collectd-{gnocchi,aodh}-plugin.conf file a few variables
 have to be changed to suit your environment:
 
 * Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
+<<<<<<< HEAD
   directory (this values will be the same for Gnocchi and Aodh plugins).
+=======
+  directory (this values will be the same for ceilometer, gnocchi and aodh
+  plugins).
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 
   ::
 
@@ -259,9 +273,15 @@ have to be changed to suit your environment:
       OS_AUTH_URL "http://<KEYSTONE_HOST>/identity/v3"
 
 
+<<<<<<< HEAD
 * Modify the credentials for the openstack service that the plugin is using.
   These will be different for gnocchi and aodh.
   These values are set when creating the Aodh and Gnocchi services in OpenStack.
+=======
+* Modify the credentials for the OpenStack service that the plugin is using.
+  These will be different for ceilometer, gnocchi and aodh.
+  These values are set when creating the ceilometer, aodh and gnocchi services in openStack.
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
   If you used an installer, some typical values are shown below.
 
   ::
@@ -295,6 +315,23 @@ To verify that the plugins are working with collectd, use the OpenStack client.
 
 The following commands vary, depending on which plugins are configured.
 
+<<<<<<< HEAD
+=======
+If you are using collectd-ceilometer-plugin:
+
+* Verify that the stats are going through to ceilometer:
+
+    ::
+
+      $ ceilometer meter-list
+
+* List the samples for on of the meters:
+
+    ::
+
+      $ ceilometer sample-list --meter <meter_name>
+
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 If you are using collectd-gnocchi-plugin:
 
 * Verify that the metrics are being created in gnocchi:

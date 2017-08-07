@@ -24,10 +24,17 @@
 collectd-ceilometer-plugin
 ==========================
 
+<<<<<<< HEAD
 Collectd plugins for publishing to OpenStack (Gnocchi and Aodh).
 
 This repositiory contains collectd plugins for publishing telemetry data
 (metrics and events) gathered by collectd to Gnocchi and Aodh.
+=======
+Collectd plugins for publishing to OpenStack (ceilometer, gnocchi and aodh).
+
+This repositiory contains collectd plugins for publishing telemetry data
+(metrics and events) gathered by collectd to ceilometer, gnocchi and aodh.
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 This allows a more comprehensive set of platform telemetry to be made available
 to OpenStack which enables service assurance, fault management and  monitoring.
 
@@ -48,20 +55,32 @@ The following are links to background information, collateral and references
 to provide a clearer view on the need for this plugin, what it does and how it
 works:
 
+<<<<<<< HEAD
+=======
+* An overview of ceilometer and its architecture:
+   http://docs.openstack.org/developer/ceilometer/overview.html
+   http://docs.openstack.org/developer/ceilometer/architecture.html
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 * Official collectd website:
    https://collectd.org/
 * Information on how collectd is enabled for Openstack:
    https://01.org/openstack/blogs/emmalfoley/2016/collectd-enabling-openstack
-* Presentation on how collectd, Ceilometer and DPDK work together:
+* Presentation on how collectd, ceilometer and DPDK work together:
    https://www.youtube.com/watch?v=BdebhsBFEJs
 
 Features
 --------
 
+<<<<<<< HEAD
+=======
+* Ceilometer plugin (for collectd)
+  ** Converts from collectd data sources to ceilometer format
+  ** Adds units for ceilometer
+>>>>>>> 5f200f9... Inconsistent capitalization on Gnocchi, Aodh, OpenStack in docs
 * Gnocchi plugin (for collectd)
-  ** Store collectd metrics in Gnocchi
+  ** Store collectd metrics in gnocchi
 * Aodh plugin (for collectd)
-  ** Forward collectd notifications to Aodh
+  ** Forward collectd notifications to aodh
 * Devstack plugin (for deploying the contents of this repo)
   ** Configure and deploy plugins
   ** Build collectd from source
