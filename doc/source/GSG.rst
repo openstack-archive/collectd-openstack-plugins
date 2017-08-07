@@ -28,14 +28,14 @@ Getting Started with Collectd
 This is a getting started guide that describes the manual setup of collectd
 and the configuration of the plugins contained in this repository (Gnocchi, Aodh).
 
+
 Pre-requisites
 --------------
 
 - Access to the internet
 - A working OpenStack environment
-- Keystone service enabled
-- Gnocchi and/or Aodh service(s) enabled
-
+- keystone service enabled
+- gnocchi and/or aodh service(s) enabled
 
 Collectd Installation
 ---------------------
@@ -191,10 +191,10 @@ Configuring Collectd
 
 * Configure some collectd plugins
 
-Collectd openstack plugins
+Collectd OpenStack plugins
 --------------------------
 This section describes the steps to installing and configuring the collectd
-plugins for Ceiloemter, Gnocchi and Aodh.
+plugins for ceiloemter, gnocchi and aodh.
 
 * Clone the collectd-ceilometer-plugin code.
 
@@ -235,7 +235,8 @@ In the collectd-{gnocchi,aodh}-plugin.conf file a few variables
 have to be changed to suit your environment:
 
 * Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
-  directory (this values will be the same for Gnocchi and Aodh plugins).
+  directory (this values will be the same for gnocchi and aodh plugins).
+
 
   ::
 
@@ -261,7 +262,8 @@ have to be changed to suit your environment:
 
 * Modify the credentials for the openstack service that the plugin is using.
   These will be different for gnocchi and aodh.
-  These values are set when creating the Aodh and Gnocchi services in OpenStack.
+  These values are set when creating the aodh and gnocchi services in OpenStack.
+
   If you used an installer, some typical values are shown below.
 
   ::
@@ -294,6 +296,7 @@ To verify that the plugins are working with collectd, use the OpenStack client.
       $ source openrc
 
 The following commands vary, depending on which plugins are configured.
+
 
 If you are using collectd-gnocchi-plugin:
 

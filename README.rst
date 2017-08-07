@@ -48,20 +48,21 @@ The following are links to background information, collateral and references
 to provide a clearer view on the need for this plugin, what it does and how it
 works:
 
+
 * Official collectd website:
    https://collectd.org/
 * Information on how collectd is enabled for Openstack:
    https://01.org/openstack/blogs/emmalfoley/2016/collectd-enabling-openstack
-* Presentation on how collectd, Ceilometer and DPDK work together:
+* Presentation on how collectd, ceilometer and DPDK work together:
    https://www.youtube.com/watch?v=BdebhsBFEJs
 
 Features
 --------
 
 * Gnocchi plugin (for collectd)
-  ** Store collectd metrics in Gnocchi
+  ** Store collectd metrics in gnocchi
 * Aodh plugin (for collectd)
-  ** Forward collectd notifications to Aodh
+  ** Forward collectd notifications to aodh
 * Devstack plugin (for deploying the contents of this repo)
   ** Configure and deploy plugins
   ** Build collectd from source
