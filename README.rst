@@ -24,12 +24,12 @@
 collectd-ceilometer-plugin
 ==========================
 
-Collectd plugins for publishing to OpenStack (Ceilometer, Gnocchi and Aodh).
+Collectd plugins for publishing to openStack (ceilometer, gnocchi and aodh).
 
 This repositiory contains collectd plugins for publishing telemetry data
-(metrics and events) gathered by collectd to Ceilometer, Gnocchi and Aodh.
+(metrics and events) gathered by collectd to ceilometer, gnocchi and aodh.
 This allows a more comprehensive set of platform telemetry to be made available
-to OpenStack which enables service assurance, fault management and  monitoring.
+to openStack which enables service assurance, fault management and  monitoring.
 
 * Free software: Apache license
 * Source: http://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
@@ -62,12 +62,12 @@ Features
 --------
 
 * Ceilometer plugin (for collectd)
-  ** Converts from collectd data sources to Ceilometer format
-  ** Adds units for Ceilometer
+  ** Converts from collectd data sources to ceilometer format
+  ** Adds units for ceilometer
 * Gnocchi plugin (for collectd)
-  ** Store collectd metrics in Gnocchi
+  ** Store collectd metrics in gnocchi
 * Aodh plugin (for collectd)
-  ** Forward collectd notifications to Aodh
+  ** Forward collectd notifications to aodh
 * Devstack plugin (for deploying the contents of this repo)
   ** Configure and deploy plugins
   ** Build collectd from source

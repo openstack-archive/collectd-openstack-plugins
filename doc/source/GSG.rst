@@ -27,7 +27,7 @@ Getting Started with Collectd
 
 This is a getting started guide that describes the manual setup of collectd
 and the configuration of the plugins contained in this repository
-(Ceilometer, Gnocchi, Aodh).
+(ceilometer, gnocchi, aodh).
 
 Pre-requisites
 --------------
@@ -233,7 +233,7 @@ In the collectd-{ceilometer,gnocchi,aodh}-plugin.conf file a few variables
 have to be changed to suit your environment:
 
 * Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
-  directory (this values will be the same for Ceilometer, Gnocchi and Aodh
+  directory (this values will be the same for ceilometer, gnocchi and aodh
   plugins).
 
   ::
@@ -260,7 +260,7 @@ have to be changed to suit your environment:
 
 * Modify the credentials for the openstack service that the plugin is using.
   These will be different for ceilometer, gnocchi and aodh.
-  These values are set when creating the Ceilometer, Aodh and Gnocchi services in OpenStack.
+  These values are set when creating the ceilometer, aodh and gnocchi services in openStack.
   If you used an installer, some typical values are shown below.
 
   ::

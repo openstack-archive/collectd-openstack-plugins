@@ -24,14 +24,14 @@
 Enabling Alarms for plugin metrics/meters
 =========================================
 
-This guide provides a description of what Aodh features are available when
+This guide provides a description of what aodh features are available when
 either the collectd-gnocchi or the collectd-ceilometer plugin are enabled.
 It provides a list of the alarms that can be created and how to create them.
 
 collectd-gnocchi-plugin
 -----------------------
 
-There are three types of gnocchi based alarms that can be created using Aodh:
+There are three types of gnocchi based alarms that can be created using aodh:
 
 - gnocchi_resources_threshold
 - gnocchi_aggregation_by_metrics_threshold
