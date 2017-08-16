@@ -57,7 +57,9 @@ class Writer(object):
         # take the plugin (specialized or default) for parsing the data
         plugin = self._meters.get(vl.plugin)
         # prepare all data related to the sample
-        metername = plugin.meter_name(vl)
+        metername = "{}@{}".format(
+            plugin.resource_id(vl), plugin.meter_name(vl))
+
         unit = plugin.unit(vl)
         timestamp = datetime.datetime.utcfromtimestamp(vl.time).isoformat()
 
