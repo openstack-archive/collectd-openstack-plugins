@@ -31,7 +31,6 @@ class TestSender(unittest.TestCase):
         super(TestSender, self).setUp()
         self.sender = common_sender.Sender()
 
-    @unittest.expectedFailure
     @mock.patch.object(requests, 'post')
     @mock.patch.object(requests, 'get')
     def test_perform_request_req_type_get(self, get, post):
@@ -45,5 +44,25 @@ class TestSender(unittest.TestCase):
         """
         self.sender._perform_request("my-url", "some payload",
                                      "some headers", req_type="get")
+
         post.assert_not_called()
-        get.assert_called_with(mock.ANY, mock.ANY, mock.ANY)
+        get.assert_called_with("my-url", params="some payload",
+                               headers=mock.ANY, timeout=mock.ANY)
+
+    @mock.patch.object(requests, 'post')
+    @mock.patch.object(requests, 'get')
+    def test_perform_request_req_type_post(self, get, post):
+        """Test the behaviour when performing a post request
+
+        Set-up: None
+        Test: call _perform_request with req_type="post"
+        Expected behaviour:
+          * requests.get is not called
+          * requests.post is called with appropriate params
+        """
+        self.sender._perform_request("my-url", "some payload",
+                                     "some headers", req_type="post")
+
+        get.assert_not_called()
+        post.assert_called_with("my-url", data="some payload",
+                                headers=mock.ANY, timeout=mock.ANY)

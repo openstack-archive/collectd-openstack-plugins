@@ -25,6 +25,7 @@ import requests
 import collectd_ceilometer
 from collectd_ceilometer.common import sender as common_sender
 from collectd_ceilometer.common.settings import Config
+from collections import OrderedDict
 
 LOGGER = logging.getLogger(__name__)
 ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
@@ -114,24 +115,50 @@ class Sender(common_sender.Sender):
             Config.instance().CEILOMETER_URL_TYPE)
         return endpoint
 
+    def _get_remote_alarm_id(self, endpoint, alarm_name):
+        """Request alarm with given name."""
+        url = "{}/v2/alarms".format(endpoint)
+        # request id from a server. openstack service can
+        # handle only predefined order of args: q.field=&q.op=&q.value=
+        # in other cases it will fail
+        params = OrderedDict([("q.field", "name"), ("q.op", "eq"),
+                              ("q.value", alarm_name)])
+        alarm_id = None
+        try:
+            result = self._perform_request(url, params, self._auth_token,
+                                           req_type="get")
+        except Exception as exc:
+            LOGGER.warn('Invalid response from server for alarm:'
+                        ' %s error = %s %s' % (alarm_name, type(exc), exc))
+            return None
+
+        try:
+            # parse response
+            alarm_id = json.loads(result.text)[0]['alarm_id']
+        except (KeyError, ValueError, IndexError):
+            LOGGER.warn('NO alarm on the server: %s' % alarm_name)
+        return alarm_id
+
     def _get_alarm_id(self, alarm_name, severity, metername, alarm_severity):
         # check for an alarm and update
         try:
             return self._alarm_ids[alarm_name]
 
-        # or create a new alarm
         except KeyError as ke:
             LOGGER.warn(ke)
-            LOGGER.warn('No known ID for %s', alarm_name)
+            LOGGER.warn('No ID in a cache for %s', alarm_name)
 
             endpoint = self._get_endpoint("aodh")
-            alarm_id = \
-                self._create_alarm(endpoint, severity,
-                                   metername, alarm_name, alarm_severity)
+            alarm_id = self._get_remote_alarm_id(endpoint, alarm_name)
+            # create new alarm
+            if alarm_id is None:
+                alarm_id = \
+                    self._create_alarm(endpoint, severity,
+                                       metername, alarm_name, alarm_severity)
             if alarm_id is not None:
                 # Add alarm ids/names to relevant dictionaries/lists
                 self._alarm_ids[alarm_name] = alarm_id
-        return None
+            return alarm_id
 
     def _create_alarm(self, endpoint, severity, metername,
                       alarm_name, alarm_severity):
