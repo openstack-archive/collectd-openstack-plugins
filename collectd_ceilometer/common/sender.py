@@ -183,7 +183,10 @@ class Sender(object):
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
-        if req_type == "put":
+        if req_type == "get":
+            response = requests.get(url, params=payload, headers=headers,
+                 timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        elif req_type == "put":
             response = requests.put(
                 url, data=payload, headers=headers,
                 timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
