@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 import json
 import logging
 import requests
-
+import urllib
 
 import collectd_ceilometer
 from collectd_ceilometer.common import sender as common_sender
@@ -119,19 +119,30 @@ class Sender(common_sender.Sender):
         try:
             return self._alarm_ids[alarm_name]
 
-        # or create a new alarm
         except KeyError as ke:
             LOGGER.warn(ke)
-            LOGGER.warn('No known ID for %s', alarm_name)
+            LOGGER.warn('No ID in a cache for %s', alarm_name)
 
             endpoint = self._get_endpoint("aodh")
-            alarm_id = \
-                self._create_alarm(endpoint, severity,
-                                   metername, alarm_name, alarm_severity)
+            # requests id from a server
+            url = "{}/v2/alarms?q.field=name&q.op=eq&q.value={}".format(
+                endpoint, urllib.quote_plus(alarm_name))
+            result = self._perform_request(url, None, self._auth_token, "get")
+            alarm_id = None
+            try:
+                # parse response
+                alarm_id = json.loads(result.text)[0]['alarm_id']
+            except (KeyError, ValueError, IndexError):
+                LOGGER.warn('NO alarm on the server: %s' % alarm_name)
+            # create new alarm
+            if alarm_id is None:
+                alarm_id = \
+                    self._create_alarm(endpoint, severity,
+                                       metername, alarm_name, alarm_severity)
             if alarm_id is not None:
                 # Add alarm ids/names to relevant dictionaries/lists
                 self._alarm_ids[alarm_name] = alarm_id
-        return None
+            return alarm_id
 
     def _create_alarm(self, endpoint, severity, metername,
                       alarm_name, alarm_severity):
