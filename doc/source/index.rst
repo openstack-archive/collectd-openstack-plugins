@@ -35,7 +35,6 @@ Contents:
    contributing
    devstackGSG
    GSG
-   vagrant
    troubleshooting
 
 Indices and tables
