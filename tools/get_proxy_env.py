@@ -14,10 +14,6 @@
 
 """The purpose of this script is generating environment variables used to
 configure /etc/profile inside of the virtual machine.
-
-The main purpose of this script is allowing vagrant to configure properly
-the no_proxy environment variable adding entries that could break openstack
-components internal connectivity.
 """
 
 import os

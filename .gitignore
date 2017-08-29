@@ -57,8 +57,5 @@ ChangeLog
 .*sw?
 .settings/
 
-# Vagrant
-.vagrant/
-
 # File created by releasenotes build
 releasenotes/build
