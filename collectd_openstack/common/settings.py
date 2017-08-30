@@ -102,10 +102,16 @@ class Config(object):
         else:
             LOGGER.info('Configuration OK')
 
-    def unit(self, plugin, pltype):
+    def unit(self, plugin, pltype, pltype_instance=None):
         """Get unit for plugin and type"""
 
-        if pltype:
+        if plugin == "virt" and pltype == "perf":
+            unit = self._units.get(
+                "%s.%s.%s" % (plugin, pltype, pltype_instance))
+            if unit:
+                return unit
+
+        elif pltype:
             unit = self._units.get('%s.%s' % (plugin, pltype))
             if unit:
                 return unit
