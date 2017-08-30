@@ -175,6 +175,45 @@ class TestConfig(TestCase):
             mock.call('Configuration parameter %s not set.', "OS_AUTH_URL"),
             mock.call('Collectd plugin will not work properly')])
 
+    def test_unit_libvirt(self):
+        """Test that unit uses three params only when pl=libvirt.
+
+        Set-up: Define a subset of unit mappings
+        Test: get unit mapping for:
+          * libvirt (three params)
+          * some other plugin (two params)
+          * some other plugin (three params)
+        Expected behaviour:
+          * libvirt.perf unit mappings should use three params
+          * other plugins are mapped using two params
+          * using three params to access other plugins fails
+        """
+        # TODO(emma-l-foley): move this to setUp()
+        config = settings.Config._decorated()
+        # Define a sub-set of unit-mappings
+        # TODO(emma-l-foley): get some proper examples here...
+        config._units = {"virt.type.type_instance": "unreachable_unit",
+                         "virt.type": "virt_unit",
+                         "virt.perf.type": "perf_type_unit",
+                         "virt.perf": "unreachable_unit",
+                         "other.type": "other_unit",
+                         "other.type.not_instance": "unreachable_unit",
+                        }
+
+        # Try and get the units
+        self.assertNotEqual("unreachable_unit",
+                            config.unit("virt", "type", pltype_instance="type"))
+        self.assertEqual("virt_unit",
+                         config.unit("virt", "type"))
+        self.assertNotEqual("unreachable_unit",
+                            config.unit("virt", "perf"))
+        self.assertEqual("other_unit",
+                         config.unit("other", "type"))
+        self.assertNotEqual("unreachable_unit",
+                            config.unit("other", "type", pltype_instance="not_instance"))
+        self.assertEqual("perf_type_unit",
+                         config.unit("virt", "perf", pltype_instance="type"))
+
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_user_units(self, LOGGER):
         """Test configuration with user defined units"""

@@ -119,6 +119,8 @@ UNITS = {
 
     'irq': 'Irq/s',
 
+    # DO NOT UPDATE, modify 'virt' plugin instead
+    # These mappings are to support older versions of collectd
     'libvirt.if_octets':        'B/s',
     'libvirt.virt_cpu_total':   'ms',
     'libvirt.disk_octets':      'B/s',
@@ -275,6 +277,29 @@ UNITS = {
     'varnish.threads':          'Thread',
     'varnish.total_requests':   'Requests',
     'varnish.total_operations': 'Operations',
+
+    'virt.cpu_affinity':     '',
+    'virt.disk_error':       '',
+    'virt.disk_octets':      'B/s',
+    'virt.disk_ops':         'Ops/s',
+    'virt.disk_time':        'ns',
+    'virt.if_dropped':       'Packets/s',
+    'virt.if_errors':        'Errors/s',
+    'virt.if_octets':        'B/s',
+    'virt.if_packets':       'Packets/s',
+    'virt.job_stats':        '',
+    'virt.memory':           'kb',
+    'virt.percent':          '%',
+    'virt.virt_cpu_total':   'ns',
+    'virt.virt_vcpu':        'ns/cpu',
+
+    'virt.perf.perf_cmt':          'B',
+    'virt.perf.perf_mbmt':         'B',
+    'virt.perf.mbml':              'B',
+    'virt.perf.perf_cpu_cycles':   'Cycles',
+    'virt.perf.instructions':      'Instructions',
+    'virt.perf.cache_references':  'Hits',
+    'virt.perf.perf_cache_misses': 'Misses',
 
     'vmem.vmpage_action':   'Actions',
     'vmem.vmpage_faults':   'Faults/s',
