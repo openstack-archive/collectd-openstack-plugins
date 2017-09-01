@@ -27,7 +27,6 @@ import unittest
 from collectd_ceilometer.aodh import plugin
 from collectd_ceilometer.aodh import sender as aodh_sender
 from collectd_ceilometer.common.keystone_light import KeystoneException
-from collectd_ceilometer.common.meters import base
 from collectd_ceilometer.common import sender as common_sender
 from collectd_ceilometer.common import settings
 
@@ -300,69 +299,6 @@ class TestPlugin(unittest.TestCase):
 
         # no requests method has been called
         put.assert_not_called()
-
-    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
-    def test_get_alarm_state_severity_low(self, severity):
-        """Test _get_alarm_state if severity is 'low'.
-
-        Set-up: create a sender instance, set severity to low
-        Test: call _get_alarm_state method with severity=low
-        Expected-behaviour: returned state value should equal 'ok'
-            and won't equal 'alarm' or insufficient data'
-        """
-        instance = aodh_sender.Sender()
-
-        # run test for moderate severity
-        severity.return_value = 'low'
-
-        self.assertEqual(instance._get_alarm_state('low'), 'ok')
-
-        self.assertNotEqual(instance._get_alarm_state('low'), 'alarm')
-
-        self.assertNotEqual(instance._get_alarm_state('low'),
-                            'insufficient data')
-
-    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
-    def test_get_alarm_state_severity_moderate(self, severity):
-        """Test _get_alarm_state if severity is 'moderate'.
-
-        Set-up: create a sender instance, set severity to moderate
-        Test: call _get_alarm_state method with severity=moderate
-        Expected-behaviour: returned state value should equal 'alarm'
-            and won't equal 'ok' or insufficient data'
-        """
-        instance = aodh_sender.Sender()
-
-        # run test for moderate severity
-        severity.return_value = 'moderate'
-
-        self.assertEqual(instance._get_alarm_state('moderate'), 'alarm')
-
-        self.assertNotEqual(instance._get_alarm_state('moderate'), 'ok')
-
-        self.assertNotEqual(instance._get_alarm_state('moderate'),
-                            'insufficient data')
-
-    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
-    def test_get_alarm_state_severity_critical(self, severity):
-        """Test _get_alarm_state if severity is 'critical'.
-
-        Set-up: create a sender instance, set severity to critical
-        Test: call _get_alarm_state method with severity=critical
-        Expected-behaviour: returned state value should equal 'alarm'
-            and won't equal 'ok' or 'insufficient data'
-        """
-        instance = aodh_sender.Sender()
-
-        # run test for moderate severity
-        severity.return_value = 'critical'
-
-        self.assertEqual(instance._get_alarm_state('critical'), 'alarm')
-
-        self.assertNotEqual(instance._get_alarm_state('critical'), 'ok')
-
-        self.assertNotEqual(instance._get_alarm_state('critical'),
-                            'insufficient data')
 
     @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)

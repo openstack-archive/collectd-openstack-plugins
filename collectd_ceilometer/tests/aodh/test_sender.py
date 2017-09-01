@@ -24,6 +24,8 @@ import unittest
 from collectd_ceilometer.aodh import sender as aodh_sender
 from collections import OrderedDict
 
+from collectd_ceilometer.common.meters import base
+
 valid_resp = '[{"alarm_actions": [], "event_rule": {"query": [],'\
              '"event_type": "events.gauge"}, "ok_actions": [],'\
              '"name": "alarm", "severity": "moderate",'\
@@ -131,3 +133,54 @@ class TestSender(unittest.TestCase):
             mock.ANY, "critical", "link status", "alarm", "critical")
         _get_endpoint.assert_called_once_with(mock.ANY, "aodh")
         self.assertEqual(alarm_id, valid_alarm_id, "invalid alarm id")
+
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
+    def test_get_alarm_state_severity_low(self, severity):
+        """Test _get_alarm_state if severity is 'low'.
+
+        Set-up: create a sender instance, set severity to low
+        Test: call _get_alarm_state method with severity=low
+        Expected-behaviour: returned state value should equal 'ok'
+            and won't equal 'alarm' or insufficient data'
+        """
+        # run test for moderate severity
+        severity.return_value = 'low'
+
+        self.assertEqual('ok', self.sender._get_alarm_state('low'))
+        self.assertNotEqual('alarm', self.sender._get_alarm_state('low'))
+        self.assertNotEqual('insufficient data',
+                            self.sender._get_alarm_state('low'))
+
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
+    def test_get_alarm_state_severity_moderate(self, severity):
+        """Test _get_alarm_state if severity is 'moderate'.
+
+        Set-up: create a sender instance, set severity to moderate
+        Test: call _get_alarm_state method with severity=moderate
+        Expected-behaviour: returned state value should equal 'alarm'
+            and won't equal 'ok' or insufficient data'
+        """
+        # run test for moderate severity
+        severity.return_value = 'moderate'
+
+        self.assertEqual('alarm', self.sender._get_alarm_state('moderate'))
+        self.assertNotEqual('ok', self.sender._get_alarm_state('moderate'))
+        self.assertNotEqual('insufficient data',
+                            self.sender._get_alarm_state('moderate'))
+
+    @mock.patch.object(base.Meter, 'collectd_severity', spec=callable)
+    def test_get_alarm_state_severity_critical(self, severity):
+        """Test _get_alarm_state if severity is 'critical'.
+
+        Set-up: create a sender instance, set severity to critical
+        Test: call _get_alarm_state method with severity=critical
+        Expected-behaviour: returned state value should equal 'alarm'
+            and won't equal 'ok' or 'insufficient data'
+        """
+        # run test for moderate severity
+        severity.return_value = 'critical'
+
+        self.assertEqual('alarm', self.sender._get_alarm_state('critical'))
+        self.assertNotEqual('okay', self.sender._get_alarm_state('critical'))
+        self.assertNotEqual('insufficient data',
+                            self.sender._get_alarm_state('critical'))
