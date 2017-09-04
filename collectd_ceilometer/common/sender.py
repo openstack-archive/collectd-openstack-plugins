@@ -177,13 +177,18 @@ class Sender(object):
     @classmethod
     def _perform_request(cls, url, payload, auth_token, req_type="post"):
         """Perform the POST/PUT request."""
-        LOGGER.debug('Performing request to %s', url)
+        LOGGER.debug('Performing request to %s, payload=%s, req_type = %s' %
+                     (url, payload, req_type))
 
         # request headers
         headers = {'X-Auth-Token': auth_token,
                    'Content-type': 'application/json'}
         # perform request and return its result
-        if req_type == "put":
+        if req_type == "get":
+            response = requests.get(
+                url, params=payload, headers=headers,
+                timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
+        elif req_type == "put":
             response = requests.put(
                 url, data=payload, headers=headers,
                 timeout=(Config.instance().CEILOMETER_TIMEOUT / 1000.))
