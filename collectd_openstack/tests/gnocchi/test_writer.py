@@ -19,8 +19,8 @@
 import mock
 import unittest
 
-from collectd_ceilometer.common.meters import MeterStorage
-from collectd_ceilometer.gnocchi import writer
+from collectd_openstack.common.meters import MeterStorage
+from collectd_openstack.gnocchi import writer
 
 
 def mock_collectd(**kwargs):
