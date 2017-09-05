@@ -2,7 +2,7 @@
  fixes:
    - |
      Partially fixes;
-     'bug 1672296 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1672296'.
+     'bug 1672296 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1672296'.
      Included a delete_alarms tool so that all alarms can be delete manually
      before collectd is restarted.Updated devstackGSG.rst to include
      instructions on using this tool.
