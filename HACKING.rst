@@ -10,7 +10,7 @@
       WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
       License for the specific language governing permissions and limitations
       under the License.
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -21,7 +21,7 @@
       Avoid deeper levels because they do not render well.
 
 =============================================
-collectd-ceilometer-plugin Style Commandments
+collectd-openstack-plugins Style Commandments
 =============================================
 
 Read the OpenStack Style Commandments https://docs.openstack.org/hacking/latest/

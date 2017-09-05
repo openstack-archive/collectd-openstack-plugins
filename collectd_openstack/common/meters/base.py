@@ -51,7 +51,7 @@ class Meter(object):
         return Config.instance().unit(vl.plugin, vl.type)
 
     def sample_type(self, vl):
-        """Translate from collectd counter type to Ceilometer type."""
+        """Translate from collectd counter type to OpenStack type."""
         types = {"gauge": "gauge",
                  "derive": "delta",
                  "absolute": "cumulative",

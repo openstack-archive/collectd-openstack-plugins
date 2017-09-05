@@ -11,7 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -22,10 +22,10 @@
       Avoid deeper levels because they do not render well.
 
 ================================================
-collectd-ceilometer-plugin troubleshooting guide
+collectd-openstack-plugins troubleshooting guide
 ================================================
 
-If you experience issues while deploying or using collectd-ceilometer-plugin,
+If you experience issues while deploying or using collectd-openstack-plugins,
 the information below can help diagnose the problem:
 
 - What version of keystone is being used in the deployment?
@@ -49,7 +49,7 @@ the information below can help diagnose the problem:
       $ openstack catalog show keystone
       $ grep "OS_AUTH_URL" /path/to/collectd.conf.d/collectd-{gnocchi,aodh}-plugin.conf
 
-- Is collectd-ceilometer-plugin.conf being parsed?
+- Is collectd-openstack-plugins.conf being parsed?
 
   - Does the collectd.conf have an Include block/directive?
 
