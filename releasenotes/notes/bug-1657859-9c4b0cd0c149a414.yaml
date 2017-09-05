@@ -1,6 +1,6 @@
 ---
 fixes:
   - |
-    Fixes 'bug 1657859 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1657859'.
+    Fixes 'bug 1657859 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1657859'.
     Changed logfile.conf to 01-logfile.conf so it loads before the python
     plugins, so debugging is easier.

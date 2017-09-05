@@ -1,5 +1,5 @@
 ---
 fixes:
-  - Fixes 'bug 1648554 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1648554'.
+  - Fixes 'bug 1648554 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1648554'.
     Added -p flag to "mkdir /etc/collectd/collectd.conf.d" to allow all
     directories to be created.
