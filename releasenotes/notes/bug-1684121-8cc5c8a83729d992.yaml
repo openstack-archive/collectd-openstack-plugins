@@ -1,6 +1,6 @@
 ---
  fixes:
   - |
-    Fixes 'bug 1684121 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1684121'.
+    Fixes 'bug 1684121 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1684121'.
     Checked and fixed any rendering, typo or allignment errors in the
     documentation.
