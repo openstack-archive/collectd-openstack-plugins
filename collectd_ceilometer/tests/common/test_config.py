@@ -73,6 +73,10 @@ class MockCollectdConfig(object):
 class TestConfig(TestCase):
     """Test configuration reader"""
 
+    def setUp(self):
+        super(TestConfig, self).setUp()
+        self.config = settings.Config._decorated()
+
     @property
     def default_values(self):
         return dict(
@@ -90,19 +94,20 @@ class TestConfig(TestCase):
         """Test valid configuration"""
 
         node = config_module(values=self.default_values)
-        config = settings.Config._decorated()
+        updated_node = config_module(values=dict(BATCH_SIZE=10))
 
         # read default configuration
-        config.read(node)
+        self.config.read(node)
 
         # compare the configuration values with the default values
         for key, value in six.iteritems(self.default_values):
-            self.assertEqual(value, getattr(config, key))
+            self.assertEqual(value, getattr(self.config, key))
 
         # test configuration change
-        self.assertEqual(1, config.BATCH_SIZE)
-        config.read(config_module(values=dict(BATCH_SIZE=10)))
-        self.assertEqual(10, config.BATCH_SIZE)
+        self.assertEqual(1, self.config.BATCH_SIZE)
+
+        self.config.read(updated_node)
+        self.assertEqual(10, self.config.BATCH_SIZE)
         LOGGER.error.assert_not_called()
 
     def test_singleton(self):
@@ -131,13 +136,12 @@ class TestConfig(TestCase):
         values = self.default_values
         values["BATCH_SIZE"] = "xyz"
         node = config_module(values=values)
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
         LOGGER.error.assert_called_once_with(
             'Invalid value "xyz" for configuration parameter "BATCH_SIZE"')
-        self.assertEqual(1, config.BATCH_SIZE)
+        self.assertEqual(1, self.config.BATCH_SIZE)
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_unknown_parameter(self, LOGGER):
@@ -148,9 +152,8 @@ class TestConfig(TestCase):
         values = self.default_values
         values["UNKNOWN"] = "xyz"
         node = config_module(values=values)
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
         LOGGER.error.assert_called_with(
             'Unknown configuration parameter "%s"', 'UNKNOWN')
@@ -166,9 +169,8 @@ class TestConfig(TestCase):
             if child.key == 'OS_AUTH_URL':
                 child.values = tuple()
                 break
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
         LOGGER.error.assert_has_calls([
             mock.call('No configuration value found for "%s"', "OS_AUTH_URL"),
@@ -188,10 +190,8 @@ class TestConfig(TestCase):
           * other plugins are mapped using two params
           * using three params to access other plugins fails
         """
-        # TODO(emma-l-foley): move this to setUp()
-        config = settings.Config._decorated()
         # Define a sub-set of unit-mappings
-        config._units = {"virt.type.type_instance": "unreachable_unit",
+        self.config._units = {"virt.type.type_instance": "unreachable_unit",
                          "virt.type": "virt_unit",
                          "virt.perf.type": "perf_type_unit",
                          "virt.perf": "unreachable_unit",
@@ -201,17 +201,20 @@ class TestConfig(TestCase):
 
         # Try and get the units
         self.assertNotEqual("unreachable_unit",
-                            config.unit("virt", "type", pltype_instance="type"))
+                            self.config.unit("virt", "type",
+                                             pltype_instance="type"))
         self.assertEqual("virt_unit",
-                         config.unit("virt", "type"))
+                         self.config.unit("virt", "type"))
         self.assertNotEqual("unreachable_unit",
-                            config.unit("virt", "perf"))
+                            self.config.unit("virt", "perf"))
         self.assertEqual("other_unit",
-                         config.unit("other", "type"))
+                         self.config.unit("other", "type"))
         self.assertNotEqual("unreachable_unit",
-                            config.unit("other", "type", pltype_instance="not_instance"))
+                            self.config.unit("other", "type",
+                                             pltype_instance="not_instance"))
         self.assertEqual("perf_type_unit",
-                         config.unit("virt", "perf", pltype_instance="type"))
+                         self.config.unit("virt", "perf",
+                                          pltype_instance="type"))
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_user_units(self, LOGGER):
@@ -222,16 +225,15 @@ class TestConfig(TestCase):
             units={'age': 'years',
                    'star.distance': 'LY',
                    'star.temperature': 'K'})
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
         LOGGER.error.assert_not_called()
-        self.assertEqual('years', config.unit('age', None))
-        self.assertEqual('LY', config.unit('star', 'distance'))
-        self.assertEqual('K', config.unit('star', 'temperature'))
-        self.assertEqual('None', config.unit('monty', None))
-        self.assertEqual('None', config.unit('monty', 'python'))
+        self.assertEqual('years', self.config.unit('age', None))
+        self.assertEqual('LY', self.config.unit('star', 'distance'))
+        self.assertEqual('K', self.config.unit('star', 'temperature'))
+        self.assertEqual('None', self.config.unit('monty', None))
+        self.assertEqual('None', self.config.unit('monty', 'python'))
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_user_units_invalid(self, LOGGER):
@@ -247,11 +249,10 @@ class TestConfig(TestCase):
             if child.key == 'UNITS':
                 child.children[0].values = (1, 2, 3)
                 break
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
-        self.assertEqual('None', config.unit('age', None))
+        self.assertEqual('None', self.config.unit('age', None))
         LOGGER.error.assert_called_with(
             'Invalid unit configuration: unit "1" "2" "3"')
 
@@ -266,13 +267,12 @@ class TestConfig(TestCase):
             if child.key == 'UNITS':
                 child.children[0].key = 'NOT_UNITS'
                 break
-        config = settings.Config._decorated()
 
-        config.read(node)
+        self.config.read(node)
 
         LOGGER.error.assert_called_with(
             'Invalid unit configuration: %s', "NOT_UNITS")
-        self.assertEqual('None', config.unit('age', None))
+        self.assertEqual('None', self.config.unit('age', None))
 
     def test_libvirt_meter_enabled(self):
         """Test configuration change when enabling the libvirt meter
@@ -283,10 +283,9 @@ class TestConfig(TestCase):
         """
 
         node = config_module(values=dict(LIBVIRT_METER_ENABLED=True))
-        config = settings.Config._decorated()
 
-        config.read(config_module(values=dict(LIBVIRT_METER_ENABLED=True)))
-        self.assertEqual(True, config.LIBVIRT_METER_ENABLED)
+        self.config.read(node)
+        self.assertEqual(True, self.config.LIBVIRT_METER_ENABLED)
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)
     def test_libvirt_meter_default_config(self, LOGGER):
@@ -299,13 +298,12 @@ class TestConfig(TestCase):
         """
 
         node = config_module(values=self.default_values)
-        config = settings.Config._decorated()
 
         for child in node.children:
             if child.key == 'LIBVIRT_METER_ENABLED':
-                config.libvirt_meter = getattr(config, child.key)
+                self.config.libvirt_meter = getattr(self.config, child.key)
 
-        config.read(node)
+        self.config.read(node)
 
-        self.assertEqual(False, config.libvirt_meter)
+        self.assertEqual(False, self.config.libvirt_meter)
         LOGGER.error.assert_not_called()
