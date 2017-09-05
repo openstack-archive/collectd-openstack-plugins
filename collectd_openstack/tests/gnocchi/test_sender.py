@@ -19,7 +19,7 @@
 
 import unittest
 
-from collectd_ceilometer.gnocchi import sender as gnocchi_sender
+from collectd_openstack.gnocchi import sender as gnocchi_sender
 
 
 class TestGnocchiSender(unittest.TestCase):

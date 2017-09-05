@@ -85,7 +85,7 @@ def mock_config(**kwargs):
 
 def config_module(
         values, severities=None,
-        module_name="collectd_ceilometer.ceilometer.plugin"):
+        module_name="collectd_openstack.aodh.plugin"):
     children = [config_value(key, value)
                 for key, value in six.iteritems(values)]
     if severities:
