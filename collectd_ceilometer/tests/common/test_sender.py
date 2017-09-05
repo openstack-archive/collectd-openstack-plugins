@@ -50,18 +50,36 @@ class TestSender(unittest.TestCase):
                                headers=mock.ANY, timeout=mock.ANY)
 
     @mock.patch.object(requests, 'post')
+    @mock.patch.object(requests, 'put')
+    def test_perform_request_req_type_put(self, put, post):
+        """Test the behaviour when performing a post request
+
+        Set-up: None
+        Test: call _perform_request with req_type="put"
+        Expected behaviour:
+          * requests.put is called
+          * requests.post is not called (i.e. no fall back to default
+        """
+        self.sender._perform_request("my-url", "some payload",
+                                     "some headers", req_type="put")
+
+        post.assert_not_called()
+        put.assert_called_with("my-url", data="some payload",
+                               headers=mock.ANY, timeout=mock.ANY)
+
+    @mock.patch.object(requests, 'post')
     @mock.patch.object(requests, 'get')
     def test_perform_request_req_type_post(self, get, post):
         """Test the behaviour when performing a post request
 
         Set-up: None
-        Test: call _perform_request with req_type="post"
+        Test: call _perform_request with no req_type
         Expected behaviour:
           * requests.get is not called
           * requests.post is called with appropriate params
         """
         self.sender._perform_request("my-url", "some payload",
-                                     "some headers", req_type="post")
+                                     "some headers")
 
         get.assert_not_called()
         post.assert_called_with("my-url", data="some payload",
