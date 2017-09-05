@@ -22,7 +22,7 @@
       Avoid deeper levels because they do not render well.
 
 ===============================================
-Deploying collectd-ceilometer-plugin with Kolla
+Deploying collectd-openstack-plugins with Kolla
 ===============================================
 
 This document describes the steps required to install, configure and verify the
@@ -80,12 +80,12 @@ the plugins section.
 
   ::
 
-      [collectd-plugin-collectd-ceilometer-plugin]
+      [collectd-plugin-collectd-openstack-plugins]
       type = git
-      location = https://github.com/openstack/collectd-ceilometer-plugin.git
+      location = https://github.com/openstack/collectd-openstack-plugins.git
       reference = master
 
-To build the collectd container with the collectd-ceilometer-plugin
+To build the collectd container with the collectd-openstack-plugins
 repository, copy the ``template-override.json`` file to a local directory.
 Run the following command to build the container.
 
@@ -112,10 +112,10 @@ is up and running.
 
 The status of the collectd container should be "Up".
 
-Configure collectd-ceilometer-plugin
+Configure collectd-openstack-plugins
 ------------------------------------
 
-Edit the ``/kolla/etc/collectd-ceilometer-plugin.conf`` file and replace the
+Edit the ``/kolla/etc/collectd-openstack-plugins.conf`` file and replace the
 variables with appropriate values. The passwords and endpoints will be
 provided by the operator. If these entries are not provided, run the
 post-deploy script as mentioned in the Kolla guide to generate the passwords
@@ -123,7 +123,7 @@ and endpoints.
 
 The other entries you need to edit in this file are outlined below:
 
-* Include the "ModulePath" to the collectd-ceilometer-plugin directory.
+* Include the "ModulePath" to the collectd-openstack-plugins directory.
 
     ::
 
@@ -144,7 +144,7 @@ Copy this config file to ``/etc/kolla/collectd/collectd.conf.d`` folder.
 
   ::
 
-    $ sudo cp collectd-ceilometer-plugin.conf /etc/kolla/collectd/collectd.conf.d
+    $ sudo cp collectd-openstack-plugins.conf /etc/kolla/collectd/collectd.conf.d
 
 Restart the collectd container for the changes to take affect.
 
@@ -154,7 +154,7 @@ Restart the collectd container for the changes to take affect.
 
 Verify the container is up and running.
 
-Verification of collectd-ceilometer-plugin
+Verification of collectd-openstack-plugins
 ------------------------------------------
 
 To verify that the plugin is working, use the ceilometer client.

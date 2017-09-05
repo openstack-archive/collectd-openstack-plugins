@@ -11,7 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -25,7 +25,7 @@
 Usage
 =====
 
-To use collectd-ceilometer-plugin in collectd::
+To use collectd-openstack-plugins in collectd::
 
     Python plugin must be enabled in collectd
 
@@ -99,7 +99,7 @@ COLLECTD_BRANCH
 
 COLLECTD_CEILOMETER_ENABLED
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    (True|False) Toggle whether collectd-ceilometer-plugin is enabled.
+    (True|False) Toggle whether collectd-openstack-plugins is enabled.
 
     Default: False
 
