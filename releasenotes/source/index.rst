@@ -1,5 +1,5 @@
 ========================================
-collectd_ceilometer_plugin Release Notes
+collectd_openstack_plugin Release Notes
 ========================================
 
 .. toctree::

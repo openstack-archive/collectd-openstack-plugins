@@ -26,8 +26,8 @@ enable_plugin gnocchi https://github.com/openstack/gnocchi master
 GNOCCHI_USE_KEYSTONE=True
 COLLECTD_GNOCCHI_ENABLED=True
 
-# Setup collectd-ceilometer plugin
+# Setup collectd-openstack plugin
 COLLECTD_INSTALL=True
 COLLECTD_INSTALL_TYPE=source
 COLLECTD_CEILOMETER_VERBOSE=True
-enable_plugin collectd-ceilometer http://github.com/openstack/collectd-ceilometer-plugin
+enable_plugin collectd-openstack http://github.com/openstack/collectd-openstack-plugins
