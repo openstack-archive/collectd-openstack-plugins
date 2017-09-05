@@ -24,7 +24,7 @@ enable_plugin ceilometer https://github.com/openstack/ceilometer master
 # For more options refer to devstackGSG.rst
 CEILOMETER_BACKEND=mysql
 
-enable_plugin collectd-ceilometer https://github.com/openstack/collectd-ceilometer-plugin
+enable_plugin collectd-openstack https://github.com/openstack/collectd-openstack-plugins
 
 COLLECTD_INSTALL=True
 COLLECTD_CEILOMETER_VERBOSE=False

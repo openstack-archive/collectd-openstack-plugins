@@ -11,7 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -22,10 +22,10 @@
       Avoid deeper levels because they do not render well.
 
 ===================================================
-Installing collectd-ceilometer-plugin with DevStack
+Installing collectd-openstack-plugins with DevStack
 ===================================================
 
-This guide outlines how to install the collectd-ceilometer-plugin using
+This guide outlines how to install the collectd-openstack-plugins using
 DevStack.
 
 Pre-requisites
@@ -52,12 +52,12 @@ collectd, gnocchi, aodh and the plugins in this repo. The sample local.conf
 provided must be edited to enable additional services.
 
 To configure DevStack for to install the plugin, download the sample local.conf
-from the collectd-ceilometer-plugin repo into your DevStack directory.
+from the collectd-openstack-plugins repo into your DevStack directory.
 
   ::
 
     $ cd devstack
-    $ wget https://github.com/openstack/collectd-ceilometer-plugin/blob/master/doc/source/examples/local.conf.minimal
+    $ wget https://github.com/openstack/collectd-openstack-plugins/blob/master/doc/source/examples/local.conf.minimal
 
 Edit the "HOST_IP" varible to appropriately match your environment.
 
@@ -138,7 +138,7 @@ To deploy with gnocchi using DevStack, add the following to you local.conf:
 
   ::
 
-      enable_plugin collectd-ceilometer-plugin http://github.com/openstack/collectd-ceilometer-plugin
+      enable_plugin collectd-openstack-plugins http://github.com/openstack/collectd-openstack-plugins
 
       COLLECTD_INSTALL=True
 
@@ -165,7 +165,7 @@ Aodh
 
 Aodh is an alarming service that allows an alarm to be created and/or updated
 if there is something unusual happening with the system. When this service is
-enabled via the collectd-ceilometer-plugin, it allows alarms to be
+enabled via the collectd-openstack-plugins, it allows alarms to be
 created/updated for all notifications sent from collectd. All notifications
 sent from collectd are configured as event alarms in aodh.
 To enable aodh with collectd, add the following to your local.conf:
@@ -220,13 +220,13 @@ Aodh Tools
 Multi-Node Deployment
 ---------------------
 
-The collectd-ceilometer-plugin can be used on a multi-node deployment. The
+The collectd-openstack-plugins can be used on a multi-node deployment. The
 following is description of deployment options and configurations for a multi-
 node setup:
 
 * Set-up:
   To collect metrics from all of the nodes in your deployment collectd must be
-  installed on each node. But the collectd-ceilometer-plugin only needs to be
+  installed on each node. But the collectd-openstack-plugins only needs to be
   configured on the controller node.
 * Configuration settings:
    - Set the configuration option that follows, in your local.conf on your

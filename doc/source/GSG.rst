@@ -11,7 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -196,12 +196,12 @@ Collectd OpenStack plugins
 This section describes the steps to installing and configuring the collectd
 plugins for gnocchi and aodh.
 
-* Clone the collectd-ceilometer-plugin code.
+* Clone the collectd-openstack-plugins code.
 
   ::
 
-    $ git clone https://github.com/openstack/collectd-ceilometer-plugin
-    $ cd collectd-ceilometer-plugin
+    $ git clone https://github.com/openstack/collectd-openstack-plugins
+    $ cd collectd-openstack-plugins
 
 * Install the module and requirements
 
@@ -210,7 +210,7 @@ plugins for gnocchi and aodh.
     $ sudo pip install .
 
 Sample configurations for each of the plugins in this repo are included under
-``collectd-ceilometer-plugin/etc/collectd.conf.d/``
+``collectd-openstack-plugins/etc/collectd.conf.d/``
 These files should be copied into the collectd configuration directory
 ``<COLLECTD_PREFIX>/etc/collectd.conf.d/``, and updated to reflect your environment
 
@@ -234,14 +234,14 @@ The following instructions apply to collectd-gnocchi and collectd-aodh plugins.
 In the collectd-{gnocchi,aodh}-plugin.conf file a few variables
 have to be changed to suit your environment:
 
-* Set the ``ModulePath`` to be the location of your collectd-ceilometer-plugin
+* Set the ``ModulePath`` to be the location of your collectd-openstack-plugins
   directory (this values will be the same for gnocchi and aodh plugins).
 
 
   ::
 
     <Plugin python>
-        ModulePath "/path/to/collectd-ceilometer-plugin"
+        ModulePath "/path/to/collectd-openstack-plugins"
         ...
 
 * You must specify the service endpoint address, ``OS_AUTH_URL``. In an openstack

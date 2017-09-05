@@ -10,7 +10,7 @@
       WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
       License for the specific language governing permissions and limitations
       under the License.
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -21,7 +21,7 @@
       Avoid deeper levels because they do not render well.
 
 ==========================
-collectd-ceilometer-plugin
+collectd-openstack-plugins
 ==========================
 
 Collectd plugins for publishing to OpenStack (gnocchi and aodh).
@@ -32,14 +32,14 @@ This allows a more comprehensive set of platform telemetry to be made available
 to OpenStack which enables service assurance, fault management and  monitoring.
 
 * Free software: Apache license
-* Source: https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
+* Source: https://git.openstack.org/cgit/openstack/collectd-openstack-plugins
 * Installation:
-   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
-* Bugs: https://bugs.launchpad.net/collectd-ceilometer-plugin
+   https://git.openstack.org/cgit/openstack/collectd-openstack-plugins/tree/doc/source/installation.rst
+* Bugs: https://bugs.launchpad.net/collectd-openstack-plugins
 * Usage:
-   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
-* Contact: E-mail the dev mailing list with the [collectd-ceilometer-plugin] tag
-   mailto:openstack-dev@lists.openstack.org?subject=[collectd-ceilometer-plugin]
+   https://git.openstack.org/cgit/openstack/collectd-openstack-plugins/tree/doc/source/usage.rst
+* Contact: E-mail the dev mailing list with the [collectd-openstack-plugins] tag
+   mailto:openstack-dev@lists.openstack.org?subject=[collectd-openstack-plugins]
 
 Collateral
 ----------

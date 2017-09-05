@@ -10,7 +10,7 @@
       WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
       License for the specific language governing permissions and limitations
       under the License.
-      Convention for heading levels in collectd-ceilometer-plugin documentation:
+      Convention for heading levels in collectd-openstack-plugins documentation:
 
       =======  Heading 0 (reserved for the title in a document)
       -------  Heading 1
@@ -38,7 +38,7 @@ policies.
        The collectd-gnocchi plugin only supports certain types of Aodh alarms.
        Please find a list of these options in:
 
-https://github.com/openstack/collectd-ceilometer-plugin/blob/master/doc/source/alarms_guide.rst.
+https://github.com/openstack/collectd-openstack-plugins/blob/master/doc/source/alarms_guide.rst.
 
 
 Creating a heat template for auto-scaling
@@ -125,7 +125,7 @@ it has scaled up/down via:
     openstack server list
 
 
-collectd-ceilometer-plugin alarms
+collectd-openstack-plugins alarms
 ---------------------------------
 
 As described in alarms_guide.rst, this plugin allows you to create Aodh
@@ -159,5 +159,5 @@ https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Aodh::G
       type: OS::Aodh::GnocchiAggregationByMetricsAlarm
 
 Please find a sample template for this type here:
-https://github.com/openstack/collectd-ceilometer-plugin/tree/master/doc/source/examples/templates/metrics.yml.
+https://github.com/openstack/collectd-openstack-plugins/tree/master/doc/source/examples/templates/metrics.yml.
 Adjust variables accordingly to suit your environment.

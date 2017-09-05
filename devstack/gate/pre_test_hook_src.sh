@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo collectd-ceilometer-plugin pre-test-hook executed
+echo collectd-openstack-plugins pre-test-hook executed
 
