@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.aodh import sender as aodh_sender
+from collectd_openstack.aodh import sender as aodh_sender
 
 import datetime
 import logging

@@ -22,13 +22,13 @@ import logging
 import requests
 
 
-import collectd_ceilometer
-from collectd_ceilometer.common import sender as common_sender
-from collectd_ceilometer.common.settings import Config
+import collectd_openstack
+from collectd_openstack.common import sender as common_sender
+from collectd_openstack.common.settings import Config
 from collections import OrderedDict
 
 LOGGER = logging.getLogger(__name__)
-ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
+ROOT_LOGGER = logging.getLogger(collectd_openstack.__name__)
 
 # HTTP status codes
 HTTP_CREATED = 201

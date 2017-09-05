@@ -19,8 +19,8 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.common.meters.base import Meter
-from collectd_ceilometer.tests.base import TestCase
+from collectd_openstack.common.meters.base import Meter
+from collectd_openstack.tests.base import TestCase
 
 import mock
 
@@ -38,7 +38,7 @@ class CollectdMock(object):
         pass
 
 collectd_class = \
-    'collectd_ceilometer.tests.common.test_meters_base.CollectdMock'
+    'collectd_openstack.tests.common.test_meters_base.CollectdMock'
 
 
 class MetersTest(TestCase):
@@ -88,7 +88,7 @@ class MetersTest(TestCase):
         self._collectd.get_dataset.assert_called_once()
         self.assertEqual("cumulative", actual)
 
-    @mock.patch('collectd_ceilometer.common.meters.base.LOGGER')
+    @mock.patch('collectd_openstack.common.meters.base.LOGGER')
     def test_sample_type_invalid(self, LOGGER):
         self._collectd.get_dataset.side_effect = Exception("Boom!")
 

@@ -21,7 +21,7 @@ import mock
 import requests
 import unittest
 
-from collectd_ceilometer.common import sender as common_sender
+from collectd_openstack.common import sender as common_sender
 
 
 class TestSender(unittest.TestCase):

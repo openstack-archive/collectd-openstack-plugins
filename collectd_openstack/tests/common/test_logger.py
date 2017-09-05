@@ -16,9 +16,9 @@ import unittest
 
 import mock
 
-from collectd_ceilometer.common.logger import CollectdLogHandler
-from collectd_ceilometer.common.settings import Config
-from collectd_ceilometer.tests.mocking import patch_class
+from collectd_openstack.common.logger import CollectdLogHandler
+from collectd_openstack.common.settings import Config
+from collectd_openstack.tests.mocking import patch_class
 
 
 class MockedCollectd(object):

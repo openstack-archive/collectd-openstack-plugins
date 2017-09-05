@@ -15,8 +15,8 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.common.meters.base import Meter
-from collectd_ceilometer.common.settings import Config
+from collectd_openstack.common.meters.base import Meter
+from collectd_openstack.common.settings import Config
 import libvirt
 import threading
 

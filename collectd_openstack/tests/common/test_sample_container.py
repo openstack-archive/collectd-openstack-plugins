@@ -19,7 +19,7 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.common.meters.storage import SampleContainer
+from collectd_openstack.common.meters.storage import SampleContainer
 
 import unittest
 

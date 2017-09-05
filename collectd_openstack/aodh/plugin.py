@@ -11,7 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Gnocchi collectd plugin"""
+
+"""Aodh collectd plugin."""
 
 import logging
 
@@ -22,19 +23,19 @@ try:
 except ImportError:
     collectd = None  # when running unit tests collectd is not avaliable
 
-import collectd_ceilometer
-from collectd_ceilometer.common.logger import CollectdLogHandler
-from collectd_ceilometer.common.meters import MeterStorage
-from collectd_ceilometer.common.settings import Config
-from collectd_ceilometer.gnocchi.writer import Writer
+import collectd_openstack
+from collectd_openstack.aodh.notifier import Notifier
+from collectd_openstack.common.logger import CollectdLogHandler
+from collectd_openstack.common.meters import MeterStorage
+from collectd_openstack.common.settings import Config
+
 
 LOGGER = logging.getLogger(__name__)
-ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
+ROOT_LOGGER = logging.getLogger(collectd_openstack.__name__)
 
 
 def register_plugin(collectd):
-    "Bind plugin hooks to collectd and viceversa"
-
+    """Bind plugin hooks to collectd and viceversa."""
     config = Config.instance()
 
     # Setup loggging
@@ -46,44 +47,37 @@ def register_plugin(collectd):
     instance = Plugin(collectd=collectd, config=config)
 
     # Register plugin callbacks
-    collectd.register_init(instance.init)
     collectd.register_config(instance.config)
-    collectd.register_write(instance.write)
     collectd.register_shutdown(instance.shutdown)
+    collectd.register_notification(instance.notify)
 
 
 class Plugin(object):
-    """Gnocchi plugin with collectd callbacks"""
-    # NOTE: this is multithreaded class
+    """Aodh plugin with collectd callbacks."""
+
+    # NOTE: this is a multithreaded class
 
     def __init__(self, collectd, config):
+        """Plugin instance."""
         self._config = config
         self._meters = MeterStorage(collectd=collectd)
-        self._writer = Writer(self._meters, config=config)
+        self._notifier = Notifier(self._meters, config=config)
 
     def config(self, cfg):
-        """Configuration callback
+        """Configuration callback.
 
         @param cfg configuration node provided by collectd
         """
-        # pylint: disable=no-self-use
         self._config.read(cfg)
 
-    def init(self):
-        """Initialization callback"""
-
-        collectd.info('Initializing the collectd OpenStack python plugin')
-        self._meters = MeterStorage(collectd=collectd)
-        # self._writer = Writer(self._meters)
-
-    def write(self, vl, data=None):
-        """Collectd write callback"""
-        self._writer.write(vl, data)
+    def notify(self, vl, data=None):
+        """Notification callback."""
+        LOGGER.info("Notification")
+        self._notifier.notify(vl, data)
 
     def shutdown(self):
-        """Shutdown callback"""
+        """Shutdown callback."""
         LOGGER.info("SHUTDOWN")
-        self._writer.flush()
 
 
 if collectd:

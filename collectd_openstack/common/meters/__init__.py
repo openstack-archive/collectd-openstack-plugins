@@ -15,4 +15,4 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.common.meters.storage import MeterStorage  # noqa
+from collectd_openstack.common.meters.storage import MeterStorage  # noqa

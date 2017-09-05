@@ -24,11 +24,11 @@ import requests
 import six
 import unittest
 
-from collectd_ceilometer.aodh import plugin
-from collectd_ceilometer.aodh import sender as aodh_sender
-from collectd_ceilometer.common.keystone_light import KeystoneException
-from collectd_ceilometer.common import sender as common_sender
-from collectd_ceilometer.common import settings
+from collectd_openstack.aodh import plugin
+from collectd_openstack.aodh import sender as aodh_sender
+from collectd_openstack.common.keystone_light import KeystoneException
+from collectd_openstack.common import sender as common_sender
+from collectd_openstack.common import settings
 
 Logger = logging.getLoggerClass()
 

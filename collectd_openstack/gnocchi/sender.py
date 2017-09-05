@@ -16,15 +16,15 @@
 from __future__ import division
 from __future__ import unicode_literals
 
-import collectd_ceilometer
-from collectd_ceilometer.common import sender as common_sender
-from collectd_ceilometer.common.settings import Config
+import collectd_openstack
+from collectd_openstack.common import sender as common_sender
+from collectd_openstack.common.settings import Config
 
 import json
 import logging
 
 LOGGER = logging.getLogger(__name__)
-ROOT_LOGGER = logging.getLogger(collectd_ceilometer.__name__)
+ROOT_LOGGER = logging.getLogger(collectd_openstack.__name__)
 
 
 class Sender(common_sender.Sender):

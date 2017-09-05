@@ -15,8 +15,8 @@
 
 from __future__ import unicode_literals
 
-from collectd_ceilometer.common.meters.storage import SampleContainer
-from collectd_ceilometer.gnocchi import sender as gnocchi_sender
+from collectd_openstack.common.meters.storage import SampleContainer
+from collectd_openstack.gnocchi import sender as gnocchi_sender
 from collections import namedtuple
 import datetime
 import json

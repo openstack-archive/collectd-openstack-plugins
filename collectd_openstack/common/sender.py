@@ -23,9 +23,9 @@ import requests
 import six
 import time
 
-from collectd_ceilometer.common.keystone_light import ClientV3
-from collectd_ceilometer.common.keystone_light import KeystoneException
-from collectd_ceilometer.common.settings import Config
+from collectd_openstack.common.keystone_light import ClientV3
+from collectd_openstack.common.keystone_light import KeystoneException
+from collectd_openstack.common.settings import Config
 
 
 LOGGER = logging.getLogger(__name__)

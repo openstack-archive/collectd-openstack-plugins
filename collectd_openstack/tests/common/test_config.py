@@ -22,7 +22,7 @@ from unittest import TestCase
 import mock
 import six
 
-from collectd_ceilometer.common import settings
+from collectd_openstack.common import settings
 
 
 def config_module(

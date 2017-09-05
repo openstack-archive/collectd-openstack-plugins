@@ -22,12 +22,12 @@ import mock
 import requests
 import unittest
 
-from collectd_ceilometer.common.keystone_light import KeystoneException
-from collectd_ceilometer.common import sender as common_sender
-from collectd_ceilometer.gnocchi import plugin
-from collectd_ceilometer.gnocchi import sender as gnocchi_sender
+from collectd_openstack.common.keystone_light import KeystoneException
+from collectd_openstack.common import sender as common_sender
+from collectd_openstack.gnocchi import plugin
+from collectd_openstack.gnocchi import sender as gnocchi_sender
 
-from collectd_ceilometer.tests import match
+from collectd_openstack.tests import match
 
 Logger = logging.getLoggerClass()
 

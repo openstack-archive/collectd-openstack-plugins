@@ -19,9 +19,9 @@ from collections import defaultdict
 import six
 import threading
 
-from collectd_ceilometer.common.meters.base import Meter
-from collectd_ceilometer.common.meters.libvirt import LibvirtMeter
-from collectd_ceilometer.common.settings import Config
+from collectd_openstack.common.meters.base import Meter
+from collectd_openstack.common.meters.libvirt import LibvirtMeter
+from collectd_openstack.common.settings import Config
 
 
 class MeterStorage(object):

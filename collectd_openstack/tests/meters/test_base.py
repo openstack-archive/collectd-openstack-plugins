@@ -15,14 +15,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Test cases for collectd_ceilometer.meters.base module."""
+"""Test cases for collectd_openstack.meters.base module."""
 
 from unittest import TestCase
 
 import mock
 
-from collectd_ceilometer.common.meters.base import Meter
-from collectd_ceilometer.tests.mocking import patch_class
+from collectd_openstack.common.meters.base import Meter
+from collectd_openstack.tests.mocking import patch_class
 
 
 class Values(object):
@@ -88,7 +88,7 @@ class MetersTest(TestCase):
         collectd.get_dataset.assert_called_once()
         self.assertEqual("cumulative", actual)
 
-    @mock.patch('collectd_ceilometer.common.meters.base.LOGGER')
+    @mock.patch('collectd_openstack.common.meters.base.LOGGER')
     @patch_collectd
     def test_sample_type_invalid(self, collectd, LOGGER):
         collectd.get_dataset.side_effect = Exception("Boom!")

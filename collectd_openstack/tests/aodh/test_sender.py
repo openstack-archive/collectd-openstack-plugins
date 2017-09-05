@@ -21,10 +21,10 @@ import mock
 import requests
 import unittest
 
-from collectd_ceilometer.aodh import sender as aodh_sender
+from collectd_openstack.aodh import sender as aodh_sender
 from collections import OrderedDict
 
-from collectd_ceilometer.common.meters import base
+from collectd_openstack.common.meters import base
 
 valid_resp = '[{"alarm_actions": [], "event_rule": {"query": [],'\
              '"event_type": "events.gauge"}, "ok_actions": [],'\
