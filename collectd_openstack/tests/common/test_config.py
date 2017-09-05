@@ -27,7 +27,7 @@ from collectd_openstack.common import settings
 
 def config_module(
         values, units=None, libvirt_meter=False,
-        module_name="collectd_ceilometer.ceilometer.plugin"):
+        module_name="collectd_openstack.service.plugin"):
     children = [config_value(key, value)
                 for key, value in six.iteritems(values)]
     if units:

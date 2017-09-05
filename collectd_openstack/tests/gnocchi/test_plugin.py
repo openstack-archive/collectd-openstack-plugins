@@ -164,7 +164,7 @@ class TestPlugin(unittest.TestCase):
         instance.write(data)
         collectd.error.assert_not_called()
 
-        # no value has been sent to ceilometer
+        # no value has been sent to gnocchi
         post.assert_not_called()
 
         # send the second value
