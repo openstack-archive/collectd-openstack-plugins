@@ -1,0 +1,18 @@
+---
+ Modifies metername and resource_id
+
+    * Changes metername value:
+       <plugin>.<type> -> <type>.<type_instance>
+       e.g. cpu.cpu -> cpu.nice
+    * Changes resource_id value
+       <hostname>-<plugin_instance>-<type_instance> ->
+       <hostname>-<plugin>-<plugin_instance>
+       e.g. localhost-0-nice -> localhost-cpu-0
+    * Changes metername in gnocchi/writer
+        metername -> <resource_id>@<metername>
+
+    * Supports multi-host deployment
+features:
+  - |
+    Metername format was updated. The metrics are now given names with the
+    format <hostname>-<plugin>-<plugin_instance>@<type>.<type_instance>
