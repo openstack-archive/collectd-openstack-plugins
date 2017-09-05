@@ -1,7 +1,7 @@
 ---
 fixes:
   - |
-    Fixes 'bug 1677597 https://bugs.launchpad.net/collectd-ceilometer-plugin/+bug/1677597'
+    Fixes 'bug 1677597 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1677597'
     Refactored the update_alarm and create_alarm functions to allow for error
     checking by introducing a update_or_create_alarm function. This allows
     retrying updating or creating alarms if they fail. Also updated the
