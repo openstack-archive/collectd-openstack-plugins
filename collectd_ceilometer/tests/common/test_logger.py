@@ -48,210 +48,165 @@ def make_record(
 
 class TestCollectdLogHandler(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        """Declare additional class attributes"""
-        super(TestCollectdLogHandler, self).__init__(*args, **kwargs)
-        self.config = Config.instance()
-
     @patch_class(MockedCollectd)
-    def test_registered_hooks_when_init(self, collectd):
+    def setUp(self, collectd):
+        """Set up some attrributes which are common to all tests."""
+        super(TestCollectdLogHandler, self).setUp()
 
-        # When CollectdLogHandler is created
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
+        self.collectd = collectd
+        self.config = Config.instance()
+        self.handler = CollectdLogHandler(collectd=self.collectd,
+                                          config=self.config)
+        self.logger = logging.Logger('some_logger')
+        self.logger.addHandler(self.handler)
+
+    def test_registered_hooks_when_init(self):
 
         # Then collectd logging hooks are registered
         # pylint: disable=protected-access
         self.assertEqual(
-            {logging.DEBUG: collectd.debug,
-             logging.INFO: collectd.info,
-             logging.WARNING: collectd.warning,
-             logging.ERROR: collectd.error,
-             logging.FATAL: collectd.error},
-            handler.priority_map)
+            {logging.DEBUG: self.collectd.debug,
+             logging.INFO: self.collectd.info,
+             logging.WARNING: self.collectd.warning,
+             logging.ERROR: self.collectd.error,
+             logging.FATAL: self.collectd.error},
+            self.handler.priority_map)
 
-    @patch_class(MockedCollectd)
-    def test_debug_when_emit(self, collectd):
+    def test_debug_when_emit(self):
 
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.DEBUG)
 
         # When a debug record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then debug hook is called
-        collectd.debug.assert_called_once_with("message")
+        self.collectd.debug.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_verbose_debug_when_emit(self, collectd):
+    def test_verbose_debug_when_emit(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         self.config.VERBOSE = True
         record = make_record(msg="message", level=logging.DEBUG)
 
         # When an info record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then info hook is called
-        collectd.info.assert_called_once_with("message")
+        self.collectd.info.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_info_when_emit(self, collectd):
+    def test_info_when_emit(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.INFO)
 
         # When an info record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then info hook is called
-        collectd.info.assert_called_once_with("message")
+        self.collectd.info.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_warning_when_emit(self, collectd):
+    def test_warning_when_emit(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.WARNING)
 
         # When a warning record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then info warning is called
-        collectd.warning.assert_called_once_with("message")
+        self.collectd.warning.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_error_when_emit(self, collectd):
+    def test_error_when_emit(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.ERROR)
 
         # When an error record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then error hook is called
-        collectd.error.assert_called_once_with("message")
+        self.collectd.error.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_fatal_when_emit(self, collectd):
+    def test_fatal_when_emit(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
         record = make_record(msg="message", level=logging.FATAL)
 
         # When a fatal record is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then error hook is called
-        collectd.error.assert_called_once_with("message")
+        self.collectd.error.assert_called_once_with("message")
 
-    @patch_class(MockedCollectd)
-    def test_long_message_when_emit(self, collectd):
+    def test_long_message_when_emit(self):
         # Given
         long_message = "LONG " * 20 + "MESSAGE."
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        handler.max_message_length = 10
+        self.handler.max_message_length = 10
         record = make_record(msg=long_message)
 
         # When a long message is emitted
-        handler.emit(record=record)
+        self.handler.emit(record=record)
 
         # Then info hook is called n times with split message
-        collectd.info.assert_has_calls([
+        self.collectd.info.assert_has_calls([
             mock.call(long_message[i:i + 10])
             for i in range(0, len(long_message), 10)])
 
-    @patch_class(MockedCollectd)
-    def test_when_logger_debug(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_when_logger_debug(self):
 
         # When debug is called
         self.config.VERBOSE = False
-        logger.debug('Say cheese: %s %d', 'string', 10)
+        self.logger.debug('Say cheese: %s %d', 'string', 10)
 
         # Then debug hook is called
-        collectd.debug.assert_called_once_with('Say cheese: string 10')
-        collectd.info.assert_not_called()
+        self.collectd.debug.assert_called_once_with('Say cheese: string 10')
+        self.collectd.info.assert_not_called()
 
-    @patch_class(MockedCollectd)
-    def test_verbose_when_logger_info(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_verbose_when_logger_info(self):
 
         # When debug is called
         self.config.VERBOSE = True
-        logger.debug('Say cheese: %s %d', 'string', 10)
+        self.logger.debug('Say cheese: %s %d', 'string', 10)
 
         # Then info hook is called
-        collectd.info.assert_called_once_with('Say cheese: string 10')
-        collectd.debug.assert_not_called()
+        self.collectd.info.assert_called_once_with('Say cheese: string 10')
+        self.collectd.debug.assert_not_called()
 
-    @patch_class(MockedCollectd)
-    def test_non_verbose_when_logger_info(self, collectd):
+    def test_non_verbose_when_logger_info(self):
         # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        handler.verbose = False
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+        self.handler.verbose = False
 
         # When debug is called
-        logger.debug('Say cheese: %s %d', 'string', 10)
+        self.logger.debug('Say cheese: %s %d', 'string', 10)
 
         # Then debug hook is called
-        collectd.debug.assert_called_once_with('Say cheese: string 10')
-        collectd.info.assert_not_called()
+        self.collectd.debug.assert_called_once_with('Say cheese: string 10')
+        self.collectd.info.assert_not_called()
 
-    @patch_class(MockedCollectd)
-    def test_info_from_logger(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_info_from_logger(self):
 
         # When info is called
-        logger.info('Say cheese: %s %d', 'string', 10)
+        self.logger.info('Say cheese: %s %d', 'string', 10)
 
         # Then info hook is called
-        collectd.info.assert_called_once_with('Say cheese: string 10')
+        self.collectd.info.assert_called_once_with('Say cheese: string 10')
 
-    @patch_class(MockedCollectd)
-    def test_warning_from_logger(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_warning_from_logger(self):
 
         # When warning is called
-        logger.warning('Say cheese: %s %d', 'string', 10)
+        self.logger.warning('Say cheese: %s %d', 'string', 10)
 
         # Then warning hook is called
-        collectd.warning.assert_called_once_with('Say cheese: string 10')
+        self.collectd.warning.assert_called_once_with('Say cheese: string 10')
 
-    @patch_class(MockedCollectd)
-    def test_error_from_logger(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_error_from_logger(self):
 
         # When error is called
-        logger.error('Say cheese: %s %d', 'string', 10)
+        self.logger.error('Say cheese: %s %d', 'string', 10)
 
         # Then error hook is called
-        collectd.error.assert_called_once_with('Say cheese: string 10')
+        self.collectd.error.assert_called_once_with('Say cheese: string 10')
 
-    @patch_class(MockedCollectd)
-    def test_fatal_from_logger(self, collectd):
-        # Given
-        handler = CollectdLogHandler(collectd=collectd, config=self.config)
-        logger = logging.Logger('some_logger')
-        logger.addHandler(handler)
+    def test_fatal_from_logger(self):
 
         # When fatal is called
-        logger.fatal('Say cheese: %s %d', 'string', 10)
+        self.logger.fatal('Say cheese: %s %d', 'string', 10)
 
         # Then error hook is called
-        collectd.error.assert_called_once_with('Say cheese: string 10')
+        self.collectd.error.assert_called_once_with('Say cheese: string 10')
