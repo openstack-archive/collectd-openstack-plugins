@@ -61,10 +61,24 @@ class Sender(object):
         self._failed_auth = False
 
     def _on_authenticated(self):
+        """Defines an action to be taken after auth_token acquired.
+
+        It's not defined in common sender so it should be overwritten in
+        the subclasses. It typically should set the _url_base.
+        """
         pass
 
     def _authenticate(self):
-        """Authenticate and renew the authentication token"""
+        """Authenticate and renew the authentication token
+
+        Check if auth_token is available, if yes: return it.
+        Else: Re-check the auth_token as another thread could set it.
+        Log a message to declare request authentication in progress.
+        Create a keystone client if it doen't already exist.
+        Get and store the auth_token as self._auth_token.
+        Log errors if the authentication of the token fails.
+        return: self._auth_token
+        """
 
         # if auth_token is available, just return it
         if self._auth_token is not None:
@@ -118,13 +132,36 @@ class Sender(object):
         return self._auth_token
 
     def _create_request_url(self, metername, *args, **kwargs):
+        """Defines an action to be taken to create the request URL.
+
+        It's not defined in common sender so it should be overwritten
+        in the subclasses. It typically should create the request url
+        for the standard action i.e. create/update alarm/measures.
+        """
         return None
 
     def _handle_http_error(self, exc, metername, payload, auth_token):
+        """Defines an action to handle the http error
+
+        It's not defined in common sender so it should be overwritten
+        in the subclasses. It should handle any HTTP errors that are expected
+        during operation and are raised from a 4* or 5* response e.g. a resource
+        cannot be found.   
+        """
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Gnocchi/Aodh"""
+        """Send the payload to Gnocchi/Aodh
+
+        Set-up the request by making sure there's an auth token, and valid
+        endpoint.
+        Create request URL, and raise error if it's creation fails.
+        Try self._perform_request, and if it fails with auth error, reset
+        the auth token.
+        Renew auth_token and try to repost, if it fails: forward error to
+        self._handle_http_error.
+        returns:
+        """
 
         # get the auth_token
         auth_token = self._authenticate()
@@ -176,7 +213,15 @@ class Sender(object):
 
     @classmethod
     def _perform_request(cls, url, payload, auth_token, req_type="post"):
-        """Perform the POST/PUT request."""
+        """Perform the POST/PUT request.
+
+        * Create request headers consisting of auth_token and content type.
+        * Perform request with the given payload and return its result.
+        * Raise exception if there was an error when performing request.
+        * Log the result of the request to help debugging.
+        return: response
+        """
+
         LOGGER.debug('Performing request to %s, payload=%s, req_type = %s' %
                      (url, payload, req_type))
 
