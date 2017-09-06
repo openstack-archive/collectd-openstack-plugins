@@ -61,10 +61,25 @@ class Sender(object):
         self._failed_auth = False
 
     def _on_authenticated(self):
+        """Defines an action to be taken after auth_token acquired.
+
+        It's not defined in common sender so it should be overwritten in
+        the subclasses. It typically should set the _url_base.
+        """
         pass
 
     def _authenticate(self):
-        """Authenticate and renew the authentication token"""
+        """Authenticate and renew the authentication token
+
+        Check if auth_token is available, if yes: return it.
+        Get the authentication lock.
+        Re-check the auth_token as another thread could see it.
+        Log a message to declare request authentication in progress.
+        Create a keystone client if it doen't already exist.
+        Store the auth_token.
+        Log errors if the authentication of the token fails.
+        return: self._auth_token
+        """
 
         # if auth_token is available, just return it
         if self._auth_token is not None:
@@ -117,14 +132,37 @@ class Sender(object):
 
         return self._auth_token
 
+
     def _create_request_url(self, metername, *args, **kwargs):
+        """Defines an action to be taken to create the request URL
+
+        It's not defined in common sender so it should be overwritten
+        in the subclasses. It typically should create the request url
+        for an alarm update.
+        """
         return None
 
     def _handle_http_error(self, exc, metername, payload, auth_token):
+        """Defines an action to handle the http error
+
+        It's not defined in common sender so it should be overwritten
+        in the subclasses. It typically should set a new url for the
+        request and get the responses for the alarm.
+        """
         raise exc
 
     def send(self, metername, payload, **kwargs):
-        """Send the payload to Gnocchi/Aodh"""
+        """Send the payload to Gnocchi/Aodh
+
+        Get the auth_token.
+        If the auth_token is not set, there's an error logged.
+        Also an error raised if missing an endpoint from ident server.
+        Create request URL, and raise error if it's creation fails.
+        Send the POST request, and if it fails with auth error, reset
+        the auth token.
+        Renew auth_token and try to repost, if it fails: forward error.
+        returns:
+        """
 
         # get the auth_token
         auth_token = self._authenticate()
@@ -174,9 +212,18 @@ class Sender(object):
                 self._handle_http_error(exc, metername, payload,
                                         auth_token, **kwargs)
 
+
     @classmethod
     def _perform_request(cls, url, payload, auth_token, req_type="post"):
-        """Perform the POST/PUT request."""
+        """Perform the POST/PUT request.
+
+        Request headers consisting of auth_token and content type.
+        Perform request and return its result.
+        Raise exception if there was an error when performing request.
+        Log the result of the request to help debugging.
+        return: response
+        """
+
         LOGGER.debug('Performing request to %s, payload=%s, req_type = %s' %
                      (url, payload, req_type))
 
