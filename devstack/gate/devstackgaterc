@@ -2,9 +2,19 @@
 
 export DEVSTACK_GATE_LIBVIRT_TYPE=kvm
 export DEVSTACK_GATE_TEMPEST=0
-export DEVSTACK_LOCAL_CONFIG='
+export DEVSTACK_LOCAL_CONFIG=$DEVSTACK_LOCAL_CONFIG'
+
+disable_all_services
+enable_service key
+enable_service mysql
+enable_service rabbit
+enable_service dstat
+# enable_plugin gnocchi http://www.github.com/gnocchixyz/gnocchi stable/3.1
+
 COLLECTD_INSTALL=True
 COLLECTD_GNOCCHI_VERBOSE=True
 COLLECTD_GNOCCHI_ENABLED=True
 GNOCCHI_USE_KEYSTONE=True
+
+CEILOMETER_TIMEOUT=5000
 '
