@@ -3,6 +3,12 @@
 export DEVSTACK_GATE_LIBVIRT_TYPE=kvm
 export DEVSTACK_GATE_TEMPEST=0
 export DEVSTACK_LOCAL_CONFIG='
+disable_all_services
+enable_service key
+enable_service mysql
+enable_service rabbit
+enable_service dstat
+
 COLLECTD_INSTALL=True
 COLLECTD_GNOCCHI_VERBOSE=True
 COLLECTD_GNOCCHI_ENABLED=True
