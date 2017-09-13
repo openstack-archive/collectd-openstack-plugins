@@ -17,7 +17,9 @@ export PATH=/usr/sbin:$PATH
 source /opt/stack/new/devstack/openrc admin
 
 while [ "$retry_count" -le "$max_retry_count" ]; do
-    if [ $(openstack metric metric list | grep interface | wc -l) -eq 0 ]; then
+    # TODO: remove this debug
+    openstack metric metric list
+    if [ $(openstack metric metric list | wc -l) -gt 4 ]; then
          echo "Testing metric interface not yet visible in db $retry_count/$max_retry_count"
     else
           echo "Testing metric obtained from db"
