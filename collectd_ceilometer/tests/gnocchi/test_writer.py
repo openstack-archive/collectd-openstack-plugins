@@ -17,9 +17,11 @@
 """Gnocchi Writer tests"""
 
 import mock
+import requests
 import unittest
 
 from collectd_ceilometer.common.meters import MeterStorage
+from collectd_ceilometer.gnocchi import sender as gnocchi_sender
 from collectd_ceilometer.gnocchi import writer
 
 
@@ -110,3 +112,26 @@ class TestGnocchiWriter(unittest.TestCase):
 
         meters = MeterStorage(collectd=collectd)
         self.writer = writer.Writer(meters=meters, config=config)
+
+    @mock.patch.object(writer, 'LOGGER', autospec=True)
+    @mock.patch.object(gnocchi_sender.Sender, 'send')
+    def test_send_data_timeout_error(self, sender_send, logger):
+        """Test that _send_data does not exit when there's a timeout error.
+
+        Set-up: the sideeffect of send() is a ReadTimeout exception
+        Test: Call _send_data, with a side effect from send
+        Expected Behaviour: The error is handled in _send_data.
+        """
+        sample = writer.Sample(value=42, timestamp=0, meta=None,
+                               unit="my-unit", metername="my-metername")
+        to_send = [sample]
+
+        sender_send.side_effect = requests.exceptions.ReadTimeout
+
+        # Nothing should happen
+        self.writer._send_data(metername="my-metername",
+                               to_send=to_send,
+                               unit="my-unit",
+                               )
+
+        logger.error.assert_called()

@@ -21,6 +21,7 @@ from collections import namedtuple
 import datetime
 import json
 import logging
+import requests
 import six
 
 LOGGER = logging.getLogger(__name__)
@@ -100,4 +101,12 @@ class Writer(object):
 
         # gnocchi samples
         payload = json.dumps([sample.to_payload() for sample in to_send])
-        self._sender.send(metername, payload, unit=unit)
+        try:
+            self._sender.send(metername, payload, unit=unit)
+        except requests.exceptions.ReadTimeout:
+            # TODO(emma-l-foley): Define a more useful action, like retry X
+            # times, with increasing wait times.
+            # Currently assuming that the timeout error occurs at start-up,
+            # when there's a an endpoint in Keystone, but no service has been
+            # started.
+            LOGGER.error("ReadTimeout in _send_data, your sample will be lost :(")
