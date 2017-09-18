@@ -100,4 +100,5 @@ class Writer(object):
 
         # gnocchi samples
         payload = json.dumps([sample.to_payload() for sample in to_send])
+
         self._sender.send(metername, payload, unit=unit)

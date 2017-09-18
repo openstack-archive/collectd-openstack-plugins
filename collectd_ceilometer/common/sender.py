@@ -21,6 +21,7 @@ import threading
 
 import requests
 import six
+import time
 
 from collectd_ceilometer.common.keystone_light import ClientV3
 from collectd_ceilometer.common.keystone_light import KeystoneException
@@ -123,7 +124,7 @@ class Sender(object):
     def _handle_http_error(self, exc, metername, payload, auth_token):
         raise exc
 
-    def send(self, metername, payload, **kwargs):
+    def send(self, metername, payload, retry=-1, **kwargs):
         """Send the payload to Gnocchi/Aodh"""
 
         # get the auth_token
@@ -173,6 +174,16 @@ class Sender(object):
                 # This is an error and it has to be forwarded
                 self._handle_http_error(exc, metername, payload,
                                         auth_token, **kwargs)
+
+        except requests.exceptions.ReadTimeout as rto:
+            # send unless retry==0, so infinite retries are possible too.
+            if retry != 0:
+                LOGGER.debug("ReadTimeout Error.. trying again...")
+                time.sleep(1)
+                self.send(metername, payload, retry=(retry - 1), **kwargs)
+            else:
+                LOGGER.error("Too many timeouts trying to send\n", rto)
+                raise rto
 
     @classmethod
     def _perform_request(cls, url, payload, auth_token, req_type="post"):
