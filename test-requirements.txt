@@ -18,4 +18,4 @@ testscenarios>=0.4
 testtools>=1.4.0
 
 # releasenotes
-reno>=1.6.2 # Apache2
+reno>=2.5.0 # Apache2
