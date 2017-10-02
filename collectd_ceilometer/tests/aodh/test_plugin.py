@@ -34,7 +34,7 @@ Logger = logging.getLoggerClass()
 
 
 def mock_collectd(**kwargs):
-    """Return collecd module with collecd logging hooks."""
+    """Return collectd module with collectd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedCollectd.__name__, specs=True,
         get_dataset=mock.MagicMock(side_effect=Exception),
@@ -76,7 +76,7 @@ class MockedCollectd(object):
 
 
 def mock_config(**kwargs):
-    """Return collecd module with collecd logging hooks."""
+    """Return collectd module with collectd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
         **kwargs)

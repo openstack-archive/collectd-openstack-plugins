@@ -24,7 +24,7 @@ from collectd_ceilometer.gnocchi import writer
 
 
 def mock_collectd(**kwargs):
-    "Returns collectd module with collecd logging hooks."
+    "Returns collectd module with collectd logging hooks."
     return mock.patch(
         __name__ + '.' + MockedCollectd.__name__, specs=True,
         get_dataset=mock.MagicMock(side_effect=Exception), **kwargs)
@@ -62,7 +62,7 @@ class MockedCollectd(object):
 
 
 def mock_config(BATCH_SIZE=1, **kwargs):
-    "Returns collectd module with collecd logging hooks."
+    "Returns collectd module with collectd logging hooks."
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
         BATCH_SIZE=BATCH_SIZE, **kwargs)
