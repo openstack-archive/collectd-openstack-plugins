@@ -1,8 +1,7 @@
 #!/bin/bash
 
-echo "All gnocchi plugin metrics are being deleted. This may take a few minutes.."
-for metric in `openstack metric metric list | awk 'NR > 2 {print $2}'`;
-do
-    openstack metric metric delete $metric
-done
-echo "All metrics created by the collectd-gnocchi-plugin have been deleted"
+echo "Gnocchi plugin metrics are being deleted. This may take a few minutes.."
+
+openstack metric delete $(openstack metric list | awk '{if (NR>3) {print $2}}')
+
+echo "Done deleting metrics created by the collectd-gnocchi-plugin"
