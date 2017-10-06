@@ -1,0 +1,65 @@
+- project:
+    name: openstack/collectd-ceilometer-plugin
+    experimental:
+      jobs:
+        - legacy-dsvm-collectd-ceilometer-plugin-src:
+            voting: false
+        - legacy-dsvm-collectd-ceilometer-plugin-bin:
+            voting: false
+        - legacy-dsvm-collectd-ceilometer-plugin-src-centos-7:
+            voting: false
+        - legacy-dsvm-collectd-ceilometer-plugin-bin-centos-7:
+            voting: false
+
+- job:
+    name: dsvm-collectd-ceilometer-plugin-bin
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/run
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/ceilometer
+      - openstack/collectd-ceilometer-plugin
+
+- job:
+    name: dsvm-collectd-ceilometer-plugin-bin-centos-7
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/run
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/post
+    timeout: 7800
+    nodeset: legacy-centos-7
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/ceilometer
+      - openstack/collectd-ceilometer-plugin
+
+- job:
+    name: dsvm-collectd-ceilometer-plugin-src
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/run
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/post
+    timeout: 7800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/ceilometer
+      - openstack/collectd-ceilometer-plugin
+
+- job:
+    name: dsvm-collectd-ceilometer-plugin-src-centos-7
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/run
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/post
+    timeout: 7800
+    nodeset: legacy-centos-7
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/aodh
+      - openstack/ceilometer
+      - openstack/collectd-ceilometer-plugin
+
+
+
