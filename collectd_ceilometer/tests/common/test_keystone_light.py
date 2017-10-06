@@ -33,7 +33,7 @@ class KeystoneLightTestV3(unittest.TestCase):
 
         self.test_authtoken = "c5bbb1c9a27e470fb482de2a718e08c2"
         self.test_public_endpoint = "http://public_endpoint"
-        self.test_internal_endpoint = "http://iternal_endpoint"
+        self.test_internal_endpoint = "http://internal_endpoint"
         self.test_region = "RegionOne"
 
         response = {"token": {
@@ -66,28 +66,28 @@ class KeystoneLightTestV3(unittest.TestCase):
                         {
                             "url": self.test_public_endpoint + '/',
                             "interface": "public",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "5e1d9a45d7d442ca8971a5112b2e89b5"
                         },
                         {
                             "url": "http://127.0.0.1:8777",
                             "interface": "admin",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "5e8b536fde6049d381ee540c018905d1"
                         },
                         {
                             "url": self.test_internal_endpoint + '/',
                             "interface": "internal",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "db90c733ddd9466696bc5aaec43b18d0"
                         }
                     ],
-                    "type": "metering",
+                    "type": "metrics",
                     "id": "f6c15a041d574bc190c70815a14ab851",
-                    "name": "ceilometer"
+                    "name": "gnocchi"
                 }
             ]
             }
@@ -141,8 +141,8 @@ class KeystoneLightTestV3(unittest.TestCase):
         )
 
     @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
-    def test_getservice_endpoint(self, mock_post):
-        """Test getservice endpoint"""
+    def test_get_service_endpoint(self, mock_post):
+        """Test get_service_endpoint"""
 
         mock_post.return_value = self.mock_response
 
@@ -150,13 +150,13 @@ class KeystoneLightTestV3(unittest.TestCase):
                           "test_password", "test_tenant")
         client.refresh()
 
-        endpoint = client.get_service_endpoint('ceilometer')
+        endpoint = client.get_service_endpoint('gnocchi')
         self.assertEqual(endpoint, self.test_internal_endpoint)
 
-        endpoint = client.get_service_endpoint('ceilometer', 'publicURL')
+        endpoint = client.get_service_endpoint('gnocchi', 'publicURL')
         self.assertEqual(endpoint, self.test_public_endpoint)
 
-        endpoint = client.get_service_endpoint('ceilometer', 'publicURL',
+        endpoint = client.get_service_endpoint('gnocchi', 'publicURL',
                                                self.test_region)
         self.assertEqual(endpoint, self.test_public_endpoint)
 
@@ -164,8 +164,8 @@ class KeystoneLightTestV3(unittest.TestCase):
             client.get_service_endpoint('badname')
 
     @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
-    def test_getservice_endpoint_error(self, mock_post):
-        """Test getservice endpoint error"""
+    def test_get_service_endpoint_error(self, mock_post):
+        """Test get service endpoint error"""
 
         response = {"token": {
             "is_domain": 'false',
@@ -194,7 +194,7 @@ class KeystoneLightTestV3(unittest.TestCase):
             "catalog": [
                 {
                     "endpoints": [],
-                    "type": "metering",
+                    "type": "metrics",
                     "id": "f6c15a041d574bc190c70815a14ab851",
                     "name": "badname"
                 }
@@ -214,7 +214,7 @@ class KeystoneLightTestV3(unittest.TestCase):
         client.refresh()
 
         with self.assertRaises(MissingServices):
-            client.get_service_endpoint('ceilometer')
+            client.get_service_endpoint('gnocchi')
 
     @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
     def test_invalidresponse_missing_token(self, mock_post):
@@ -280,7 +280,7 @@ class KeystoneLightTestV3(unittest.TestCase):
             client.refresh()
 
     @mock.patch('collectd_ceilometer.common.keystone_light.requests.post')
-    def test_invalidresponse_missing_token_http_header(self, mock_post):
+    def test_invalid_response_missing_token_http_header(self, mock_post):
         """Test invalid response: missing token in header"""
 
         response = {"token": {
@@ -313,28 +313,28 @@ class KeystoneLightTestV3(unittest.TestCase):
                         {
                             "url": self.test_public_endpoint + '/',
                             "interface": "public",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "5e1d9a45d7d442ca8971a5112b2e89b5"
                         },
                         {
                             "url": "http://127.0.0.1:8777",
                             "interface": "admin",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "5e8b536fde6049d381ee540c018905d1"
                         },
                         {
                             "url": self.test_internal_endpoint + '/',
                             "interface": "internal",
-                            "region": "RegionOne",
+                            "region": self.test_region,
                             "region_id": self.test_region,
                             "id": "db90c733ddd9466696bc5aaec43b18d0"
                         }
                     ],
-                    "type": "metering",
+                    "type": "metrics",
                     "id": "f6c15a041d574bc190c70815a14ab851",
-                    "name": "ceilometer"
+                    "name": "gnocchi"
                 }
             ]
             }
