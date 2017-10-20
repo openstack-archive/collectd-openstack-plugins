@@ -100,8 +100,7 @@ class Sender(common_sender.Sender):
 
     def _create_metric(self, metername, endpoint, unit):
         url = "{}/v1/metric/".format(endpoint)
-        payload = json.dumps({"archive_policy_name": "high",
-                              "name": metername,
+        payload = json.dumps({"name": metername,
                               "unit": unit,
                               })
         result = self._perform_request(url, payload, self._auth_token)
