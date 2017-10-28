@@ -14,8 +14,8 @@
 - job:
     name: dsvm-collectd-ceilometer-plugin-bin
     parent: legacy-dsvm-base
-    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/run
-    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/post
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/run.yaml
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -26,8 +26,8 @@
 - job:
     name: dsvm-collectd-ceilometer-plugin-bin-centos-7
     parent: legacy-dsvm-base
-    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/run
-    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/post
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/run.yaml
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/post.yaml
     timeout: 7800
     nodeset: legacy-centos-7
     required-projects:
@@ -39,8 +39,8 @@
 - job:
     name: dsvm-collectd-ceilometer-plugin-src
     parent: legacy-dsvm-base
-    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/run
-    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/post
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/run.yaml
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -51,8 +51,8 @@
 - job:
     name: dsvm-collectd-ceilometer-plugin-src-centos-7
     parent: legacy-dsvm-base
-    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/run
-    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/post
+    run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/run.yaml
+    post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/post.yaml
     timeout: 7800
     nodeset: legacy-centos-7
     required-projects:
