@@ -38,7 +38,6 @@ policies.
        The collectd-gnocchi plugin only supports certain types of Aodh alarms.
        Please find a list of these options in:
 
-https://github.com/openstack/collectd-ceilometer-plugin/blob/master/doc/source/alarms_guide.rst.
 
 
 Creating a heat template for auto-scaling
