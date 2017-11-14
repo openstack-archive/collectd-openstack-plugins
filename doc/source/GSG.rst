@@ -68,7 +68,7 @@ This section describes how to install collectd.
 
        $ sudo apt-get install collectd
        # OR
-       $ sudo yum installl collectd
+       $ sudo yum install collectd
 
 * Install the libraries to are needed to build collectd:
 
