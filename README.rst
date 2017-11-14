@@ -33,8 +33,10 @@ to OpenStack which enables service assurance, fault management and  monitoring.
 
 * Free software: Apache license
 * Source: https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
-* Installation:
-   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/installation.rst
+* Getting Started with Collectd:
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/GSG.rst
+* Installing collectd-ceilometer-plugin with DevStack:
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/devstackGSG.rst
 * Bugs: https://bugs.launchpad.net/collectd-ceilometer-plugin
 * Usage:
    https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
