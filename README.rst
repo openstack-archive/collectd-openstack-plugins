@@ -35,6 +35,8 @@ to OpenStack which enables service assurance, fault management and  monitoring.
 * Source: https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin
 * Getting Started Guide:
    https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/GSG.rst
+* Installing collectd-ceilometer-plugin with DevStack:
+   https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/devstackGSG.rst
 * Bugs: https://bugs.launchpad.net/collectd-ceilometer-plugin
 * Usage:
    https://git.openstack.org/cgit/openstack/collectd-ceilometer-plugin/tree/doc/source/usage.rst
