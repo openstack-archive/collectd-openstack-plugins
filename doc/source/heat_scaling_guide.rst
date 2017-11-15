@@ -38,7 +38,7 @@ policies.
        The collectd-gnocchi plugin only supports certain types of Aodh alarms.
        Please find a list of these options in:
 
-https://github.com/openstack/collectd-ceilometer-plugin/blob/master/doc/source/alarms_guide.rst.
+https://github.com/openstack/collectd-ceilometer-plugin/blob/master/doc/source/alarms_guide.rst
 
 
 Creating a heat template for auto-scaling
@@ -123,23 +123,6 @@ it has scaled up/down via:
   ::
 
     openstack server list
-
-
-collectd-ceilometer-plugin alarms
----------------------------------
-
-As described in alarms_guide.rst, this plugin allows you to create Aodh
-threshold alarms. This type of alarm can be defined in a heat template using
-an OS::Aodh::Alarm resource.
-Define this resource with the ceilometer meter that you want to monitor and
-the threshold you want the alarm to be triggered at.
-For more information on this resource:
-https://docs.openstack.org/heat/latest/template_guide/openstack.html#OS::Aodh::Alarm
-
-  ::
-
-    threshold_alarm:
-      type: OS::Aodh::Alarm
 
 
 collectd-gnocchi-plugin alarms
