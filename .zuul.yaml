@@ -1,18 +1,13 @@
 - project:
-    name: openstack/collectd-ceilometer-plugin
     experimental:
       jobs:
-        - dsvm-collectd-ceilometer-plugin-src:
-            voting: false
-        - dsvm-collectd-ceilometer-plugin-bin:
-            voting: false
-        - dsvm-collectd-ceilometer-plugin-src-centos-7:
-            voting: false
-        - dsvm-collectd-ceilometer-plugin-bin-centos-7:
-            voting: false
+        - collectd-ceilometer-plugin-src
+        - collectd-ceilometer-plugin-bin
+        - collectd-ceilometer-plugin-src-centos-7
+        - collectd-ceilometer-plugin-bin-centos-7
 
 - job:
-    name: dsvm-collectd-ceilometer-plugin-bin
+    name: collectd-ceilometer-plugin-bin
     parent: legacy-dsvm-base
     run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/run.yaml
     post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin/post.yaml
@@ -24,7 +19,7 @@
       - openstack/collectd-ceilometer-plugin
 
 - job:
-    name: dsvm-collectd-ceilometer-plugin-bin-centos-7
+    name: collectd-ceilometer-plugin-bin-centos-7
     parent: legacy-dsvm-base
     run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/run.yaml
     post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-bin-centos-7/post.yaml
@@ -37,7 +32,7 @@
       - openstack/collectd-ceilometer-plugin
 
 - job:
-    name: dsvm-collectd-ceilometer-plugin-src
+    name: collectd-ceilometer-plugin-src
     parent: legacy-dsvm-base
     run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/run.yaml
     post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src/post.yaml
@@ -49,7 +44,7 @@
       - openstack/collectd-ceilometer-plugin
 
 - job:
-    name: dsvm-collectd-ceilometer-plugin-src-centos-7
+    name: collectd-ceilometer-plugin-src-centos-7
     parent: legacy-dsvm-base
     run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/run.yaml
     post-run: playbooks/legacy/dsvm-collectd-ceilometer-plugin-src-centos-7/post.yaml
