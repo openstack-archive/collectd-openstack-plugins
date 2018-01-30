@@ -22,7 +22,7 @@ enable_service dstat
 # For more options refer to devstackGSG.rst
 
 # GNOCCHI
-enable_plugin gnocchi https://github.com/openstack/gnocchi master
+enable_plugin gnocchi https://github.com/gnocchixyz/gnocchi stable/3.1
 GNOCCHI_USE_KEYSTONE=True
 COLLECTD_GNOCCHI_ENABLED=True
 
