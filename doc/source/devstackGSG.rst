@@ -143,7 +143,7 @@ To deploy with gnocchi using DevStack, add the following to you local.conf:
       COLLECTD_INSTALL=True
 
       # GNOCCHI
-      enable_plugin gnocchi https://github.com/openstack/gnocchi master
+      enable_plugin gnocchi https://github.com/gnocchixyz/gnocchi master
       enable_service gnocchi-api,gnocchi-metricd,gnocchi-statsd
       GNOCCHI_USE_KEYSTONE=True
       COLLECTD_GNOCCHI_ENABLED=True
