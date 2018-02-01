@@ -1,0 +1,9 @@
+Code-Review+2: Helena <helena.mcgough@intel.com>
+Code-Review+2: Emma Foley <emma.l.foley@intel.com>
+Workflow+1: Emma Foley <emma.l.foley@intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 01 Feb 2018 10:53:15 +0000
+Reviewed-on: https://review.openstack.org/539684
+Project: openstack/collectd-ceilometer-plugin
+Branch: refs/heads/master
