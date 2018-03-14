@@ -253,7 +253,7 @@ class TestPlugin(unittest.TestCase):
     @mock.patch.object(common_sender.Sender, '_perform_request', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
-    @mock_config()
+    @mock_config(DEFAULT_ARCHIVE_POLICY='')
     @mock_value()
     def test_request_error(
             self, data, config, collectd, ClientV3, perf_req):
