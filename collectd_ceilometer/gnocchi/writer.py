@@ -44,7 +44,7 @@ class Writer(object):
     def __init__(self, meters, config):
         self._meters = meters
         self._samples = SampleContainer()
-        self._sender = gnocchi_sender.Sender()
+        self._sender = gnocchi_sender.Sender(config)
         self._config = config
 
     def write(self, vl, data):
