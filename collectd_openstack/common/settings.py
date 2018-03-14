@@ -59,6 +59,8 @@ class Config(object):
         CfgParam('OS_TENANT_NAME', None, six.text_type),
         CfgParam('VERBOSE', False, bool),
         CfgParam('LIBVIRT_METER_ENABLED', False, bool),
+        # Gnocchi only
+        CfgParam('DEFAULT_ARCHIVE_POLICY', None, six.text_type),
 
         CfgParam('LIBVIRT_CONN_URI', 'qemu:///system', six.text_type),
     ]
