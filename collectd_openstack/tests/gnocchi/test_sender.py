@@ -24,11 +24,15 @@ import unittest
 from collectd_openstack.gnocchi import sender as gnocchi_sender
 
 
+class MockedConfig(object):
+    DEFAULT_ARCHIVE_POLICY = ''
+
+
 class TestGnocchiSender(unittest.TestCase):
     """Test the sender class."""
 
     def setUp(self):
-        self.sender = gnocchi_sender.Sender()
+        self.sender = gnocchi_sender.Sender(config=MockedConfig)
         self.sender._url_base = \
             "http://my-endpoint/v1/metric/%s/measures"
 
