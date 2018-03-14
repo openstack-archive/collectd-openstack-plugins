@@ -165,7 +165,8 @@ class TestPlugin(unittest.TestCase):
             CEILOMETER_TIMEOUT=1000,
             OS_USERNAME='tester',
             OS_PASSWORD='testpasswd',
-            OS_TENANT_NAME='service')
+            OS_TENANT_NAME='service',
+            DEFAULT_ARCHIVE_POLICY='')
 
     @mock.patch.object(plugin, 'Plugin', autospec=True)
     @mock.patch.object(plugin, 'Config', autospec=True)

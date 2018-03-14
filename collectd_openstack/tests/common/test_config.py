@@ -87,6 +87,7 @@ class TestConfig(TestCase):
             OS_USERNAME='tester',
             OS_PASSWORD='testpasswd',
             OS_TENANT_NAME='service',
+            DEFAULT_ARCHIVE_POLICY='',
             LIBVIRT_METER_ENABLED=False)
 
     @mock.patch.object(settings, 'LOGGER', autospec=True)

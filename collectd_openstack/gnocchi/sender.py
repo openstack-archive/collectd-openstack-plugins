@@ -30,13 +30,14 @@ ROOT_LOGGER = logging.getLogger(collectd_openstack.__name__)
 class Sender(common_sender.Sender):
     """Sends the JSON serialized data to Gnocchi"""
 
-    def __init__(self):
+    def __init__(self, config):
         """Create the Sender instance
 
         The cofinguration must be initialized before the object is created.
         """
         super(Sender, self).__init__()
         self._meter_ids = {}
+        self._config = config
 
     def _on_authenticated(self):
         # get the uri of service endpoint
@@ -100,9 +101,13 @@ class Sender(common_sender.Sender):
 
     def _create_metric(self, metername, endpoint, unit):
         url = "{}/v1/metric/".format(endpoint)
-        payload = json.dumps({"name": metername,
-                              "unit": unit,
-                              })
+        data = {"name": metername,
+                "unit": unit,
+                }
+        if self._config.DEFAULT_ARCHIVE_POLICY:
+            data["archive_policy_name"] = self._config.DEFAULT_ARCHIVE_POLICY
+
+        payload = json.dumps(data)
         result = self._perform_request(url, payload, self._auth_token)
         metric_id = json.loads(result.text)['id']
         LOGGER.debug("metric_id=%s", metric_id)
