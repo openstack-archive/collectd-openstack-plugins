@@ -1,0 +1,8 @@
+Code-Review+2: Monty Taylor <mordred@inaugust.com>
+Verified+2: Monty Taylor <mordred@inaugust.com>
+Workflow+1: Monty Taylor <mordred@inaugust.com>
+Submitted-by: Monty Taylor <mordred@inaugust.com>
+Submitted-at: Fri, 23 Mar 2018 17:00:39 +0000
+Reviewed-on: https://review.openstack.org/555865
+Project: openstack/collectd-openstack-plugins
+Branch: refs/heads/master
