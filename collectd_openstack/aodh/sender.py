@@ -39,12 +39,12 @@ HTTP_NOT_FOUND = 404
 class Sender(common_sender.Sender):
     """Sends the JSON serialized data to Aodh."""
 
-    def __init__(self):
+    def __init__(self, config):
         """Create the Sender instance.
 
         The configuration must be initialized before the object is created.
         """
-        super(Sender, self).__init__()
+        super(Sender, self).__init__(config)
 
         self._alarm_ids = {}
 

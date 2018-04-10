@@ -35,7 +35,7 @@ class Sender(common_sender.Sender):
 
         The cofinguration must be initialized before the object is created.
         """
-        super(Sender, self).__init__()
+        super(Sender, self).__init__(config)
         self._meter_ids = {}
         self._config = config
 
