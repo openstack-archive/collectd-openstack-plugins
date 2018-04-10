@@ -30,7 +30,7 @@ class Notifier(object):
     def __init__(self, meters, config):
         """Initialize Notifier."""
         self._meters = meters
-        self._sender = aodh_sender.Sender()
+        self._sender = aodh_sender.Sender(config)
         self._config = config
 
     def notify(self, vl, data):
