@@ -22,6 +22,7 @@ import requests
 import unittest
 
 from collectd_openstack.aodh import sender as aodh_sender
+from collectd_openstack.common.settings import Config
 from collections import OrderedDict
 
 from collectd_openstack.common.meters import base
@@ -56,7 +57,8 @@ class TestSender(unittest.TestCase):
 
     def setUp(self):
         super(TestSender, self).setUp()
-        self.sender = aodh_sender.Sender()
+        self._config = Config._decorated()
+        self.sender = aodh_sender.Sender(self._config)
 
     @mock.patch.object(aodh_sender.Sender, "_get_remote_alarm_id",
                        autospec=True)
