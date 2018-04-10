@@ -50,7 +50,7 @@ class Sender(object):
     HTTP_UNAUTHORIZED = requests.codes['UNAUTHORIZED']
     HTTP_NOT_FOUND = requests.codes['NOT_FOUND']
 
-    def __init__(self):
+    def __init__(self, config):
         """Create the Sender instance
 
         The configuration must be initialized before the object is created.
@@ -60,6 +60,7 @@ class Sender(object):
         self._auth_token = None
         self._auth_lock = threading.Lock()
         self._failed_auth = False
+        self._config = config
 
     def _on_authenticated(self):
         """Defines an action to be taken after auth_token acquired.
@@ -96,12 +97,11 @@ class Sender(object):
             try:
                 # create a keystone client if it doesn't exist
                 if self._keystone is None:
-                    cfg = Config.instance()
                     self._keystone = ClientV3(
-                        auth_url=cfg.OS_AUTH_URL,
-                        username=cfg.OS_USERNAME,
-                        password=cfg.OS_PASSWORD,
-                        tenant_name=cfg.OS_TENANT_NAME
+                        auth_url=self._config.OS_AUTH_URL,
+                        username=self._config.OS_USERNAME,
+                        password=self._config.OS_PASSWORD,
+                        tenant_name=self._config.OS_TENANT_NAME
                     )
                 # store the authentication token
                 self._auth_token = self._keystone.auth_token
@@ -170,7 +170,7 @@ class Sender(object):
         """
 
         # get the auth_token
-        auth_token = self._authenticate()
+        auth_token = self._authenticate(self._config)
         LOGGER.info('Auth_token: %s', auth_token)
 
         # if auth_token is not set, there is nothing to do
@@ -207,7 +207,7 @@ class Sender(object):
                 self._auth_token = None
 
                 # renew the authentication token
-                auth_token = self._authenticate()
+                auth_token = self._authenticate(self._config)
 
                 if auth_token is not None:
                     # and try to repost
