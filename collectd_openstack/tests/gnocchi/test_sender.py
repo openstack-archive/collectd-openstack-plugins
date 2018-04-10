@@ -21,6 +21,7 @@ import mock
 import requests
 import unittest
 
+from collectd_openstack.common.settings import Config
 from collectd_openstack.gnocchi import sender as gnocchi_sender
 
 
@@ -32,7 +33,8 @@ class TestGnocchiSender(unittest.TestCase):
     """Test the sender class."""
 
     def setUp(self):
-        self.sender = gnocchi_sender.Sender(config=MockedConfig)
+        self._config = Config._decorated()
+        self.sender = gnocchi_sender.Sender(self._config)
         self.sender._url_base = \
             "http://my-endpoint/v1/metric/%s/measures"
 

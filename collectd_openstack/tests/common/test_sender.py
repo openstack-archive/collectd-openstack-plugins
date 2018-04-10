@@ -22,6 +22,7 @@ import requests
 import unittest
 
 from collectd_openstack.common import sender as common_sender
+from collectd_openstack.common.settings import Config
 
 
 class TestSender(unittest.TestCase):
@@ -29,7 +30,7 @@ class TestSender(unittest.TestCase):
 
     def setUp(self):
         super(TestSender, self).setUp()
-        self.sender = common_sender.Sender()
+        self.sender = common_sender.Sender(Config)
 
         self.sender._url_base = \
             "http://my-gnocchi-endpoint/v1/action"
