@@ -24,6 +24,7 @@ import unittest
 
 from collectd_openstack.common.keystone_light import KeystoneException
 from collectd_openstack.common import sender as common_sender
+from collectd_openstack.common import settings
 from collectd_openstack.gnocchi import plugin
 from collectd_openstack.gnocchi import sender as gnocchi_sender
 
@@ -148,12 +149,12 @@ class TestPlugin(unittest.TestCase):
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
-    @mock_config(BATCH_SIZE=2)
+    @mock_config(BATCH_SIZE=2, OS_USERNAME='admin', OS_PASSWORD='admin', OS_AUTH_URL='internal')
     @mock_value()
-    def test_write(self, data, config, collectd, ClientV3, post, get_metric_id):
+    def test_write(self, data, config, collectd, client, post, get_metric_id):
         """Test collectd data writing"""
 
-        auth_client = ClientV3.return_value
+        auth_client = client.return_value
         auth_client.get_service_endpoint.return_value = \
             'https://test-gnocchi.tld'
 
@@ -177,19 +178,14 @@ class TestPlugin(unittest.TestCase):
         collectd.error.assert_not_called()
 
         # authentication client has been created
-        ClientV3.assert_called_once()
+        client.assert_called_once()
 
         # and values has been sent
         post.assert_called_once_with(
             'https://test-gnocchi.tld' +
             '/v1/metric/my-metric-id/measures',
-            data=match.json([{
-                "value": 1234,
-                "timestamp": "1973-11-29T21:33:09",
-                }, {
-                "value": 1234,
-                "timestamp": "1973-11-29T21:33:09",
-                }]),
+            data = match.json('[{"timestamp": "1973-11-29T21:33:09", "value": 1234},'
+                  ' {"timestamp": "1973-11-29T21:33:09", "value": 1234}]'),
             headers={'Content-type': 'application/json',
                      'X-Auth-Token': auth_client.auth_token},
             timeout=1.0)
@@ -214,27 +210,24 @@ class TestPlugin(unittest.TestCase):
         post.assert_called_once_with(
             'https://test-gnocchi.tld' +
             '/v1/metric/my-metric-id/measures',
-            data=match.json([{
-                "value": 1234,
-                "timestamp": "1973-11-29T21:33:09",
-                }]),
+            data= match.json('[{"timestamp": "1973-11-29T21:33:09", "value": 1234}]'),
             headers={
                 'Content-type': 'application/json',
                 'X-Auth-Token': auth_client.auth_token},
             timeout=1.0)
 
     @mock.patch.object(requests, 'post', spec=callable)
-    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'NoAuthClientV3', autospec=True)
     @mock.patch.object(common_sender, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
     def test_write_auth_failed(
-            self, data, config, collectd, LOGGER, ClientV3, post):
+            self, data, config, collectd, LOGGER, client, post):
         """Test authentication failure"""
 
         # tell the auth client to rise an exception
-        ClientV3.side_effect = KeystoneException(
+        client.side_effect = KeystoneException(
             "Missing name 'xxx' in received services",
             "exception",
             "services list")
@@ -261,7 +254,7 @@ class TestPlugin(unittest.TestCase):
     @mock_config(DEFAULT_ARCHIVE_POLICY='')
     @mock_value()
     def test_request_error(
-            self, data, config, collectd, ClientV3, perf_req):
+            self, data, config, collectd, client, perf_req):
         """Test error raised by underlying requests module"""
 
         # tell POST request to raise an exception
@@ -277,10 +270,10 @@ class TestPlugin(unittest.TestCase):
     @mock.patch.object(requests, 'post', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
-    @mock_config()
+    @mock_config(OS_USERNAME='admin', OS_PASSWORD='admin', OS_AUTH_URL='internal')
     @mock_value()
     def test_reauthentication(self, data, config, collectd,
-                              ClientV3, post, get_metric_id):
+                              client, post, get_metric_id):
         """Test re-authentication"""
         # init instance
         instance = plugin.Plugin(collectd=collectd, config=config)
@@ -299,8 +292,8 @@ class TestPlugin(unittest.TestCase):
 
         post.return_value = response_ok
 
-        client = ClientV3.return_value
-        client.auth_token = 'Test auth token'
+        newClient = client.return_value
+        newClient.auth_token = 'Test auth token'
 
         # write the value
         instance.write(data)
@@ -309,14 +302,14 @@ class TestPlugin(unittest.TestCase):
         post.assert_called_once_with(
             mock.ANY, data=mock.ANY,
             headers={u'Content-type': mock.ANY,
-                     u'X-Auth-Token': 'Test auth token'},
+                     u'X-Auth-Token': newClient.auth_token},
             timeout=1.0)
 
         # POST response is unauthorized -> new token needs to be acquired
         post.side_effect = [response_unauthorized, response_ok]
 
         # set a new auth token
-        client.auth_token = 'New test auth token'
+        newClient.auth_token = 'New test auth token'
 
         instance.write(data)
 
@@ -340,7 +333,7 @@ class TestPlugin(unittest.TestCase):
     @mock_config()
     @mock_value()
     def test_exception_value_error(self, data, config, collectd,
-                                   LOGGER, Writer, ClientV3, post):
+                                   LOGGER, Writer, client, post):
         """Test exception raised during write and shutdown"""
 
         writer = Writer.return_value
@@ -359,7 +352,7 @@ class TestPlugin(unittest.TestCase):
     @mock_config()
     @mock_value()
     def test_exception_runtime_error(self, data, config, collectd,
-                                     LOGGER, Writer, ClientV3, post):
+                                     LOGGER, Writer, client, post):
         """Test exception raised during write and shutdown"""
 
         writer = Writer.return_value

@@ -21,6 +21,7 @@ from __future__ import unicode_literals
 from collectd_openstack.common import keystone_light
 from collectd_openstack.common.keystone_light import ClientV3
 from collectd_openstack.common.keystone_light import MissingServices
+from collectd_openstack.common.no_auth import NoAuthClientV3
 import mock
 import unittest
 
