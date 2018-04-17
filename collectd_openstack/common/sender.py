@@ -24,6 +24,7 @@ import six
 import time
 
 from collectd_openstack.common.keystone_light import ClientV3
+from collectd_openstack.common.no_auth import NoAuthClientV3
 from collectd_openstack.common.keystone_light import KeystoneException
 from collectd_openstack.common.settings import Config
 
@@ -56,7 +57,7 @@ class Sender(object):
         The configuration must be initialized before the object is created.
         """
         self._url_base = None
-        self._keystone = None
+        self._client = None
         self._auth_token = None
         self._auth_lock = threading.Lock()
         self._failed_auth = False
@@ -96,15 +97,22 @@ class Sender(object):
             # pylint: disable=broad-except
             try:
                 # create a keystone client if it doesn't exist
-                if self._keystone is None:
-                    self._keystone = ClientV3(
-                        auth_url=self._config.OS_AUTH_URL,
-                        username=self._config.OS_USERNAME,
-                        password=self._config.OS_PASSWORD,
-                        tenant_name=self._config.OS_TENANT_NAME
-                    )
+                if self._client is None:
+
+                    if (self._config.OS_PASSWORD) and (self._config.OS_USERNAME):
+                        self._client = ClientV3(
+                            auth_url=self._config.OS_AUTH_URL,
+                            username=self._config.OS_USERNAME,
+                            password=self._config.OS_PASSWORD,
+                            tenant_name=self._config.OS_TENANT_NAME
+                        )
+                    else:
+                        # if no password is given, create instance of no_auth
+                        # plugin to avoid Keystone Authentication
+                        self._client = NoAuthClientV3()
+
                 # store the authentication token
-                self._auth_token = self._keystone.auth_token
+                self._auth_token = self._client.auth_token
 
                 self._on_authenticated()
 
@@ -175,18 +183,17 @@ class Sender(object):
 
         # if auth_token is not set, there is nothing to do
         if auth_token is None:
-            LOGGER.debug('Unable to send data. Not authenticated')
-            return
+            LOGGER.debug('Bypassing Keystone Authentication')
+            return ''
 
         if self._url_base is None:
-            LOGGER.debug(
-                'Unable to send data. Missing endpoint from ident server')
-            return
+            return 'etc/collectd.conf/collectd-gnocchi-plugin.conf'
+#            return 'https://test-aodh.tld/'
 
         # create request URL
         url = self._create_request_url(metername, **kwargs)
         if url is None:
-            LOGGER.debug("_create_request_url returned None, aborting send")
+            LOGGER.debug('_create_request_url returned None, aborting send')
             return
 
         # send the POST request
@@ -219,7 +226,7 @@ class Sender(object):
 
         except requests.exceptions.ReadTimeout as rto:
             if retry > 0:
-                LOGGER.debug("ReadTimeout Error.. trying again...")
+                LOGGER.debug('ReadTimeout Error.. trying again...')
                 time.sleep(1)
                 self.send(metername, payload, retry=(retry - 1), **kwargs)
             else:
@@ -241,8 +248,11 @@ class Sender(object):
                      (url, payload, req_type))
 
         # request headers
-        headers = {'X-Auth-Token': auth_token,
-                   'Content-type': 'application/json'}
+        headers = {'Content-type': 'application/json'}
+        if auth_token:
+            headers['X-Auth-Token'] = auth_token
+
+
         # perform request and return its result
         if req_type == "get":
             response = requests.get(

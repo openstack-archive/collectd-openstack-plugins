@@ -202,7 +202,7 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     @mock_config()
     @mock_value()
-    def test_update_alarm(self, data, config, collectd, ClientV3,
+    def test_update_alarm(self, data, config, collectd, client,
                           put, _get_alarm_state, _get_alarm_id):
         """Test the update alarm function.
 
@@ -211,9 +211,10 @@ class TestPlugin(unittest.TestCase):
         Expected behaviour:
          - If alarm-id is present a put request is performed
         """
-        auth_client = ClientV3.return_value
+        auth_client = client.return_value
         auth_client.get_service_endpoint.return_value = \
             'https://test-aodh.tld'
+        client.auth_token = 'Test auth token'
 
         # init instance
         instance = plugin.Plugin(collectd=collectd, config=config)
@@ -230,8 +231,7 @@ class TestPlugin(unittest.TestCase):
             'https://test-aodh.tld' +
             '/v2/alarms/my-alarm-id/state',
             data='"insufficient data"',
-            headers={'Content-type': 'application/json',
-                     'X-Auth-Token': auth_client.auth_token},
+            headers={'Content-type': 'application/json'},
             timeout=1.0)
 
         # reset method
@@ -244,7 +244,7 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     @mock_config()
     @mock_value()
-    def test_update_alarm_no_id(self, data, config, collectd, ClientV3,
+    def test_update_alarm_no_id(self, data, config, collectd, client,
                                 put, _get_alarm_id, _create_alarm):
         """Test if the is no alarm id the alarm won't be updated.
 
@@ -254,7 +254,7 @@ class TestPlugin(unittest.TestCase):
         Expected behaviour:
          - if an alarm is create an update request is not performed
         """
-        auth_client = ClientV3.return_value
+        auth_client = client.return_value
         auth_client.get_service_endpoint.return_value = \
             'https://test-aodh.tld'
 
@@ -272,16 +272,17 @@ class TestPlugin(unittest.TestCase):
         put.reset_mock()
 
     @mock.patch.object(requests, 'put', spec=callable)
-    @mock.patch.object(common_sender, 'ClientV3', autospec=True)
+    @mock.patch.object(common_sender, 'NoAuthClientV3', autospec=True)
     @mock.patch.object(common_sender, 'LOGGER', autospec=True)
     @mock_collectd()
     @mock_config()
     @mock_value()
     def test_notify_auth_failed(
-            self, data, config, collectd, LOGGER, ClientV3, put):
+            self, data, config, collectd, LOGGER, client, put):
         """Test authentication failure."""
+
         # tell the auth client to raise an exception
-        ClientV3.side_effect = KeystoneException(
+        client.side_effect = KeystoneException(
             "Missing name 'xxx' in received services",
             "exception",
             "services list")
@@ -308,8 +309,9 @@ class TestPlugin(unittest.TestCase):
     @mock_config()
     @mock_value()
     def test_request_error(
-            self, data, config, collectd, ClientV3, perf_req):
+            self, data, config, collectd, client, perf_req):
         """Test error raised by underlying requests module."""
+
         # tell POST request to raise an exception
         perf_req.side_effect = requests.RequestException('Test POST exception')
 
@@ -324,10 +326,10 @@ class TestPlugin(unittest.TestCase):
     @mock.patch.object(requests, 'put', spec=callable)
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
     @mock_collectd()
-    @mock_config()
+    @mock_config(OS_USERNAME='admin', OS_PASSWORD='admin', OS_URL='internal')
     @mock_value()
     def test_reauthentication(self, data, config, collectd,
-                              ClientV3, put, _get_alarm_id, _get_alarm_state):
+                              client, put, _get_alarm_id, _get_alarm_state):
         """Test re-authentication for update request."""
 
         # response returned on success
@@ -339,9 +341,8 @@ class TestPlugin(unittest.TestCase):
         response_unauthorized.status_code = requests.codes["UNAUTHORIZED"]
 
         # set-up client
-        client = ClientV3.return_value
-        client.auth_token = 'Test auth token'
-        client.get_service_endpoint.return_value = \
+        auth_client = client.return_value
+        auth_client.get_service_endpoint.return_value = \
             'https://test-aodh.tld'
 
         # init instance attempt to update/create alarm
@@ -360,7 +361,7 @@ class TestPlugin(unittest.TestCase):
             '/v2/alarms/my-alarm-id/state',
             data='"insufficient data"',
             headers={u'Content-type': 'application/json',
-                     u'X-Auth-Token': 'Test auth token'},
+                     u'X-Auth-Token': auth_client.auth_token},
             timeout=1.0)
 
     @mock.patch.object(common_sender, 'ClientV3', autospec=True)
@@ -370,7 +371,7 @@ class TestPlugin(unittest.TestCase):
     @mock_config()
     @mock_value()
     def test_exception_value_error(self, data, config, collectd,
-                                   LOGGER, Notifier, ClientV3):
+                                   LOGGER, Notifier, client):
         """Test exception raised during notify and shutdown."""
         notifier = Notifier.return_value
         notifier.notify.side_effect = ValueError('Test notify error')
@@ -385,7 +386,7 @@ class TestPlugin(unittest.TestCase):
     @mock_collectd()
     @mock_config()
     def test_exception_runtime_error(self, config, collectd,
-                                     LOGGER, ClientV3):
+                                     LOGGER, client):
         """Test exception raised during shutdown."""
         # init instance
         instance = plugin.Plugin(collectd=collectd, config=config)
