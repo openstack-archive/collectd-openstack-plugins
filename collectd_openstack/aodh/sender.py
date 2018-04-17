@@ -110,7 +110,7 @@ class Sender(common_sender.Sender):
 
     def _get_endpoint(self, service):
         """Get the uri of service endpoint."""
-        endpoint = self._keystone.get_service_endpoint(
+        endpoint = self._client.get_service_endpoint(
             service,
             Config.instance().CEILOMETER_URL_TYPE)
         return endpoint
