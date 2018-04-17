@@ -29,7 +29,9 @@ class MatchJson(object):
         self._obj = obj
 
     def __eq__(self, json_text):
-        return self._obj == loads(json_text)
+        json_obj = sorted(loads(json_text))
+        me = sorted(loads(self._obj))
+        return me == json_obj
 
     def __repr__(self):
         return "MatchJson({})".format(repr(self._obj))
