@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    In the rocky cycle, several changes were made to the testing structure of
+    the collectd-openstack-plugins repo to conform to the new python testing
+    interface (PTI). Use of upper constraints was introduced, stestr was
+    adopted as the default test runner and sphinx-build became the default
+    docs building command.
