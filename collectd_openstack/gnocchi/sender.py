@@ -48,7 +48,7 @@ class Sender(common_sender.Sender):
     def _create_request_url(self, metername, **kwargs):
         unit = kwargs['unit']
         metric_id = self._get_metric_id(metername, unit)
-        return self._url_base % (metric_id)
+        return (self._url_base % (metric_id), 'post')
 
     def _handle_http_error(self, exc, metername,
                            payload, auth_token, **kwargs):

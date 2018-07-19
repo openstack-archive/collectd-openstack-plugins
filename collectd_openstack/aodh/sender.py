@@ -62,19 +62,13 @@ class Sender(common_sender.Sender):
         alarm_name = self._get_alarm_name(metername, resource_id)
         alarm_id = self._get_alarm_id(alarm_name,
                                       severity, metername, alarm_severity)
-        payload = self._get_alarm_payload(**kwargs)
 
+        url = None
         # Create a url if an alarm already exists
         if alarm_id is not None:
             url = self._url_base % (alarm_id)
-            try:
-                self._perform_request(url, payload, self._auth_token, "put")
-            except requests.exceptions.HTTPError as exc:
-                # This is an error and it has to be forwarded
-                self._handle_http_error(exc, metername, payload,
-                                        self._auth_token, **kwargs)
 
-        return None
+        return (url, 'put')
 
     def _handle_http_error(self, exc, metername,
                            payload, auth_token, **kwargs):
@@ -193,7 +187,7 @@ class Sender(common_sender.Sender):
         alarm_name = metername + "(" + resource_id + ")"
         return alarm_name
 
-    def _get_alarm_payload(self, **kwargs):
+    def get_alarm_payload(self, **kwargs):
         """Get the payload for the update/post request of the alarm."""
         severity = kwargs['severity']
         payload = json.dumps(self._get_alarm_state(severity))

@@ -137,10 +137,11 @@ class Sender(object):
 
         It's not defined in common sender so it should be overwritten
         in the subclasses.
-        It typically should create the request url for the standard action
-        i.e. create/update alarm/measures.
+        It typically should create the tuple with:
+            - request url for the standard action i.e. create/update alarm/measures
+            - request method ("post", "put", "get")
         """
-        return None
+        return (None, 'post')
 
     def _handle_http_error(self, exc, metername, payload, auth_token):
         """Defines an action to handle the http error
@@ -183,15 +184,15 @@ class Sender(object):
                 'Unable to send data. Missing endpoint from ident server')
             return
 
-        # create request URL
-        url = self._create_request_url(metername, **kwargs)
+        # create request URL named tuple
+        url, req_type = self._create_request_url(metername, **kwargs)
         if url is None:
             LOGGER.debug("_create_request_url returned None, aborting send")
             return
 
-        # send the POST request
+        # send the request
         try:
-            return self._perform_request(url, payload, auth_token)
+            return self._perform_request(url, payload, auth_token, req_type)
         except requests.exceptions.HTTPError as exc:
             response = exc.response
 
@@ -211,7 +212,8 @@ class Sender(object):
 
                 if auth_token is not None:
                     # and try to repost
-                    return self._perform_request(url, payload, auth_token)
+                    return self._perform_request(url, payload, auth_token,
+                                                 req_type)
             else:
                 # This is an error and it has to be forwarded
                 self._handle_http_error(exc, metername, payload,
