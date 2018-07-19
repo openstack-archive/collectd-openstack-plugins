@@ -68,7 +68,8 @@ class TestGnocchiSender(unittest.TestCase):
         expected_args = (
             "http://my-endpoint/v1/metric/my-metrid-id/measures",
             "some-payload",
-            "my-auth-token")
+            "my-auth-token",
+            "post")
 
         self.sender.send("my-metername", "some-payload", unit="some-unit")
         sender_perform_request.assert_called_with(*expected_args)

@@ -58,6 +58,10 @@ class Notifier(object):
     def _send_data(self, metername, severity, resource_id, alarm_severity):
         """Send data to Aodh."""
         LOGGER.debug('Sending alarm for %s',  metername)
-        self._sender.send(metername, None, severity=severity,
+        payload = self._sender._get_alarm_payload(severity=severity,
+                                                  resource_id=resource_id,
+                                                  alarm_severity=alarm_severity)
+
+        self._sender.send(metername, payload, severity=severity,
                           resource_id=resource_id,
                           alarm_severity=alarm_severity)

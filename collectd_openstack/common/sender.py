@@ -132,6 +132,18 @@ class Sender(object):
 
         return self._auth_token
 
+    def _get_request_type(self):
+        """ Returns string representing request type method (post, put, get)
+
+        It's not defined in common sender so it should be overwritten
+        in the subclasses.
+        This should return one of:
+        - "post"
+        - "put"
+        - "get"
+        """
+        return None
+
     def _create_request_url(self, metername, *args, **kwargs):
         """Defines an action to be taken to create the request URL.
 
@@ -184,14 +196,15 @@ class Sender(object):
             return
 
         # create request URL
+        req_type = self._get_request_type()
         url = self._create_request_url(metername, **kwargs)
         if url is None:
             LOGGER.debug("_create_request_url returned None, aborting send")
             return
 
-        # send the POST request
+        # send the request
         try:
-            return self._perform_request(url, payload, auth_token)
+            return self._perform_request(url, payload, auth_token, req_type)
         except requests.exceptions.HTTPError as exc:
             response = exc.response
 
@@ -211,7 +224,8 @@ class Sender(object):
 
                 if auth_token is not None:
                     # and try to repost
-                    return self._perform_request(url, payload, auth_token)
+                    return self._perform_request(url, payload, auth_token,
+                                                 req_type)
             else:
                 # This is an error and it has to be forwarded
                 self._handle_http_error(exc, metername, payload,

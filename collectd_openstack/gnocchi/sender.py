@@ -45,6 +45,10 @@ class Sender(common_sender.Sender):
 
         self._url_base = "{}/v1/metric/%s/measures".format(endpoint)
 
+    def _get_request_type(self):
+        # gnochi request are POST-based
+        return "post"
+
     def _create_request_url(self, metername, **kwargs):
         unit = kwargs['unit']
         metric_id = self._get_metric_id(metername, unit)

@@ -19,7 +19,6 @@ from __future__ import unicode_literals
 
 import json
 import logging
-import requests
 
 
 import collectd_openstack
@@ -54,6 +53,10 @@ class Sender(common_sender.Sender):
 
         self._url_base = "{}/v2/alarms/%s/state".format(endpoint)
 
+    def _get_request_type(self):
+        # AODH requests are PUT-based
+        return 'put'
+
     def _create_request_url(self, metername, **kwargs):
         """Create the request url for an alarm update."""
         severity = kwargs['severity']
@@ -62,19 +65,13 @@ class Sender(common_sender.Sender):
         alarm_name = self._get_alarm_name(metername, resource_id)
         alarm_id = self._get_alarm_id(alarm_name,
                                       severity, metername, alarm_severity)
-        payload = self._get_alarm_payload(**kwargs)
 
+        url = None
         # Create a url if an alarm already exists
         if alarm_id is not None:
             url = self._url_base % (alarm_id)
-            try:
-                self._perform_request(url, payload, self._auth_token, "put")
-            except requests.exceptions.HTTPError as exc:
-                # This is an error and it has to be forwarded
-                self._handle_http_error(exc, metername, payload,
-                                        self._auth_token, **kwargs)
 
-        return None
+        return url
 
     def _handle_http_error(self, exc, metername,
                            payload, auth_token, **kwargs):
