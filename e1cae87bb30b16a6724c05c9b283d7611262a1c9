@@ -1,0 +1,9 @@
+Code-Review+2: Helena <helena.mcgough@intel.com>
+Code-Review+2: sean mooney <work@seanmooney.info>
+Workflow+1: sean mooney <work@seanmooney.info>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 27 Aug 2018 10:42:47 +0000
+Reviewed-on: https://review.openstack.org/562297
+Project: openstack/collectd-openstack-plugins
+Branch: refs/heads/master
