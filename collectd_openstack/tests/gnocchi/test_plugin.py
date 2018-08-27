@@ -70,17 +70,22 @@ class MockedCollectd(object):
         "Gets a dataset."
 
 
-def mock_config(BATCH_SIZE=1, **kwargs):
+def mock_config(BATCH_SIZE=1, OS_AUTH_URL=None, OS_USERNAME=None,
+                OS_PASSWORD=None, **kwargs):
     "Returns collectd module with collectd logging hooks."
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
-        BATCH_SIZE=BATCH_SIZE, **kwargs)
+        BATCH_SIZE=BATCH_SIZE, OS_AUTH_URL=OS_AUTH_URL, OS_USERNAME=OS_USERNAME,
+        OS_PASSWORD=OS_PASSWORD, **kwargs)
 
 
 class MockedConfig(object):
     "Mocked config class."
 
     BATCH_SIZE = 1
+    OS_AUTH_URL = ''
+    OS_USERNAME = 'test'
+    OS_PASSWORD = 'test'
 
 
 def mock_value(

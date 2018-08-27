@@ -75,11 +75,12 @@ class MockedCollectd(object):
         """Get notification severity."""
 
 
-def mock_config(**kwargs):
+def mock_config(OS_AUTH_URL=None, OS_USERNAME=None, OS_PASSWORD=None, **kwargs):
     """Return collectd module with collectd logging hooks."""
     return mock.patch(
         __name__ + '.' + MockedConfig.__name__, specs=True,
-        **kwargs)
+        OS_AUTH_URL=OS_AUTH_URL, OS_USERNAME=OS_USERNAME,
+        OS_PASSWORD=OS_PASSWORD, **kwargs)
 
 
 def config_module(
