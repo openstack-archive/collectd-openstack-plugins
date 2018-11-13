@@ -8,7 +8,7 @@ prelude: >
     will cause a change in state.
 features:
   - Provides the collectd-aodh-plugin. This allows collectd notifications
-    to to be sent to Aodh, where it they are used to create corresponding alarms.
+    to be sent to Aodh, where it they are used to create corresponding alarms.
     The notifications sent are used to create new alarms or update existing
     alarms in Aodh. These alarms are of type event, and updates on these alarms
     occur if the notification from collectd will cause a change in the alarm
