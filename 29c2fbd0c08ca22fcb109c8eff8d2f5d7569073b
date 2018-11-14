@@ -1,0 +1,9 @@
+Code-Review+1: rongyaozu <rongyaozu@inspur.com>
+Code-Review+2: sean mooney <work@seanmooney.info>
+Workflow+1: sean mooney <work@seanmooney.info>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 14 Nov 2018 16:19:11 +0000
+Reviewed-on: https://review.openstack.org/617437
+Project: openstack/collectd-openstack-plugins
+Branch: refs/heads/master
