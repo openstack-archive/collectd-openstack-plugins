@@ -41,7 +41,7 @@ to OpenStack which enables service assurance, fault management and  monitoring.
 * Usage:
    https://git.openstack.org/cgit/openstack/collectd-openstack-plugins/tree/doc/source/usage.rst
 * Contact: E-mail the dev mailing list with the [collectd-openstack-plugins] tag
-   mailto:openstack-dev@lists.openstack.org?subject=[collectd-openstack-plugins]
+   mailto:openstack-discuss@lists.openstack.org?subject=[collectd-openstack-plugins]
 
 Collateral
 ----------
