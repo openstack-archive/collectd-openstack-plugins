@@ -21,7 +21,7 @@ try:
     import collectd
     # pylint: enable=import-error
 except ImportError:
-    collectd = None  # when running unit tests collectd is not avaliable
+    collectd = None  # when running unit tests collectd is not available
 
 import collectd_openstack
 from collectd_openstack.aodh.notifier import Notifier
