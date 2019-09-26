@@ -1,6 +1,0 @@
----
-fixes:
-  - Fixes bug 'https://launchpad.net/bugs/1664973'
-    VERBOSE parameter is read and used again
-    Initial log level was fixed, so configuration is properly logged.
-    Initial VERBOSE changed to False, to avoid too much verbosity.

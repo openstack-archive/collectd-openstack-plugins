@@ -1,6 +1,0 @@
----
-fixes:
- - |
-   Fixes 'bug 1669814 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1669814'.
-   Included the _update_alarm functions test and the _alarm_not_updated
-   test.

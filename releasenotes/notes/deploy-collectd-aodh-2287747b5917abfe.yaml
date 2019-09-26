@@ -1,7 +1,0 @@
----
-features:
-  - Created deployment code for the collectd-aodh-plugin. This
-    feature is not enabled by default, but instructions are also
-    provided for enabling this feature. Once enabled, when a
-    notification is registered by collectd a corresponding event
-    alarm is created by aodh.

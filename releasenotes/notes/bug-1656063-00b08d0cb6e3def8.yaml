@@ -1,9 +1,0 @@
----
-fixes:
-  - |
-    Fixes 'bug 1656063 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1656063'.
-    OS_AUTH_URL now uses KEYSTONE_AUTH_URI instead of KEYSTONE_SERVICE_URI.
-    Previously, the URL needed to be changed after deployment because the admin
-    url was being used for Keystone, instead of the public url used for
-    obtainining auth tokens. There's no longer a need to adjust the
-    configuration file after deployment.

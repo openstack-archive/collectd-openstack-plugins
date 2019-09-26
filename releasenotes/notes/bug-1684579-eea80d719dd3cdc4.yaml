@@ -1,7 +1,0 @@
----
- fixes:
-  - |
-    Fixes 'bug 1684579 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1684579'.
-    Changed the extensions for the back-up .conf files. This prevents back-up
-    .conf file being read if the original .conf is deleted. Thus preventing
-    those plugins from running when they are not configured properly.

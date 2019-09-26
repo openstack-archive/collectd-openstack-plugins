@@ -1,6 +1,0 @@
----
-features:
-  - |
-    Metername format was updated. The metrics are now given names with the
-    format <hostname>-<plugin>-<plugin_instance>@<type>.<type_instance>. This
-    supports a multi-host deployment.

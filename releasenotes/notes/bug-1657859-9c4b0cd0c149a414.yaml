@@ -1,6 +1,0 @@
----
-fixes:
-  - |
-    Fixes 'bug 1657859 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1657859'.
-    Changed logfile.conf to 01-logfile.conf so it loads before the python
-    plugins, so debugging is easier.

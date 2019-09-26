@@ -1,4 +1,0 @@
----
-fixes:
-  - Fixes 'bug 1680013 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1680013'
-    Hostname in collectd is now set to match the system hostname.

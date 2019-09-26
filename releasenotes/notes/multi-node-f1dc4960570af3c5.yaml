@@ -1,8 +1,0 @@
----
-other:
-  - |
-    Include a MULTI_NODE_DEPLOYMENT configuration option for devstack, which
-    configures the collectd network plugin on the controller node.
-    Documentation is also included on how to configure collectd on the compute
-    nodes. All of the compute nodes require collectd to be installed with the
-    network and virt plugins to be configured.

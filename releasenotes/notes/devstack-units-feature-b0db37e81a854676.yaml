@@ -1,9 +1,0 @@
----
-features:
-  - Enabled the pre-existing custom units feature for DevStack
-    deployment. You can now customize the units of existing meters
-    before DevStack is deployed. This can be done for multiple
-    units at a time.
-other:
-  - Updated the devstackGSG.rst guide to provide instructions on
-    how to enable the custom units feature before DevStack is deployed.

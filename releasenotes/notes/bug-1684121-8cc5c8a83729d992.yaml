@@ -1,6 +1,0 @@
----
- fixes:
-  - |
-    Fixes 'bug 1684121 https://bugs.launchpad.net/collectd-openstack-plugins/+bug/1684121'.
-    Checked and fixed any rendering, typo or allignment errors in the
-    documentation.
